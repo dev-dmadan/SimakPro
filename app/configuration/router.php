@@ -45,6 +45,17 @@ $route = new \Klein\Klein();
         });
 
     /** End Auth */
+    
+    /** Lookup */
+        
+        $route->respond('POST', '/lookup/[:lookupName]', function($request) use ($__request) {
+            $__request->call('lookup/getLookup', array($request->lookupName));
+        });
+
+    /** End Lookup */
+
+    /** Export Excel */
+    /** End Export Excel */
 
     /** Home */
 
@@ -53,6 +64,42 @@ $route = new \Klein\Klein();
         });
 
     /** End Home */
+
+    /** Bank */
+        
+        $route->respond('GET', '/bank', function() use ($__request) {
+            $__request->call('bank');
+        });
+
+        $route->respond('POST', '/bank/save', function() use ($__request) {
+            $__request->call('bank/save');
+        });
+        
+        $route->respond('UPDATE', '/bank/edit/[:id]', function($request) use ($__request) {
+            $__request->call('bank/edit', array($request->id));
+        });
+
+        $route->respond('DELETE', '/bank/delete/[:id]', function($request) use ($__request) {
+            $__request->call('bank/delete', array($request->id));
+        });
+
+        $route->respond('GET', '/bank/view/[:id]', function($request) use ($__request) {
+            $__request->call('bank/detail', array($request->id));
+        });
+
+        $route->respond('GET', '/bank/[:id]', function($request) use ($__request) {
+            $__request->call('bank/getData', array($request->id));
+        });
+
+        $route->respond('POST', '/bank/get/datatable', function() use ($__request) {
+            $__request->call('bank/getDatatable');
+        });
+
+        $route->respond('POST', '/bank/get/access-right', function() use ($__request) {
+            $__request->call('bank/getAccessRight');
+        });
+
+    /** End Bank */
 
 /** End Your custom route */
 

@@ -5,12 +5,12 @@ Defined('BASE_PATH') or die(ACCESS_DENIED);
     $__configuration['BASE_URL'] = array(
         'PROD' => '',
         'DEV-LIVE' => '',
-        'DEV' => 'http://localhost/Others/Hello-Framework-PHP/'
+        'DEV' => 'http://localhost/Others/SimakPro/'
     );
     $__configuration['SITE_URL'] = array(
         'PROD' => '',
         'DEV-LIVE' => '',
-        'DEV' => 'http://localhost/Others/Hello-Framework-PHP/'
+        'DEV' => 'http://localhost/Others/SimakPro/'
     );
     $__configuration['CONTROLLER'] = ROOT.DS. 'app' .DS. 'controller' .DS;
     $__configuration['MODEL'] = ROOT.DS. 'app' .DS. 'model' .DS;
@@ -36,7 +36,7 @@ Defined('BASE_PATH') or die(ACCESS_DENIED);
         'DEV-LIVE' => '',
         'DEV' => '5955b79bfe79491f4759b213bf392274'
     );
-    $__configuration['QUERY_STRING_AUTH'] = 'access_key';
+    $__configuration['QUERY_STRING_AUTH'] = 'SimakPro_access_key';
 /** End Key Auth for Secret Key JWT */
 
 /** Pusher Realtime */
@@ -127,7 +127,7 @@ Defined('BASE_PATH') or die(ACCESS_DENIED);
     $__configuration['DB_NAME'] = array(
         'PROD' => '',
         'DEV-LIVE' => '',
-        'DEV' => 'dev-hello-framework'
+        'DEV' => 'dev-simakpro'
     );
 /** End Database Configuration */
 
