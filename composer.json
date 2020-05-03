@@ -16,6 +16,7 @@
         "firebase/php-jwt": "^5.1",
         "phpoffice/phpspreadsheet": "^1.11",
         "almasaeed2010/adminlte": "~3.0",
-        "ramsey/uuid": "^4.0"
+        "ramsey/uuid": "^4.0",
+        "pusher/pusher-php-server": "^4.1"
     }
 }
