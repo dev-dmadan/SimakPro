@@ -69,9 +69,10 @@ class Controller {
      *          'library1', ...
      *      ]
      * @param {string} alias
+     * @param {array} constructArgument
      */
-    final protected function library($name, $alias = '') {
-        $this->loadModule('library', $name, $alias);
+    final protected function library($name, $alias = '', $constructArgument = array()) {
+        $this->loadModule('library', $name, $alias, $constructArgument);
     } 
 
     /**
@@ -320,6 +321,17 @@ class Controller {
                 $this->$name = new $temp(...$constructArgument);
             }
         }
+    }
+
+    /**
+     * 
+     */
+    final protected function PublishMessage($channel, $event, $data = array()) {
+        $pusher = new Pusher\Pusher(PUSHER_KEY, PUSHER_SECRET, PUSHER_APP_ID, array(
+            'cluster' => PUSHER_CLUSTER,
+            'useTLS' => true
+        ));
+        $pusher->trigger($channel, $event, $data);
     }
 
     /**
