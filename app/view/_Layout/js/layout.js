@@ -6,6 +6,42 @@ const __ToastSwal = Swal.mixin({
 });
 
 /**
+ * 
+ */
+async function getAccessRight(module) {
+    const result = {
+        success: false,
+        message: '',
+        accessRight: null
+    };
+
+    try {
+        const setup = {
+            method: 'POST',
+            body: JSON.stringify({
+                userId: USER_DATA.UserId,
+                userName: USER_DATA.UserName
+            })
+        };
+        if(USE_JWT) {
+            setup.headers = new Headers({
+                'Authorization': `Bearer ${getCookieValue(QUERY_STRING_AUTH)}`
+            });
+        }
+        const request = await fetch(`${SITE_URL}${module}/get/access-right`, setup);
+        const data = await request.json();
+
+        result.accessRight = data;
+        result.success = true;
+    } 
+    catch (error) {
+        result.message = error;
+    }
+
+    return result;
+}
+
+/**
  * Method toast
  * Show toast swall in right top
  * @param {string} type default info. info | warning | success | error | question 
@@ -15,7 +51,7 @@ const __ToastSwal = Swal.mixin({
 function toast(type = 'info', message = '', toast_ = 'swal') {
     if(toast_ == 'swal') {
         __ToastSwal.fire({
-            type: type,
+            icon: type,
             title: message
         });
     }
@@ -44,8 +80,24 @@ function toast(type = 'info', message = '', toast_ = 'swal') {
     }
 }
 
-function loading() {
+/**
+ * 
+ */
+function loadingCard(cardSelector, isLoading = true) {
+    if(isLoading) {
+        const nodeDiv = document.createElement("DIV");
+        nodeDiv.className = 'overlay d-flex justify-content-center align-items-center';
 
+        const nodeI = document.createElement("I");
+        nodeI.className = 'fas fa-2x fa-sync fa-spin';
+
+        nodeDiv.appendChild(nodeI);
+        cardSelector.appendChild(nodeDiv);
+
+        return;
+    }
+
+    cardSelector.removeChild(cardSelector.lastElementChild);
 }
 
 /**
@@ -103,10 +155,94 @@ function setSidebar() {
 }
 
 /**
+ * Method getCookieValue
+ * Get cookies value by cookie name
+ * @param {string} cookieName
+ * @return {string} cookieValue
+ */
+function getCookieValue(cookieName) {
+    const ccokie = document.cookie.match('(^|[^;]+)\\s*' + cookieName + '\\s*=\\s*([^;]+)');
+    
+    return ccokie ? ccokie.pop() : '';
+}
+
+/**
  * 
  */
-function getActiveSidebar() {
+function setLookupValue(lookup) {
+    let result = '';
+    if(!lookup.id || !lookup.value) {
+        return result;
+    }
+    
+    if(lookup.target && lookup.target.trim() != '') {
+        result = `<a target="_blank" href="${SITE_URL}${lookup.target}/${lookup.id}">${lookup.value}</a>`;
+    }
+    else {
+        result = lookup.value;
+    }
 
+    return result;
+}
+
+/**
+ * 
+ */
+function setButtonAction(access) {
+    let result = '';
+    if(!access.id || !access.accessList) {
+        return result;
+    }
+
+    if(access.id.trim() == '') {
+        return result;
+    }
+
+    const buttonView = access.accessList.isCanRead ? `<button type="button" class="btn btn-sm btn-flat btn-primary btn-view" value="${access.id}"><i class="far fa-eye"></i></button>` : '';
+    const buttonEdit = access.accessList.isCanUpdate ? `<button type="button" class="btn btn-sm btn-flat btn-success btn-edit" value="${access.id}"><i class="far fa-edit"></i></button>` : '';
+    const buttonDelete = access.accessList.isCanDelete ? `<button type="button" class="btn btn-sm btn-flat btn-danger btn-delete" value="${access.id}"><i class="far fa-trash-alt"></i></button>` : '';
+    result = `<div class="btn-group">${buttonView}${buttonEdit}${buttonDelete}</div>`;
+
+    return result;
+}
+
+/**
+ * Method populateLookup
+ * @param {array} lookupList
+ *                      lookupList.selector {object}
+ *                      lookupList.lookupName {string}
+ *                      lookupList.filter {object}
+ */
+async function populateLookup(lookupList) {
+    const requestList = [];
+    lookupList.forEach(item => {
+        const setup = {
+            method: 'POST',
+            body: JSON.stringify(item.filter ? item.filter : {})
+        };
+        if(USE_JWT) {
+            setup.headers = new Headers({
+                'Authorization': `Bearer ${getCookieValue(QUERY_STRING_AUTH)}`
+            });
+        }
+
+        const request = fetch(`${SITE_URL}lookup/${item.lookupName}`, setup)
+        .then(res => res.json());
+        
+        requestList.push(request);
+    });
+    const response = await Promise.all(requestList);
+
+    response.forEach((item, index) => {
+        const selector = lookupList[index].selector;
+        item.forEach(element => {
+            const opt = document.createElement('option');
+            opt.innerHTML = element.name;
+            opt.value = element.id;
+            selector.appendChild(opt);
+        });
+        $(`#${selector.id}`).val(null).trigger('change');
+    });
 }
 
 /**
@@ -117,4 +253,4 @@ function goBack() {
     window.history.go(-1);
 }
 
-export {goBack, toast, loading, loadingButton, setSidebar};
+export {getAccessRight, goBack, toast, loadingCard, loadingButton, setSidebar, getCookieValue, setLookupValue, setButtonAction, populateLookup};
