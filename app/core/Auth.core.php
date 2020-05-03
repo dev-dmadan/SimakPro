@@ -131,12 +131,19 @@ class Auth {
     private function verifyJWT($isReturnMessage = false) {
         $verify = $isReturnMessage ? (Object)array('success' => false, 'message' => '') : false;
         
-        $http_authorization = (isset($_SERVER['HTTP_AUTHORIZATION']) && !empty($_SERVER['HTTP_AUTHORIZATION'])) ? $_SERVER['HTTP_AUTHORIZATION'] : false;
+        $authorization_header = isset(apache_request_headers()['Authorization']) ? apache_request_headers()['Authorization'] : null;
+        $http_authorization = ($authorization_header && !empty($authorization_header)) ? $authorization_header : false;
         $query_string = (isset($_GET[QUERY_STRING_AUTH]) && !empty($_GET[QUERY_STRING_AUTH])) ? $_GET[QUERY_STRING_AUTH] : false;
         $cookies = (isset($_COOKIE[QUERY_STRING_AUTH]) && !empty($_COOKIE[QUERY_STRING_AUTH])) ? $_COOKIE[QUERY_STRING_AUTH] : false;
         
         $authHeader = $http_authorization ? $http_authorization : ($query_string ? $query_string : ($cookies ? $cookies : false));
-        
+
+        // die(var_dump(array(
+        //     'headers' => $http_authorization,
+        //     'query_string' => $query_string,
+        //     'cookies' => $cookies
+        // )));
+
         try {
             if(!$authHeader) {
                 if($isReturnMessage) {
