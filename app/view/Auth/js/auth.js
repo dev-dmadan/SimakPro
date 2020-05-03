@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } 
         catch (error) {
             Swal.fire({
-                type: 'error',
+                icon: 'error',
                 title: 'Oops...',
                 text: `Something went wrong: ${error}`,
             });

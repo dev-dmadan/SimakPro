@@ -92,6 +92,15 @@ class Login extends Controller {
                 $this->setSession($userData->data[0]);
             }
 
+            $_SESSION['sess_user'] = (object)array(
+                'UserId' => $userData->data[0]['userId'],
+                'UserName' => $userData->data[0]['username'],
+                'ContactId' => $userData->data[0]['contactId'],
+                'ContactName' => $userData->data[0]['name'],
+                'Image' => $userData->data[0]['image']
+            );
+            $this->setAccessRight($userData->data[0]['username']);
+
             $result->success = true;
         } 
         catch (Exception $e) {
@@ -108,7 +117,8 @@ class Login extends Controller {
      * 
      */
     private function setSession($userData) {
-
+        $_SESSION['sess_login'] = true;
+        $_SESSION['sess_timeout'] = time() + 7200;
     }
 
     /**
@@ -117,8 +127,6 @@ class Login extends Controller {
     private function setCookies($userData) {
         $jwtToken = $this->auth->buildJWT($userData['username'], 7200);
         setcookie(QUERY_STRING_AUTH, $jwtToken, (time() + 7200), '/');
-
-        $this->setAccessRight($userData['username']);
     }
 
     /**

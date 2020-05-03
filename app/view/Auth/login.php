@@ -99,12 +99,9 @@ Defined('BASE_PATH') or die(ACCESS_DENIED);
         <script>
             const BASE_URL = <?php echo json_encode(BASE_URL); ?>;
             const SITE_URL = <?php echo json_encode(SITE_URL); ?>;
-            const PUSHER_APP_ID = <?php echo json_encode(PUSHER_APP_ID); ?>;
             const PUSHER_KEY = <?php echo json_encode(PUSHER_KEY); ?>;
-            const PUSHER_SECRET = <?php echo json_encode(PUSHER_SECRET); ?>;
             const PUSHER_CLUSTER = <?php echo json_encode(PUSHER_CLUSTER); ?>;
         </script>
         <script type="module" src="<?= BASE_URL. 'app/view/Auth/js/auth.js'; ?>"></script>
-        <!-- <script src="<?= BASE_URL. 'app/view/Auth/js/login.js'; ?>"></script> -->
     </body>
 </html>

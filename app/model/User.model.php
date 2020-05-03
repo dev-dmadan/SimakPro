@@ -23,7 +23,7 @@ class UserModel extends Database {
             'data' => null
         );
 
-        $query  = "SELECT u.username, u.password, u.contactId, c.name, c.email ";
+        $query  = "SELECT u.id userId, u.username, u.password, u.contactId, c.name, c.email, c.image ";
         $query .= "FROM user u JOIN contact c ON c.id = u.contactId ";
         $query .= "WHERE (BINARY u.username = :username OR BINARY c.email = :username);";
         try {
