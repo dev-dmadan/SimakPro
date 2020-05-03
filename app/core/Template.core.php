@@ -82,7 +82,7 @@ class Template {
     private function getJS() {
         $js = '';
         foreach ($this->js as $value) {
-            $js .= '<script' .($value->type ? ('type="' .$value->type. '"') : ''). ' src="'.BASE_URL.$value->src.'"></script>'."\n";
+            $js .= '<script' .($value->type ? (' type="' .$value->type. '"') : ''). ' src="'.BASE_URL.$value->src.'"></script>'."\n";
         }
 
         return $js;
