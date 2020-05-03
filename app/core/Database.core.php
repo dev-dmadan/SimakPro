@@ -35,10 +35,12 @@ class Database extends Controller {
             $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         }
         catch(PDOException $e) {
-            die(json_encode(array(
-                'success' => false,
-                'message' => 'Fail Connection to Database: ' .$e->getMessage(),
-            )));
+            // die(json_encode(array(
+            //     'success' => false,
+            //     'message' => 'Fail Connection to Database: ' .$e->getMessage(),
+            // )));
+
+            $this->responseError(500, 'Fail Connection to Database: ' .$e->getMessage());
         }
     }
 
