@@ -41,6 +41,10 @@ class Bank extends Controller {
      * 
      */
     public function getData($id) {
+        if(!$this->isCanAccess || !$this->isCanAccess->isCanRead) {
+            $this->responseError(403, 'Access Denied');
+        }
+
         $result = (object)array(
             'success' => false,
             'message' => '',
@@ -67,11 +71,15 @@ class Bank extends Controller {
      * 
      */
     public function getDatatable() {
+        if(!$this->isCanAccess || !$this->isCanAccess->isCanRead) {
+            $this->responseError(403, 'Access Denied');
+        }
+
         $dataTableSetup = (object)array(
             'table' => 'VwBank',
             'filterList' => ['name', 'saldo', 'active_status', 'created_by', 'created_on'],
             'sortList' => [null, 'name', 'saldo', 'active_status', 'created_by', 'created_on', null],
-            'defaultSort' => ['created_on' => 'desc'],
+            'defaultSort' => ['active_status' => 'asc', 'created_on' => 'desc'],
             'filter' => null
         );
         
@@ -136,6 +144,10 @@ class Bank extends Controller {
      * 
      */
     public function save() {
+        if(!$this->isCanAccess || !$this->isCanAccess->isCanInsert) {
+            $this->responseError(403, 'Access Denied');
+        }
+
         $result = (object)array(
             'success' => false,
             'message' => '',
@@ -150,20 +162,20 @@ class Bank extends Controller {
             }
             
             $validation = $this->set_validation($data);
-            if(!$validation['cek']) {
+            if(!$validation->success) {
                 $isError = false;
-                $result->errorList = $validation['error'];
+                $result->errorList = $validation->errorList;
 
                 throw new Exception('Silahkan Cek Kembali Form Isian');
             }
 
-            $save = $this->Bank->save($data);
+            $save = $this->Bank->insert($data);
             if(!$save->success) {
                 throw new Exception($save->message);
             }
 
             $result->success = true;
-            $result->message = 'Tambah Data Bank Baru Berhasil';
+            $result->message = 'Tambah Data Bank Berhasil';
             $this->PublishMessage('Bank', 'reload-datatable');
         } 
         catch (Exception $e) {
@@ -181,21 +193,104 @@ class Bank extends Controller {
      * 
      */
     public function edit($id) {
+        if(!$this->isCanAccess || !$this->isCanAccess->isCanUpdate) {
+            $this->responseError(403, 'Access Denied');
+        }
 
+        $result = (object)array(
+            'success' => false,
+            'message' => '',
+            'errorList' => []
+        );
+        $isError = true;
+        $data = json_decode(file_get_contents("php://input"));
+
+        try {
+            if(!$data || empty($data)) {
+                throw new Exception("Data is undifined");
+            }
+            
+            $validation = $this->set_validation($data);
+            if(!$validation->success) {
+                $isError = false;
+                $result->errorList = $validation->errorList;
+
+                throw new Exception('Silahkan Cek Kembali Form Isian');
+            }
+
+            $update = $this->Bank->update($id, $data);
+            if(!$update->success) {
+                throw new Exception($update->message);
+            }
+
+            $result->success = true;
+            $result->message = 'Edit Data Bank Berhasil';
+            $this->PublishMessage('Bank', 'reload-datatable');
+        } 
+        catch (Exception $e) {
+            if($isError) {
+                $this->responseError(400, $e->getMessage(), true);
+            }
+
+            $result->message = $e->getMessage();
+        }
+
+        $this->responseJSON($result);
     }
 
     /**
      * 
      */
     public function detail($id) {
+        if(!$this->isCanAccess || !$this->isCanAccess->isCanRead) {
+            $this->responseError(403, 'Access Denied');
+        }
 
+        $config = (object)array(
+            'js' => array(
+                (object)array(
+                    'src' => self::pathView. 'js/view.js',
+                    'type' => 'module'
+                )
+            )
+        );
+
+        $this->template('bank/view', $config);
     }
 
     /**
      * 
      */
     public function delete($id) {
+        if(!$this->isCanAccess || !$this->isCanAccess->isCanDelete) {
+            $this->responseError(403, 'Access Denied');
+        }
 
+        $result = (object)array(
+            'success' => false,
+            'message' => ''
+        );
+        $isError = true;
+
+        try {
+            $delete = $this->Bank->delete($id);
+            if(!$delete->success) {
+                throw new Exception($delete->message);
+            }
+
+            $result->success = true;
+            $result->message = 'Hapus Data Bank Berhasil';
+            $this->PublishMessage('Bank', 'reload-datatable');
+        } 
+        catch (Exception $e) {
+            if($isError) {
+                $this->responseError(400, $e->getMessage(), true);
+            }
+
+            $result->message = $e->getMessage();
+        }
+
+        $this->responseJSON($result);
     }
 
     /**

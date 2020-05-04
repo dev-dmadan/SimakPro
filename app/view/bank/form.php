@@ -2,7 +2,7 @@
 Defined('BASE_PATH') or die(ACCESS_DENIED); 
 ?>
 
-<div class="modal fade" id="form-modal">
+<div class="modal fade" id="form-bank-modal">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">

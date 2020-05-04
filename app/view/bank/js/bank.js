@@ -4,12 +4,14 @@ import * as _Datatable from '../../_Layout/js/datatable.js';
 export class Bank {
     accessList = null;
     table = document.querySelector('#bank-table');
+    tableMutasi = document.querySelector('#bank-table');
     dataTable = null;
+    dataTableMutasi = null;
     id = document.querySelector('#id');
     name = document.querySelector('#name');
     saldo = document.querySelector('#saldo');
     active_status = document.querySelector('#active_status');
-    modalCard = document.querySelector('#form-modal .modal-content');
+    modalCard = document.querySelector('#form-bank-modal .modal-content');
 
     constructor() {
         console.log('%c Bank constructor...', 'color: blue');
@@ -61,18 +63,41 @@ export class Bank {
         };
     }
 
+    listMutasi(token) {
+        const serverSideSetup = {
+            ajax: {
+                url: `${SITE_URL}bank/get/datatable/mutasi`,
+                type: 'POST',
+                headers: { 
+                    'Authorization': `Bearer ${token}` 
+                }
+            }
+        };
+        const columnDefsSetup = [
+            {
+                targets: [0, 6],
+                orderable: false
+            }
+        ];
+        this.dataTable = _Datatable.getDefaultDatatable(serverSideSetup, null, columnDefsSetup, _Datatable.languageSetup.indonesia);
+        this.dataTable.createdRow = (row, data) => {
+            $('td:eq(0)', row).addClass('text-right');
+            $('td:eq(2)', row).addClass('text-right');
+        };
+    }
+
     new() {
         this.reset();
         this.saldo.parentElement.parentElement.style.display = 'flex';
         document.querySelector('#save').value = "add";
 
-        $('#form-modal').modal({backdrop: 'static'});
+        $('#form-bank-modal').modal({backdrop: 'static'});
     }
 
     async save() {
         loadingCard(this.modalCard);
 
-        let isHideModal = false;
+        let isHideModal = true;
         try {
             const action = document.querySelector('#save').value;
             const uriSave = action == 'add' ? `${SITE_URL}bank/save` : (action == 'edit' ? `${SITE_URL}bank/edit/${this.id.value}` : null);
@@ -90,7 +115,8 @@ export class Bank {
                     name: this.name.value,
                     saldo: isNaN(parseFloat(this.saldo.value)) ? 0 : parseFloat(this.saldo.value),
                     active_statusId: this.active_status.value,
-                    created_by: USER_DATA.ContactId
+                    created_by: USER_DATA.ContactId,
+                    modified_by: USER_DATA.ContactId
                 })
             });
             const data = await request.json();
@@ -100,8 +126,8 @@ export class Bank {
                 throw data.message;
             }
 
-            isHideModal = data.success;
             toast((data.success ? 'success' : 'warning'), data.message);
+            isHideModal = data.success;
         } 
         catch (error) {
             Swal.fire({
@@ -113,7 +139,7 @@ export class Bank {
         finally {
             loadingCard(this.modalCard, false);
             if(isHideModal) {
-                $('#form-modal').modal('hide');
+                $('#form-bank-modal').modal('hide');
             }
         }
     }
@@ -140,7 +166,7 @@ export class Bank {
             const data = await this.getData(id);
             console.log('%c Response getData: ', 'color: green', data);
 
-            $('#form-modal').modal({backdrop: 'static'});
+            $('#form-bank-modal').modal({backdrop: 'static'});
             this.loadEdit(data);
         } 
         catch (error) {
@@ -150,7 +176,7 @@ export class Bank {
                 text: `Something went wrong: ${error}`,
             });
 
-            $('#form-modal').modal('hide');
+            $('#form-bank-modal').modal('hide');
         }
         finally {
             loadingCard(this.modalCard, false);

@@ -30,8 +30,10 @@ Defined('BASE_PATH') or die(ACCESS_DENIED);
                     <div class="card card-primary card-outline">
                         <div class="card-header">
                             <button id="new" class="btn btn-flat btn-primary">New</button>
-                            <button id="exportExcel" class="btn btn-flat btn-success"><i class="far fa-file-excel"></i> Export</button>
-                            <button id="refresh" class="btn btn-flat btn-info float-right"><i class="fas fa-sync-alt"></i> Refresh</button>
+                            <div class="float-right">
+                                <button id="exportExcel" class="btn btn-flat btn-success"><i class="far fa-file-excel"></i> Export</button>
+                                <button id="refresh" class="btn btn-flat btn-info"><i class="fas fa-sync-alt"></i> Refresh</button>
+                            </div>
                         </div>
                         <div class="card-body">
                             <table id="bank-table" class="table table-sm table-bordered table-striped">

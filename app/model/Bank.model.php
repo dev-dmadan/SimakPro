@@ -8,6 +8,39 @@ class BankModel extends Database {
     }
 
     /**
+     * Method getLookup
+     * Get Bank Lookup Data
+     * @return {object} result
+     *                  result.success {boolean}
+     *                  result.message {string}
+     *                  result.data {array}
+     */
+    public function getLookup() {
+        $result = (object)array(
+            'success' => false,
+            'message' => '',
+            'data' => null
+        );
+
+        $query  = "SELECT id, name FROM bank";
+        try {
+            $statement = $this->connection->prepare($query);
+            $statement->execute();
+
+            $result->data = $statement->fetchAll(PDO::FETCH_ASSOC);
+            $result->success = true;
+        } 
+        catch (PDOException $e) {
+            $result->message = $e->getMessage();
+        }
+        catch (Exception $e) {
+            $result->message = $e->getMessage();
+        }
+
+        return $result;
+    }
+
+    /**
      * 
      */
     public function getById($id) {
@@ -38,7 +71,7 @@ class BankModel extends Database {
     /**
      * 
      */
-    public function save($data) {
+    public function insert($data) {
         $result = (object)array(
             'success' => false,
             'message' => ''
@@ -50,7 +83,7 @@ class BankModel extends Database {
             
             $data->id = $this->NewGuid();
 
-            $insertBank = $this->insert($data);
+            $insertBank = $this->insertBank($data);
             if(!$insertBank->success) {
                 throw new Exception($insertBank->message);
             }
@@ -87,7 +120,7 @@ class BankModel extends Database {
     /**
      * 
      */
-    public function insert($data) {
+    public function insertBank($data) {
         $result = (object)array(
             'success' => false,
             'message' => '',
@@ -104,7 +137,7 @@ class BankModel extends Database {
                 ':saldo' => $data->saldo, 
                 ':active_statusId' => $data->active_statusId, 
                 ':created_by' => $data->created_by, 
-                ':modified_by' => $data->created_by
+                ':modified_by' => $data->modified_by
             ));
             $result->rowAffected = $statement->rowCount();
             $result->success = true;
@@ -158,26 +191,128 @@ class BankModel extends Database {
     }
 
     /**
-     * Method getLookup
-     * Get Bank Lookup Data
-     * @return {object} result
-     *                  result.success {boolean}
-     *                  result.message {string}
-     *                  result.data {array}
+     * 
      */
-    public function getLookup() {
+    public function update($id, $data) {
         $result = (object)array(
             'success' => false,
             'message' => '',
-            'data' => null
+            'rowAffected' => 0
         );
-
-        $query  = "SELECT id, name FROM bank";
+        
+        $query  = "UPDATE bank SET ";
+        $query .= "name = :name, active_statusId = :active_statusId, modified_by = :modified_by ";
+        $query .= "WHERE id = :id;";
         try {
             $statement = $this->connection->prepare($query);
-            $statement->execute();
+            $statement->execute(array(
+                ':id' => $id, 
+                ':name' => $data->name, 
+                ':active_statusId' => $data->active_statusId, 
+                ':modified_by' => $data->modified_by
+            ));
+            $result->rowAffected = $statement->rowCount();
+            $result->success = true;
+        } 
+        catch (PDOException $e) {
+            $result->message = $e->getMessage();
+        }
+        catch (Exception $e) {
+            $result->message = $e->getMessage();
+        }
 
-            $result->data = $statement->fetchAll(PDO::FETCH_ASSOC);
+        return $result;
+    }
+
+    /**
+     * 
+     */
+    public function delete($id) {
+        $result = (object)array(
+            'success' => false,
+            'message' => ''
+        );
+
+        $isError = false;
+        try {
+            $this->connection->beginTransaction();
+
+            $deleteMutasi = $this->deleteMutasi($id);
+            if(!$deleteMutasi->success) {
+                throw new Exception($deleteMutasi->message);
+            }
+
+            $deleteBank = $this->deleteBank($id);
+            if(!$deleteBank->success) {
+                throw new Exception($deleteBank->message);
+            }
+
+            $this->connection->commit();
+            $result->success = true;
+        } 
+        catch (PDOException $e) {
+            $isError = true;
+            $result->message = $e->getMessage();
+        }
+        catch (Exception $e) {
+            $isError = true;
+            $result->message = $e->getMessage();
+        }
+        finally {
+            if($isError) {
+                $this->connection->rollBack();
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * 
+     */
+    public function deleteBank($id) {
+        $result = (object)array(
+            'success' => false,
+            'message' => '',
+            'rowAffected' => 0
+        );
+        
+        $query  = "DELETE FROM bank WHERE id = :id;";
+        try {
+            $statement = $this->connection->prepare($query);
+            $statement->execute(array(
+                ':id' => $id
+            ));
+            $result->rowAffected = $statement->rowCount();
+            $result->success = true;
+        } 
+        catch (PDOException $e) {
+            $result->message = $e->getMessage();
+        }
+        catch (Exception $e) {
+            $result->message = $e->getMessage();
+        }
+
+        return $result;
+    }
+
+    /**
+     * 
+     */
+    public function deleteMutasi($bankId) {
+        $result = (object)array(
+            'success' => false,
+            'message' => '',
+            'rowAffected' => 0
+        );
+        
+        $query  = "DELETE FROM mutasi_bank WHERE bankId = :bankId;";
+        try {
+            $statement = $this->connection->prepare($query);
+            $statement->execute(array(
+                ':bankId' => $bankId
+            ));
+            $result->rowAffected = $statement->rowCount();
             $result->success = true;
         } 
         catch (PDOException $e) {
