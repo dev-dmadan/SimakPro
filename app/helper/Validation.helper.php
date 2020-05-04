@@ -99,19 +99,19 @@ class Validation {
 					);
 
 					$setValidasi = $this->set_validasi($jenis, $dataValidasi); 
-					if(!$setValidasi['cek']){
+					if(!$setValidasi['cek']) {
 						$cek = false;
 						$this->error[$var] = $setValidasi['error'];
 					}
-
-					$output = array(
-						'cek' => $cek,
-						'error' => $this->error,
-						'value' => $this->value,
-					);
 				} 	
 			}
 		}
+
+		$output = (object)array(
+			'success' => $cek,
+			'errorList' => $this->error,
+			'value' => $this->value,
+		);
 
 		return $output;
 	}
@@ -123,7 +123,7 @@ class Validation {
 	 * @param data {array} berupa array yg isinya field, label, min, max, dan required
 	 * @return result {array}
 	 */
-	public function set_validasi($jenis, $data) {
+	private function set_validasi($jenis, $data) {
 		// arahkan validasi sesuai dengan jenisnya
 		switch ($jenis) {
 			case 'string':
