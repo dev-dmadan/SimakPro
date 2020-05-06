@@ -3,6 +3,7 @@ import * as _Bank from './bank.js';
 
 const Bank = new _Bank.Bank();
 Bank.listMutasi(_Layout.getCookieValue(QUERY_STRING_AUTH));
+Bank.editMode = 'view';
 
 const ChannelPusher = PUSHER.subscribe('Bank');
 const dataTableSetup = Bank.dataTableMutasi;
@@ -33,6 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         Bank.loadView(Bank.id.value);
     });
 
+    Bank.loadView(Bank.id.value);
     const accessList = await _Layout.getAccessRight('bank'); 
     if(accessList.success && accessList.accessRight) {
         if(!accessList.accessRight.isCanUpdate) {

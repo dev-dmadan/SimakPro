@@ -2,9 +2,10 @@ import {toast, getCookieValue, loadingCard} from '../../_Layout/js/layout.js';
 import * as _Datatable from '../../_Layout/js/datatable.js';
 
 export class Bank {
+    editMode = 'list';
     accessList = null;
     table = document.querySelector('#bank-table');
-    tableMutasi = document.querySelector('#bank-table');
+    tableMutasi = document.querySelector('#mutasi-bank-table');
     dataTable = null;
     dataTableMutasi = null;
     id = document.querySelector('#id');
@@ -66,7 +67,7 @@ export class Bank {
     listMutasi(token) {
         const serverSideSetup = {
             ajax: {
-                url: `${SITE_URL}bank/get/datatable/mutasi`,
+                url: `${SITE_URL}bank/get/datatable/mutasi/${this.id.value}`,
                 type: 'POST',
                 headers: { 
                     'Authorization': `Bearer ${token}` 
@@ -75,14 +76,16 @@ export class Bank {
         };
         const columnDefsSetup = [
             {
-                targets: [0, 6],
+                targets: [0, 5],
                 orderable: false
             }
         ];
-        this.dataTable = _Datatable.getDefaultDatatable(serverSideSetup, null, columnDefsSetup, _Datatable.languageSetup.indonesia);
-        this.dataTable.createdRow = (row, data) => {
+        this.dataTableMutasi = _Datatable.getDefaultDatatable(serverSideSetup, null, columnDefsSetup, _Datatable.languageSetup.indonesia);
+        this.dataTableMutasi.createdRow = (row, data) => {
             $('td:eq(0)', row).addClass('text-right');
             $('td:eq(2)', row).addClass('text-right');
+            $('td:eq(3)', row).addClass('text-right');
+            $('td:eq(4)', row).addClass('text-right');
         };
     }
 
@@ -116,7 +119,8 @@ export class Bank {
                     saldo: isNaN(parseFloat(this.saldo.value)) ? 0 : parseFloat(this.saldo.value),
                     active_statusId: this.active_status.value,
                     created_by: USER_DATA.ContactId,
-                    modified_by: USER_DATA.ContactId
+                    modified_by: USER_DATA.ContactId,
+                    editMode: this.editMode
                 })
             });
             const data = await request.json();
@@ -151,7 +155,29 @@ export class Bank {
     }
 
     async loadView(id) {
+        console.log('%c Load View...', 'color: blue', id);
 
+        try {
+            const data = await this.getData(id);
+            console.log('%c Response getData: ', 'color: green', data);
+
+            document.querySelector('[name="label-name"]').textContent = data.name;
+            document.querySelector('#label-name').textContent = data.name;
+            document.querySelector('#label-saldo').textContent = data.saldo;
+            document.querySelector('#label-active_status').textContent = data.active_status;
+            document.querySelector('#label-created_on').textContent = data.created_on;
+            document.querySelector('#label-created_by').textContent = data.created_by;
+        } 
+        catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: `Something went wrong: ${error}`,
+            });
+        }
+        finally {
+            
+        }
     }
 
     async edit(id) {

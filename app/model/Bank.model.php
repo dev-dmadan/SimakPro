@@ -163,19 +163,20 @@ class BankModel extends Database {
         );
 
         $id = $this->NewGuid();
-        $query  = "INSERT INTO mutasi_bank (id, bankId, date, credit, debt, saldo, created_by, modified_by) ";
-        $query .= "VALUES(:id, :bankId, :date, :credit, :debt, :saldo, :created_by, :modified_by);";
+        $query  = "INSERT INTO mutasi_bank (id, bankId, date, credit, debt, saldo, notes, created_by, modified_by) ";
+        $query .= "VALUES(:id, :bankId, :date, :credit, :debt, :saldo, :notes, :created_by, :modified_by);";
         try {
             $statement = $this->connection->prepare($query);
             $statement->execute(array(
-                'id' => $id, 
-                'bankId' => $bankId, 
-                'date' => date('Y-m-d'), 
-                'credit' => $transaction->credit,
-                'debt' => $transaction->debt,
-                'saldo' => $transaction->saldo,
-                'created_by' => $created_by,
-                'modified_by' => $created_by
+                ':id' => $id, 
+                ':bankId' => $bankId, 
+                ':date' => date('Y-m-d'), 
+                ':credit' => $transaction->credit,
+                ':debt' => $transaction->debt,
+                ':saldo' => $transaction->saldo,
+                ':notes' => $notes,
+                ':created_by' => $created_by,
+                ':modified_by' => $created_by
             ));
             $result->rowAffected = $statement->rowCount();
             $result->success = true;

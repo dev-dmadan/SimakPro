@@ -1,5 +1,5 @@
 <?php 
-Defined('BASE_PATH') or die(ACCESS_DENIED); 
+Defined('BASE_PATH') or die(ACCESS_DENIED);
 ?>
 
 <div class="content-wrapper">

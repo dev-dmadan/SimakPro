@@ -12,7 +12,7 @@ Defined('BASE_PATH') or die(ACCESS_DENIED);
                 </button>
             </div>
             <form id="form-bank" class="form-horizontal">
-                <input type="hidden" id="id">
+                <input type="hidden" id="id" value="<?= isset($id) ? $id : ''; ?>">
                 <div class="modal-body">
                     
                     <div class="form-group row">

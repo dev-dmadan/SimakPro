@@ -124,6 +124,59 @@ class Bank extends Controller {
         $this->responseJSON($result);
     }
 
+    public function getMutasiDatatable($bankId) {
+        if(!$this->isCanAccess || !$this->isCanAccess->isCanRead) {
+            $this->responseError(403, 'Access Denied');
+        }
+
+        $dataTableSetup = (object)array(
+            'table' => 'mutasi_bank',
+            'filterList' => ['date', 'credit', 'debt', 'saldo'],
+            'sortList' => [null, 'date', 'credit', 'debt', 'saldo', null],
+            'defaultSort' => ['created_on' => 'desc'],
+            'filter' => "bankId = '{$bankId}'"
+        );
+        
+        $result = (object)array(
+            'draw' => $_POST['draw'],
+            'recordsTotal' => 0,
+            'recordsFiltered' => 0,
+            'data' => null,
+        );
+        
+        try {
+            $dataTable = $this->DataTable->getDataTable($dataTableSetup);  
+            if(!$dataTable->success) {
+                throw new Exception($dataTable->message);
+            }
+
+            $no = $_POST['start'];
+            $data = array();
+            foreach($dataTable->dataTable->data as $row) {
+                $no++;
+
+                $temp = array();
+                $temp[] = $no;
+				$temp[] = $this->General->printDate($row['date'], 'full');
+				$temp[] = $this->General->printCurrency($row['credit']);
+                $temp[] = $this->General->printCurrency($row['debt']);
+                $temp[] = $this->General->printCurrency($row['saldo']);
+                $temp[] = $row['notes'];
+                
+                $data[] = $temp;
+            }
+
+            $result->recordsTotal = $dataTable->dataTable->recordsTotal;
+            $result->recordsFiltered = $dataTable->dataTable->recordsFiltered;
+            $result->data = $data;
+        } 
+        catch (Exception $e) {
+            $this->responseError(400, $e->getMessage(), true);
+        }
+
+        $this->responseJSON($result);
+    }
+
     /**
      * 
      */
@@ -225,7 +278,8 @@ class Bank extends Controller {
 
             $result->success = true;
             $result->message = 'Edit Data Bank Berhasil';
-            $this->PublishMessage('Bank', 'reload-datatable');
+
+            $this->PublishMessage('Bank', ($data->editMode == 'list' ? 'reload-datatable' : 'reload-view'));
         } 
         catch (Exception $e) {
             if($isError) {
@@ -246,6 +300,11 @@ class Bank extends Controller {
             $this->responseError(403, 'Access Denied');
         }
 
+        // $bankData = $this->Bank->getById($id);
+        // if(!$bankData->success || count($bankData->data) < 1) {
+        //     $this->responseError(404, 'Not Found');
+        // }
+
         $config = (object)array(
             'js' => array(
                 (object)array(
@@ -255,7 +314,7 @@ class Bank extends Controller {
             )
         );
 
-        $this->template('bank/view', $config);
+        $this->template('bank/view', $config, array('id' => $id));
     }
 
     /**
