@@ -26,13 +26,7 @@ class Template {
         $__header = $this->getHeader();
         $__sidebar = $this->getSidebar();
         $__footer = $this->getFooter();
-        $__content = $this->getContent();
-
-        if(!empty($data)) {
-            foreach($data as $key => $value) {
-                ${$key} = $value;
-            }
-        }
+        $__content = $this->getContent($data);
 
         if(!empty($config)) {
             if(isset($config->css) && !empty($config->css)) {
@@ -115,8 +109,14 @@ class Template {
         return $footer;
     }
 
-    private function getContent() {
+    private function getContent($data) {
         ob_start();
+
+        if(!empty($data)) {
+            foreach($data as $key => $value) {
+                ${$key} = $value;
+            }
+        }
 
         $temp = explode('/', $this->content);
         $viewPath = '';
