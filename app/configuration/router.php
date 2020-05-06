@@ -95,11 +95,99 @@ $route = new \Klein\Klein();
             $__request->call('bank/getDatatable');
         });
 
+        $route->respond('POST', '/bank/get/datatable/mutasi/[:id]', function($request) use ($__request) {
+            $__request->call('bank/getMutasiDatatable', array($request->id));
+        });
+
         $route->respond('POST', '/bank/get/access-right', function() use ($__request) {
             $__request->call('bank/getAccessRight');
         });
 
     /** End Bank */
+    
+    /** Contact */
+
+        $route->respond('GET', '/contact', function() use ($__request) {
+            $__request->call('contact');
+        });
+
+        $route->respond('GET', '/contact/[kas-besar|kas-kecil|sub-kas-kecil:action]', function($request) use ($__request) {
+            $controler = 'contact';
+            switch (strtolower($request->action)) {
+                case 'kas-besar':
+                    $controler = 'contact/kasBesar';
+                    break;
+                case 'kas-kecil':
+                    $controler = 'contact/kasKecil';
+                    break;
+                case 'sub-kas-kecil':
+                    $controler = 'contact/subKasKecil';
+                    break;
+                
+                default:
+                    break;
+            }
+
+            $__request->call($controler);
+        });
+
+        $route->respond('POST', '/contact/get/datatable', function() use ($__request) {
+            $__request->call('contact/getatatable');
+        });
+
+        $route->respond('POST', '/contact/save', function() use ($__request) {
+            $__request->call('contact/save');
+        });
+        
+        $route->respond('UPDATE', '/contact/edit/[:id]', function($request) use ($__request) {
+            $__request->call('contact/edit', array($request->id));
+        });
+
+        $route->respond('DELETE', '/contact/delete/[:id]', function($request) use ($__request) {
+            $__request->call('contact/delete', array($request->id));
+        });
+
+        $route->respond('GET', '/contact/view/[:id]', function($request) use ($__request) {
+            $__request->call('contact/detail', array($request->id));
+        });
+
+        $route->respond('POST', '/contact/get/access-right', function() use ($__request) {
+            $__request->call('contact/getAccessRight');
+        });
+
+    /** End Contact */
+
+    /** Proyek */
+
+        $route->respond('GET', '/proyek', function() use ($__request) {
+            $__request->call('proyek');
+        });
+
+        $route->respond('POST', '/proyek/get/datatable', function() use ($__request) {
+            $__request->call('proyek/getatatable');
+        });
+
+        $route->respond('POST', '/proyek/save', function() use ($__request) {
+            $__request->call('proyek/save');
+        });
+        
+        $route->respond('UPDATE', '/proyek/edit/[:id]', function($request) use ($__request) {
+            $__request->call('proyek/edit', array($request->id));
+        });
+
+        $route->respond('DELETE', '/proyek/delete/[:id]', function($request) use ($__request) {
+            $__request->call('proyek/delete', array($request->id));
+        });
+
+        $route->respond('GET', '/proyek/view/[:id]', function($request) use ($__request) {
+            $__request->call('proyek/detail', array($request->id));
+        });
+
+        $route->respond('POST', '/proyek/get/access-right', function() use ($__request) {
+            $__request->call('proyek/getAccessRight');
+        });
+
+    /** End Proyek */
 
 /** End Your custom route */
 
