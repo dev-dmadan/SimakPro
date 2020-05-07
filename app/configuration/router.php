@@ -183,6 +183,46 @@ $route = new \Klein\Klein();
             $__request->call('proyek/getAccessRight');
         });
 
+        /** Detail Project Payment */
+
+            $route->respond('POST', '/proyek/get/datatable/project-payment/[:id]', function($request) use ($__request) {
+                $__request->call('proyek/getProjectPaymentDatatable', array($request->id));
+            });
+
+            $route->respond('POST', '/proyek/project-payment/save', function() use ($__request) {
+                $__request->call('proyek/projectPaymentSave');
+            });
+
+            $route->respond('UPDATE', '/proyek/project-payment/edit/[:id]', function($request) use ($__request) {
+                $__request->call('proyek/projectPaymentEdit', array($request->id));
+            });
+
+            $route->respond('DELETE', '/proyek/project-payment/delete/[:id]', function($request) use ($__request) {
+                $__request->call('proyek/projectPaymentDelete', array($request->id));
+            });
+
+        /** End Detail Project Payment */
+
+        /** Detail Project SKK */
+            
+            $route->respond('POST', '/proyek/get/datatable/project-skk/[:id]', function($request) use ($__request) {
+                $__request->call('proyek/getProjectSKKDatatable', array($request->id));
+            });
+
+            $route->respond('POST', '/proyek/project-skk/save', function() use ($__request) {
+                $__request->call('proyek/projectSKKSave');
+            });
+
+            $route->respond('UPDATE', '/proyek/project-skk/edit/[:id]', function($request) use ($__request) {
+                $__request->call('proyek/projectSKKEdit', array($request->id));
+            });
+
+            $route->respond('DELETE', '/proyek/project-skk/delete/[:id]', function($request) use ($__request) {
+                $__request->call('proyek/projectSKKDelete', array($request->id));
+            });
+
+        /** End Detail Project SKK */
+
     /** End Proyek */
 
 /** End Your custom route */
