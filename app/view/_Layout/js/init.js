@@ -9,5 +9,6 @@ $.fn.dataTable.ext.errMode = function ( settings, helpPage, message ) {
     });
 };
 document.addEventListener('DOMContentLoaded', () => {
+    document.querySelector('#user-info-name').textContent = USER_DATA ? USER_DATA.ContactName : '';
     _Layout.setSidebar();
 });
