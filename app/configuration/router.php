@@ -112,23 +112,7 @@ $route = new \Klein\Klein();
         });
 
         $route->respond('GET', '/contact/[kas-besar|kas-kecil|sub-kas-kecil:action]', function($request) use ($__request) {
-            $controler = 'contact';
-            switch (strtolower($request->action)) {
-                case 'kas-besar':
-                    $controler = 'contact/kasBesar';
-                    break;
-                case 'kas-kecil':
-                    $controler = 'contact/kasKecil';
-                    break;
-                case 'sub-kas-kecil':
-                    $controler = 'contact/subKasKecil';
-                    break;
-                
-                default:
-                    break;
-            }
-
-            $__request->call($controler);
+            $__request->call('contact', array($request->action));
         });
 
         $route->respond('POST', '/contact/get/datatable', function() use ($__request) {
@@ -148,6 +132,10 @@ $route = new \Klein\Klein();
         });
 
         $route->respond('GET', '/contact/view/[:id]', function($request) use ($__request) {
+            $__request->call('contact/detail', array($request->id));
+        });
+
+        $route->respond('GET', '/contact/[kas-besar|kas-kecil|sub-kas-kecil:action]/view/[:id]', function($request) use ($__request) {
             $__request->call('contact/detail', array($request->id));
         });
 
@@ -171,6 +159,14 @@ $route = new \Klein\Klein();
             $__request->call('proyek/save');
         });
         
+        $route->respond('GET', '/proyek/form', function() use ($__request) {
+            $__request->call('proyek/form');
+        });
+
+        $route->respond('GET', '/proyek/form/[:id]', function($request) use ($__request) {
+            $__request->call('proyek/form', array($request->id));
+        });
+
         $route->respond('UPDATE', '/proyek/edit/[:id]', function($request) use ($__request) {
             $__request->call('proyek/edit', array($request->id));
         });
