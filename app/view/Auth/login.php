@@ -59,7 +59,7 @@ Defined('BASE_PATH') or die(ACCESS_DENIED);
                             
                             <!-- <div class="col-4"> -->
                             <div class="col-12">
-                                <button id="login-button" type="button" class="btn btn-primary btn-block">Sign In</button>
+                                <button id="login-button" type="submit" class="btn btn-primary btn-block">Sign In</button>
                             </div>
                             <!-- /.col -->
                         </div>
