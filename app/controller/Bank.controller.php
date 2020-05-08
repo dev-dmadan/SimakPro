@@ -300,10 +300,10 @@ class Bank extends Controller {
             $this->responseError(403, 'Access Denied');
         }
 
-        // $bankData = $this->Bank->getById($id);
-        // if(!$bankData->success || count($bankData->data) < 1) {
-        //     $this->responseError(404, 'Not Found');
-        // }
+        $bankData = $this->Bank->getById($id);
+        if(!$bankData->success || count($bankData->data) < 1) {
+            $this->responseError(404, 'Not Found');
+        }
 
         $config = (object)array(
             'js' => array(
