@@ -146,7 +146,8 @@ class Login extends Controller {
                 );
 
                 $tempSidebar[] = (object)array(
-                    'title' => $access['name'],
+                    'name' => $access['name'],
+                    'title' => $access['title'],
                     'icon' => $access['icon'],
                     'router' => $access['router']
                 );
