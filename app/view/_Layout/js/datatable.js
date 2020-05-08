@@ -135,7 +135,7 @@ function getDefaultDatatable(serverSideSetup = null, lengthSetup = null, columnD
  */
 function renderData(row, data) {
     data.forEach((item, index) => {
-        if(typeof item === 'object') {
+        if(item && typeof item === 'object') {
             let tdValue = '';
             if(item.lookup) {
                 tdValue = setLookupValue(item.lookup);
