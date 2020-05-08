@@ -12,7 +12,7 @@ Defined('BASE_PATH') or die(ACCESS_DENIED);
                 </div><!-- /.col -->
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item"><a href="<?= SITE_URL; ?>">Home</a></li>
                         <li class="breadcrumb-item active">Bank</li>
                     </ol>
                 </div><!-- /.col -->
@@ -40,7 +40,7 @@ Defined('BASE_PATH') or die(ACCESS_DENIED);
                                 <thead>
                                     <tr>
                                         <th class="text-right">No</th>
-                                        <th>Name</th>
+                                        <th>Nama</th>
                                         <th class="text-right">Saldo</th>
                                         <th>Status</th>
                                         <th>Created By</th>
