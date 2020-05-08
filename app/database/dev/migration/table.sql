@@ -65,6 +65,7 @@ DROP TABLE IF EXISTS contact;
 CREATE TABLE IF NOT EXISTS contact (
     id CHAR(36) NOT NULL,
     name VARCHAR(255) DEFAULT NULL,
+    birthplace VARCHAR(255) DEFAULT NULL,
     birthdate DATE DEFAULT NULL,
     genderId CHAR(36) DEFAULT NULL,
     address TEXT DEFAULT NULL,
