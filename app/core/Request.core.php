@@ -19,7 +19,7 @@ class Request {
      * @param {array} data
      * @param {boolean} caseSensitive Get Controller and Method Name by case sensitive
      */
-    public function call($request = "", $data = array(), $caseSensitive = false) {
+    public function call($request = "", $data = array(), $caseSensitive = false, $dataConstruct = array()) {
         $uri = explode('/', $request);
 
         if($caseSensitive) {
@@ -38,7 +38,7 @@ class Request {
         try {
             if(file_exists($controller)) {
                 require_once $controller;
-                $object = new $class();
+                $object = new $class(...$dataConstruct);
     
                 if(method_exists($object, $method)) {
                     call_user_func_array(array($object, $method), $data);
