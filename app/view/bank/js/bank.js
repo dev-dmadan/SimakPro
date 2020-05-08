@@ -41,6 +41,10 @@ export class Bank {
             $('td:eq(0)', row).addClass('text-right');
             $('td:eq(2)', row).addClass('text-right');
 
+            const status = $('td:eq(3)', row).text();
+            const badge = status == 'Aktif' ? 'badge-success' : 'badge-danger';
+            $('td:eq(3)', row).addClass('text-center').html(`<span class="badge ${badge}">${status}</span>`);
+
             const actionTd = $('td:eq(6)', row)[0];
             if(actionTd.children.length > 0) {
                 for (let i = 0; i < actionTd.children[0].children.length; i++) {
