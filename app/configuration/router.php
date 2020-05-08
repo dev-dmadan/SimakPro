@@ -108,21 +108,25 @@ $route = new \Klein\Klein();
     /** Contact */
 
         $route->respond('GET', '/contact', function() use ($__request) {
-            $__request->call('contact');
+            $__request->call('contact', array(), true, array(null));
         });
 
         $route->respond('GET', '/contact/[kas-besar|kas-kecil|sub-kas-kecil:action]', function($request) use ($__request) {
-            $__request->call('contact', array($request->action));
+            $__request->call('contact', array(), false, array($request->action));
         });
 
-        $route->respond('POST', '/contact/get/datatable', function() use ($__request) {
-            $__request->call('contact/getatatable');
+        $route->respond('POST', '/contact/get/datatable', function($request) use ($__request) {
+            $__request->call('contact/getDatatable', array(), false, array($request->paramsPost()->contact_type));
         });
 
         $route->respond('POST', '/contact/save', function() use ($__request) {
             $__request->call('contact/save');
         });
         
+        $route->respond('GET', '/contact/[:id]', function($request) use ($__request) {
+            $__request->call('contact/getData', array($request->id));
+        });
+
         $route->respond('UPDATE', '/contact/edit/[:id]', function($request) use ($__request) {
             $__request->call('contact/edit', array($request->id));
         });
