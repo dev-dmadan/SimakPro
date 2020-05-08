@@ -43,6 +43,7 @@ $__userData = isset($_SESSION['sess_user']) && !empty($_SESSION['sess_user']) ? 
 <script src="<?= ADMIN_LTE. 'plugins/sweetalert2/sweetalert2.min.js'; ?>"></script>
 <script src="<?= ADMIN_LTE. 'plugins/toastr/toastr.min.js'; ?>"></script>
 <script src="<?= ADMIN_LTE. 'plugins/select2/js/select2.full.min.js'; ?>"></script>
+<script src="<?= ADMIN_LTE. 'plugins/bs-custom-file-input/bs-custom-file-input.min.js'; ?>"></script>
 <script src="<?= ADMIN_LTE. 'dist/js/adminlte.js'; ?>"></script>
 <script type="module" src="<?= BASE_URL. 'app/view/_Layout/js/init.js'; ?>"></script>
 <?= $__js; ?>
