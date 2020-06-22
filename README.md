@@ -25,6 +25,7 @@ Sistem ini dibangun menggunakan bahasa pemrograman PHP 7 dibagian server, dan me
 - Native PHP 7 dengan menggunakan konsep OOP
 - Framework PHP disupport dengan [HelloFramework](https://github.com/dev-dmadan/Hello-Framework-PHP)
 - Native JavaScript ES5/ES6 dengan menggunakan konsep OOP / jQuery
+- Template admin disupport dengan [AdminLTE v3](https://github.com/ColorlibHQ/AdminLTE)
 - Notifikasi realtime / Websocket disupport dengan [Pusher](https://pusher.com/)
 - Database MariaDB / MySQL
 - Authentikasi menggunakan basic Session / Token JWT
