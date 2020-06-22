@@ -171,17 +171,14 @@ class Controller {
                     foreach($to['to'] as $nameTo => $emailTo) {
                         if(is_string($nameTo)) {
                             $mail->addAddress($emailTo, $nameTo);
-                        }
-                        else {
+                        } else {
                             $mail->addAddress($emailTo);
                         }
                     }
-                }
-                else {
+                } else {
                     $mail->addAddress($to['to']);
                 }
-            }
-            else {
+            } else {
                 $mail->addAddress($to);
             }
 
@@ -191,13 +188,11 @@ class Controller {
                     foreach($to['cc'] as $nameCC => $emailCC) {
                         if(is_string($nameCC)) {
                             $mail->addCC($nameCC, $emailCC);
-                        }
-                        else {
+                        } else {
                             $mail->addCC($emailCC);
                         }
                     }
-                }
-                else {
+                } else {
                     $mail->addCC($to['cc']);
                 }
             }
@@ -208,8 +203,7 @@ class Controller {
 
             $mail->send();
             $result->success = true;
-        } 
-        catch (Exception $e) {
+        } catch (Exception $e) {
             $result->message = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
         }
 
@@ -304,20 +298,17 @@ class Controller {
                 $temp = strtolower($type) == 'model' ? $value. 'Model' : $value;
                 if(is_string($key)) {
                     $this->$key = new $temp(...$constructArgument);
-                }
-                else {
+                } else {
                     $this->$value = new $temp(...$constructArgument);
                 }
             }
-        }
-        else {
+        } else {
             require_once $dir[0].$name.$dir[1];
 
             $temp = strtolower($type) == 'model' ? $name. 'Model' : $name;
             if(!empty($alias)) {
                 $this->$alias = new $temp(...$constructArgument);
-            }
-            else {
+            } else {
                 $this->$name = new $temp(...$constructArgument);
             }
         }
@@ -364,6 +355,7 @@ class Controller {
      * Guid to String
      * @param {byte | string} guid
      * @param {string} type. Default is string. byte | string
+     * @return {string} guid
      */
     final protected function ToStringGuid($guid, $type = 'string') {
         $uuid = ($type == 'byte') ? Uuid::fromBytes($guid) : Uuid::fromString($guidString);

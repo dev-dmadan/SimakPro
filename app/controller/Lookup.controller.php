@@ -38,8 +38,7 @@ class Lookup extends Controller {
             }
 
             $result = $lookupData->data;
-        } 
-        catch (Exception $e) {
+        } catch (Exception $e) {
             $this->responseError(400, $e->getMessage(), true);
         }
 

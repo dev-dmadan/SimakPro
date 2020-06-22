@@ -57,8 +57,7 @@ class Login extends Controller {
                     $result->errorList['password'] = $messageDefault->required['password'];
                     $check = false;
                 }
-            }
-            else {
+            } else {
                 $isError = false;
                 throw new Exception('Please check parameter');
             }
@@ -87,8 +86,7 @@ class Login extends Controller {
 
             if(USE_JWT) {
                 $this->setCookies($userData->data[0]);
-            }
-            else {
+            } else {
                 $this->setSession($userData->data[0]);
             }
 
@@ -102,8 +100,7 @@ class Login extends Controller {
             $this->setAccessRight($userData->data[0]['username']);
 
             $result->success = true;
-        } 
-        catch (Exception $e) {
+        } catch (Exception $e) {
             if($isError) {
                 $statusCode = 400;
             }

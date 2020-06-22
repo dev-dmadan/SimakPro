@@ -113,9 +113,7 @@ class Auth {
             $isGranted->isCanInsert = $accessCheck[$accessName]->isCanInsert;
             $isGranted->isCanUpdate = $accessCheck[$accessName]->isCanUpdate;
             $isGranted->isCanDelete = $accessCheck[$accessName]->isCanDelete;
-        } 
-        catch (Exception $e) {
-        }
+        } catch (Exception $e) {}
         
         return $isGranted;
     }
@@ -155,8 +153,7 @@ class Auth {
 
             if($query_string || $cookies) {
                 $JWT = $authHeader;
-            }
-            else {
+            } else {
                 $tempJWT = explode("Bearer ", $authHeader);
                 $JWT = isset($tempJWT[1]) ? $tempJWT[1] : false;
             }
@@ -172,16 +169,13 @@ class Auth {
             $decoded = JWT::decode($JWT, KEY_AUTH, array('HS256'));
             if($isReturnMessage) {
                 $verify->success = true;
-            }
-            else {
+            } else {
                 $verify = true;
             }
-        } 
-        catch (Exception $e) {
+        } catch (Exception $e) {
             if($isReturnMessage) {
                 $verify->message = $e->getMessage();
-            }
-            else {
+            } else {
                 return false;
             }
         }
