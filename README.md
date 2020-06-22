@@ -90,160 +90,160 @@ Sistem ini dibangun menggunakan bahasa pemrograman PHP 7 dibagian server, dan me
         </IfModule>
         ```
 
-    5. ### Update index.php
-        Sesuaikan environment project yang ingin digunakan. Ganti nilai constanta "ENVIRONMENT"
-        ```php
-        /**
-         * Const ENVIRONMENT
-         * By Default: DEV, DEV-LIVE, PROD
-         * DEV      => Local only
-         * DEV-LIVE => Development in cloud/host
-         * PROD     => Golive / production
-        */
-        define('ENVIRONMENT', "DEV");
-        ```
+5. ### Update index.php
+    Sesuaikan environment project yang ingin digunakan. Ganti nilai constanta "ENVIRONMENT"
+    ```php
+    /**
+        * Const ENVIRONMENT
+        * By Default: DEV, DEV-LIVE, PROD
+        * DEV      => Local only
+        * DEV-LIVE => Development in cloud/host
+        * PROD     => Golive / production
+    */
+    define('ENVIRONMENT', "DEV");
+    ```
 
-    6. ### Update config.php
-        Buka project, masuk ke
-        ```
-        ..\app\configuration\
-        ```
-        Buka file config.php, sesuaikan nilai-nilai yang ada pada variabel $__configuration.
-        Terutama yang harus diubah adalah
-        ```php
-        $__configuration['BASE_URL'] = array(
-            'PROD' => '',
-            'DEV-LIVE' => '',
-            'DEV' => 'http://localhost/SimakPro/'
-        );
-        $__configuration['SITE_URL'] = array(
-            'PROD' => '',
-            'DEV-LIVE' => '',
-            'DEV' => 'http://localhost/SimakPro/'
-        );
+6. ### Update config.php
+    Buka project, masuk ke
+    ```
+    ..\app\configuration\
+    ```
+    Buka file config.php, sesuaikan nilai-nilai yang ada pada variabel $__configuration.
+    Terutama yang harus diubah adalah
+    ```php
+    $__configuration['BASE_URL'] = array(
+        'PROD' => '',
+        'DEV-LIVE' => '',
+        'DEV' => 'http://localhost/SimakPro/'
+    );
+    $__configuration['SITE_URL'] = array(
+        'PROD' => '',
+        'DEV-LIVE' => '',
+        'DEV' => 'http://localhost/SimakPro/'
+    );
 
-        /** Use JWT & Key Auth for Secret Key JWT */
-        $__configuration['USE_JWT'] = true;
-        $__configuration['KEY_AUTH'] = array(
-            'PROD' => '',
-            'DEV-LIVE' => '',
-            'DEV' => '5955b79bfe79491f4759b213bf392274'
-        );
-        $__configuration['QUERY_STRING_AUTH'] = 'SimakPro_access_key';
-        /** End Key Auth for Secret Key JWT */
+    /** Use JWT & Key Auth for Secret Key JWT */
+    $__configuration['USE_JWT'] = true;
+    $__configuration['KEY_AUTH'] = array(
+        'PROD' => '',
+        'DEV-LIVE' => '',
+        'DEV' => '5955b79bfe79491f4759b213bf392274'
+    );
+    $__configuration['QUERY_STRING_AUTH'] = 'SimakPro_access_key';
+    /** End Key Auth for Secret Key JWT */
 
-        /** Pusher Realtime */
-        $__configuration['PUSHER_APP_ID'] = array(
-            'PROD' => '',
-            'DEV-LIVE' => '',
-            'DEV' => '965857'
-        );
-        $__configuration['PUSHER_KEY'] = array(
-            'PROD' => '',
-            'DEV-LIVE' => '',
-            'DEV' => '48ed041a3c047eb45efc'
-        );
-        $__configuration['PUSHER_SECRET'] = array(
-            'PROD' => '',
-            'DEV-LIVE' => '',
-            'DEV' => '05f22616e5e1f5f66e06'
-        );
-        $__configuration['PUSHER_CLUSTER'] = array(
-            'PROD' => '',
-            'DEV-LIVE' => '',
-            'DEV' => 'ap1'
-        );
-        /** End Pusher Realtime */
+    /** Pusher Realtime */
+    $__configuration['PUSHER_APP_ID'] = array(
+        'PROD' => '',
+        'DEV-LIVE' => '',
+        'DEV' => '965857'
+    );
+    $__configuration['PUSHER_KEY'] = array(
+        'PROD' => '',
+        'DEV-LIVE' => '',
+        'DEV' => '48ed041a3c047eb45efc'
+    );
+    $__configuration['PUSHER_SECRET'] = array(
+        'PROD' => '',
+        'DEV-LIVE' => '',
+        'DEV' => '05f22616e5e1f5f66e06'
+    );
+    $__configuration['PUSHER_CLUSTER'] = array(
+        'PROD' => '',
+        'DEV-LIVE' => '',
+        'DEV' => 'ap1'
+    );
+    /** End Pusher Realtime */
 
-        /** CORS Support */
-        $__configuration['CORS_SUPPORT'] = array(
-            'PROD' => true,
-            'DEV-LIVE' => true,
-            'DEV' => true
-        );
-        /** End CORS Support */
+    /** CORS Support */
+    $__configuration['CORS_SUPPORT'] = array(
+        'PROD' => true,
+        'DEV-LIVE' => true,
+        'DEV' => true
+    );
+    /** End CORS Support */
 
-        /** Email Configuration */
-        $__configuration['HOST_EMAIL'] = array(
-            'PROD' => '',
-            'DEV-LIVE' => '',
-            'DEV' => ''
-        );
-        $__configuration['NAME_EMAIL'] = array(
-            'PROD' => '',
-            'DEV-LIVE' => '',
-            'DEV' => ''
-        );
-        $__configuration['USERNAME_EMAIL'] = array(
-            'PROD' => '',
-            'DEV-LIVE' => '',
-            'DEV' => ''
-        );
-        $__configuration['PASSWORD_EMAIL'] = array(
-            'PROD' => '',
-            'DEV-LIVE' => '',
-            'DEV' => ''
-        );
-        $__configuration['PORT_EMAIL'] = array(
-            'PROD' => 465,
-            'DEV-LIVE' => 465,
-            'DEV' => 465
-        );
-        $__configuration['SMTP_SECURE_EMAIL'] = array(
-            'PROD' => '',
-            'DEV-LIVE' => '',
-            'DEV' => ''
-        ); // tls or ssl
-        /** End Email Configuration */
+    /** Email Configuration */
+    $__configuration['HOST_EMAIL'] = array(
+        'PROD' => '',
+        'DEV-LIVE' => '',
+        'DEV' => ''
+    );
+    $__configuration['NAME_EMAIL'] = array(
+        'PROD' => '',
+        'DEV-LIVE' => '',
+        'DEV' => ''
+    );
+    $__configuration['USERNAME_EMAIL'] = array(
+        'PROD' => '',
+        'DEV-LIVE' => '',
+        'DEV' => ''
+    );
+    $__configuration['PASSWORD_EMAIL'] = array(
+        'PROD' => '',
+        'DEV-LIVE' => '',
+        'DEV' => ''
+    );
+    $__configuration['PORT_EMAIL'] = array(
+        'PROD' => 465,
+        'DEV-LIVE' => 465,
+        'DEV' => 465
+    );
+    $__configuration['SMTP_SECURE_EMAIL'] = array(
+        'PROD' => '',
+        'DEV-LIVE' => '',
+        'DEV' => ''
+    ); // tls or ssl
+    /** End Email Configuration */
 
-        /** Database Configuration */
-        $__configuration['USE_SQL_BUILDER'] = array(
-            'PROD' => true,
-            'DEV-LIVE' => true,
-            'DEV' => true
-        );
-        $__configuration['DB_HOST'] = array(
-            'PROD' => 'localhost',
-            'DEV-LIVE' => 'localhost',
-            'DEV' => 'localhost'
-        );
-        $__configuration['DB_USERNAME'] = array(
-            'PROD' => '',
-            'DEV-LIVE' => '',
-            'DEV' => 'root'
-        );
-        $__configuration['DB_PASSWORD'] = array(
-            'PROD' => '',
-            'DEV-LIVE' => '',
-            'DEV' => ''
-        );
-        $__configuration['DB_NAME'] = array(
-            'PROD' => '',
-            'DEV-LIVE' => '',
-            'DEV' => 'dev-simakpro'
-        );
-        /** End Database Configuration */
-        ```
-    7. ### Update router.php
-        Masih berkutat di folder configuration, buka file router.php
-        Seuaikan code berikut dengan settingan .htaccess masing-masing, jika .htaccess menggunakan versi sub direktori maka pastikan code ini tidak dikomentaari
-        ```php
-        /** USE THIS CODE IF YOUR PROJECT IN SUBDIRECTORY OR NOT USE SERVER DEV BUILT-IN  */
-            $base  = dirname($_SERVER['PHP_SELF']);
-            if(ltrim($base, '/')) { 
-                $_SERVER['REQUEST_URI'] = substr($_SERVER['REQUEST_URI'], strlen($base));
-            }
-        /** USE THIS CODE IF YOUR PROJECT IN SUBDIRECTORY OR NOT USE SERVER DEV BUILT-IN */
-        ```
-        Jika .htaccess menggunakan versi root, maka komentari code tersebut
-    8. ### Install Composer jika belum tersedia
-    9. ### Update Composer
-        Buka cmd / PowerShell, arahkan direktori ke project anda, dan lakukan update composer
-        ```composer
-        C:\xampp\htdocs\SimakPro>composer update
-        ```
+    /** Database Configuration */
+    $__configuration['USE_SQL_BUILDER'] = array(
+        'PROD' => true,
+        'DEV-LIVE' => true,
+        'DEV' => true
+    );
+    $__configuration['DB_HOST'] = array(
+        'PROD' => 'localhost',
+        'DEV-LIVE' => 'localhost',
+        'DEV' => 'localhost'
+    );
+    $__configuration['DB_USERNAME'] = array(
+        'PROD' => '',
+        'DEV-LIVE' => '',
+        'DEV' => 'root'
+    );
+    $__configuration['DB_PASSWORD'] = array(
+        'PROD' => '',
+        'DEV-LIVE' => '',
+        'DEV' => ''
+    );
+    $__configuration['DB_NAME'] = array(
+        'PROD' => '',
+        'DEV-LIVE' => '',
+        'DEV' => 'dev-simakpro'
+    );
+    /** End Database Configuration */
+    ```
+7. ### Update router.php
+    Masih berkutat di folder configuration, buka file router.php
+    Seuaikan code berikut dengan settingan .htaccess masing-masing, jika .htaccess menggunakan versi sub direktori maka pastikan code ini tidak dikomentaari
+    ```php
+    /** USE THIS CODE IF YOUR PROJECT IN SUBDIRECTORY OR NOT USE SERVER DEV BUILT-IN  */
+        $base  = dirname($_SERVER['PHP_SELF']);
+        if(ltrim($base, '/')) { 
+            $_SERVER['REQUEST_URI'] = substr($_SERVER['REQUEST_URI'], strlen($base));
+        }
+    /** USE THIS CODE IF YOUR PROJECT IN SUBDIRECTORY OR NOT USE SERVER DEV BUILT-IN */
+    ```
+    Jika .htaccess menggunakan versi root, maka komentari code tersebut
+8. ### Install Composer jika belum tersedia
+9. ### Update Composer
+    Buka cmd / PowerShell, arahkan direktori ke project anda, dan lakukan update composer
+    ```composer
+    C:\xampp\htdocs\SimakPro>composer update
+    ```
 
-    10. ### Akses aplikasi secara langsung di browser dengan cara biasa / menggunakan fitur server built-in
+10. ### Akses aplikasi secara langsung di browser dengan cara biasa / menggunakan fitur server built-in
 
 ## Menambah modul baru
 > Coming soon
