@@ -59,8 +59,7 @@ class Bank extends Controller {
 
             $result->data = $data->data;
             $result->success = true;
-        } 
-        catch (Exception $e) {
+        } catch (Exception $e) {
             $this->responseError(400, $e->getMessage(), true);
         }
 
@@ -116,14 +115,16 @@ class Bank extends Controller {
             $result->recordsTotal = $dataTable->dataTable->recordsTotal;
             $result->recordsFiltered = $dataTable->dataTable->recordsFiltered;
             $result->data = $data;
-        } 
-        catch (Exception $e) {
+        } catch (Exception $e) {
             $this->responseError(400, $e->getMessage(), true);
         }
 
         $this->responseJSON($result);
     }
 
+    /**
+     * 
+     */
     public function getMutasiDatatable($bankId) {
         if(!$this->isCanAccess || !$this->isCanAccess->isCanRead) {
             $this->responseError(403, 'Access Denied');
@@ -169,8 +170,7 @@ class Bank extends Controller {
             $result->recordsTotal = $dataTable->dataTable->recordsTotal;
             $result->recordsFiltered = $dataTable->dataTable->recordsFiltered;
             $result->data = $data;
-        } 
-        catch (Exception $e) {
+        } catch (Exception $e) {
             $this->responseError(400, $e->getMessage(), true);
         }
 
@@ -229,9 +229,10 @@ class Bank extends Controller {
 
             $result->success = true;
             $result->message = 'Tambah Data Bank Berhasil';
-            $this->PublishMessage('Bank', 'reload-datatable');
-        } 
-        catch (Exception $e) {
+            $this->PublishMessage('Bank', 'reload-datatable', array(
+                'UserId' => $_SESSION['sess_user']->UserId
+            ));
+        } catch (Exception $e) {
             if($isError) {
                 $this->responseError(400, $e->getMessage(), true);
             }
@@ -279,9 +280,10 @@ class Bank extends Controller {
             $result->success = true;
             $result->message = 'Edit Data Bank Berhasil';
 
-            $this->PublishMessage('Bank', ($data->editMode == 'list' ? 'reload-datatable' : 'reload-view'));
-        } 
-        catch (Exception $e) {
+            $this->PublishMessage('Bank', ($data->editMode == 'list' ? 'reload-datatable' : 'reload-view'), array(
+                'UserId' => $_SESSION['sess_user']->UserId
+            ));
+        } catch (Exception $e) {
             if($isError) {
                 $this->responseError(400, $e->getMessage(), true);
             }
@@ -339,9 +341,10 @@ class Bank extends Controller {
 
             $result->success = true;
             $result->message = 'Hapus Data Bank Berhasil';
-            $this->PublishMessage('Bank', 'reload-datatable');
-        } 
-        catch (Exception $e) {
+            $this->PublishMessage('Bank', 'reload-datatable', array(
+                'UserId' => $_SESSION['sess_user']->UserId
+            ));
+        } catch (Exception $e) {
             if($isError) {
                 $this->responseError(400, $e->getMessage(), true);
             }
