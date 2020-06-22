@@ -62,7 +62,7 @@ Sistem ini dibangun menggunakan bahasa pemrograman PHP 7 dibagian server, dan me
     Jika anda ingin menginstall dengan database yang sudah disediakan, maka harap hilangkan komentar script sql untuk membuat DB baru. Abaikan jika anda menggunakan database baru/custom.
 
 4. ### Update .htaccess
-    .htaccess yang digunakan pada SimakPro terdapat 2 versi, yaitu project yang disimpan pada direktori utama (C:\xampp\htdocs\SimakPro), dan project yang disimpan pada sub-direktori (C:\xampp\htdocs\others\SimakPro)
+    .htaccess yang digunakan pada SimakPro terdapat 2 versi, yaitu project yang disimpan pada direktori utama (C:\xampp\htdocs\) atau pada public_html jika di hosting/cloud, dan project yang disimpan pada sub-direktori (C:\xampp\htdocs\others\SimakPro)
 
     - Direktori Utama
     
@@ -70,7 +70,7 @@ Sistem ini dibangun menggunakan bahasa pemrograman PHP 7 dibagian server, dan me
         ```
         ..\assets\htaccess\root\
         ```
-        Copy file .htaccess, dan paste ke tempat terluar (C:\xampp\htdocs\SimakPro\), pastikan .htaccess bersama dengan file index.php
+        Copy file .htaccess, dan paste ke tempat terluar (C:\xampp\htdocs\), pastikan .htaccess bersama dengan file index.php
 
     - Sub Diirektori
         Buka project, masuk ke
@@ -226,7 +226,7 @@ Sistem ini dibangun menggunakan bahasa pemrograman PHP 7 dibagian server, dan me
     ```
 7. ### Update router.php
     Masih berkutat di folder configuration, buka file router.php
-    Seuaikan code berikut dengan settingan .htaccess masing-masing, jika .htaccess menggunakan versi sub direktori maka pastikan code ini tidak dikomentaari
+    Sesuaikan code berikut dengan settingan .htaccess masing-masing, jika .htaccess menggunakan versi sub direktori maka pastikan code ini tidak dikomentaari
     ```php
     /** USE THIS CODE IF YOUR PROJECT IN SUBDIRECTORY OR NOT USE SERVER DEV BUILT-IN  */
         $base  = dirname($_SERVER['PHP_SELF']);
