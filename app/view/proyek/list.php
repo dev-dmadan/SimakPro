@@ -36,12 +36,17 @@ Defined('BASE_PATH') or die(ACCESS_DENIED);
                             </div>
                         </div>
                         <div class="card-body">
-                            <table id="bank-table" class="table table-sm table-bordered table-striped">
+                            <table id="proyek-table" class="table table-sm table-bordered table-striped">
                                 <thead>
                                     <tr>
                                         <th class="text-right">No</th>
+                                        <th>Kode Proyek</th>
                                         <th>Nama</th>
-                                        <th class="text-right">Saldo</th>
+                                        <th>Pemilik</th>
+                                        <th>Tanggal</th>
+                                        <th>Kota</th>
+                                        <th class="text-right">Total</th>
+                                        <th>Progress</th>
                                         <th>Status</th>
                                         <th>Created By</th>
                                         <th>Created On</th>

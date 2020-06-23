@@ -156,7 +156,7 @@ $route = new \Klein\Klein();
         });
 
         $route->respond('POST', '/proyek/get/datatable', function() use ($__request) {
-            $__request->call('proyek/getatatable');
+            $__request->call('proyek/getDatatable');
         });
 
         $route->respond('POST', '/proyek/save', function() use ($__request) {

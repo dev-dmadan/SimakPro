@@ -77,9 +77,15 @@ class Proyek extends Controller {
         // Sesuaikan lagi - update 22 juni 2020
         $dataTableSetup = (object)array(
             'table' => 'VwProyek',
-            'filterList' => ['name', 'saldo', 'active_status', 'created_by', 'created_on'],
-            'sortList' => [null, 'name', 'saldo', 'active_status', 'created_by', 'created_on', null],
-            'defaultSort' => ['active_status' => 'asc', 'created_on' => 'desc'],
+            'filterList' => [
+                'code', 'name', 'owner', 'date', 'kota',
+                'total', 'progress', 'project_status', 'created_by', 'created_on'
+            ],
+            'sortList' => [
+                null, 'code', 'name', 'owner', 'date', 'kota', 
+                'total', 'progress', 'project_status', 'created_by', 'created_on', null
+            ],
+            'defaultSort' => ['project_status' => 'desc', 'created_on' => 'desc'],
             'filter' => null
         );
         
@@ -103,11 +109,15 @@ class Proyek extends Controller {
 
                 $temp = array();
 
-                // Sesuaikan lagi - update 22 juni 2020
                 $temp[] = $no;
-				$temp[] = $row['name'];
-				$temp[] = $this->General->printCurrency($row['saldo']);
-                $temp[] = $this->General->printLookup($row['active_statusId'], $row['active_status']);
+                $temp[] = $row['code'];
+                $temp[] = $row['name'];
+                $temp[] = $row['owner'];
+                $temp[] = $this->General->printDate($row['date'], 'full');
+                $temp[] = $row['kota'];
+                $temp[] = $this->General->printCurrency($row['total']);
+                $temp[] = $row['progress']. ' %';
+                $temp[] = $this->General->printLookup($row['project_statusId'], $row['project_status']);
                 $temp[] = $this->General->printLookup($row['created_byId'], $row['created_by'], 'contact/view');
                 $temp[] = $this->General->printDate(explode(' ', $row['created_on'])[0], 'full');
                 $temp[] = $this->General->printAccess($row['id'], $this->isCanAccess); 
@@ -144,7 +154,7 @@ class Proyek extends Controller {
     /**
      * 
      */
-    public function form($id) {
+    public function form($id = null) {
         $isNew = false;
         if(!$id || empty($id) || !isset($id)) {
             $isNew = true;

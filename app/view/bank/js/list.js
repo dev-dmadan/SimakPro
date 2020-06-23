@@ -25,10 +25,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     ChannelPusher.bind('reload-datatable', data => {
         console.log('%c Response subscribe channel: ', 'color: green', data);
         
-        refreshButton.disabled = true;
-        BankTable.ajax.reload(response => {
-            refreshButton.disabled = false;
-        }, false);
+        if(data.UserId == USER_DATA.UserId) {
+            refreshButton.disabled = true;
+            BankTable.ajax.reload(response => {
+                refreshButton.disabled = false;
+            }, false);
+        }
     });
 
     const accessList = await _Layout.getAccessRight('bank'); 

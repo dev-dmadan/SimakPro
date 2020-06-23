@@ -1,12 +1,12 @@
 import * as _Layout from '../../_Layout/js/layout.js';
-import * as _Bank from './bank.js';
+import * as _Proyek from './proyek.js';
 
-const Bank = new _Bank.Bank();
-Bank.list(_Layout.getCookieValue(QUERY_STRING_AUTH));
+const Proyek = new _Proyek.Proyek();
+Proyek.list(_Layout.getCookieValue(QUERY_STRING_AUTH));
 
-const ChannelPusher = PUSHER.subscribe('Bank');
-const dataTableSetup = Bank.dataTable;
-const BankTable = $('#bank-table').DataTable(dataTableSetup);
+const ChannelPusher = PUSHER.subscribe('Proyek');
+const dataTableSetup = Proyek.dataTable;
+const ProyekTable = $('#proyek-table').DataTable(dataTableSetup);
 const card = document.querySelector('.card');
 
 _Layout.loadingCard(card);
@@ -14,24 +14,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     const newButton = document.querySelector('#new');
     const excelButton = document.querySelector('#exportExcel');
     const refreshButton = document.querySelector('#refresh');
-    const saveButton = document.querySelector('#save');
-
-    $('.select2bs4').select2({
-        theme: 'bootstrap4',
-        placeholder: "Pilih Status",
-		allowClear: true
-    });
 
     ChannelPusher.bind('reload-datatable', data => {
         console.log('%c Response subscribe channel: ', 'color: green', data);
         
-        refreshButton.disabled = true;
-        BankTable.ajax.reload(response => {
-            refreshButton.disabled = false;
-        }, false);
+        if(data.UserId == USER_DATA.UserId) {
+            refreshButton.disabled = true;
+            ProyekTable.ajax.reload(response => {
+                refreshButton.disabled = false;
+            }, false);
+        }
     });
 
-    const accessList = await _Layout.getAccessRight('bank'); 
+    const accessList = await _Layout.getAccessRight('proyek'); 
     if(accessList.success && accessList.accessRight) {
         if(!accessList.accessRight.isCanInsert) {
             newButton.disabled = true;
@@ -44,21 +39,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         // }
     }
 
-    await _Layout.populateLookup([
-        {
-            selector: document.querySelector('#active_status'),
-            lookupName: 'active-status'
-        }
-    ]);
-
     _Layout.loadingCard(card, false);
 
     newButton.addEventListener('click', () => {
-        Bank.new();
-    });
-
-    saveButton.addEventListener('click', () => {
-        Bank.save();
+        Proyek.new();
     });
 
     excelButton.addEventListener('click', () => {
@@ -67,7 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     refreshButton.addEventListener('click', () => {
         refreshButton.disabled = true;
-        BankTable.ajax.reload(response => {
+        ProyekTable.ajax.reload(response => {
             refreshButton.disabled = false;
         }, false);
     });

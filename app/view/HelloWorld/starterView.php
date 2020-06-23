@@ -638,6 +638,4 @@ Defined('BASE_PATH') or die(ACCESS_DENIED);
         </div><!-- /.container-fluid -->
     </section>
     <!-- /.content -->
-
-    <?php require_once 'form.php'; ?>
 </div>
