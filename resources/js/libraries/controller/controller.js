@@ -1,5 +1,5 @@
 import {HTTPClient} from '../httpClient/httpClient';
-import { AlertHelper } from '../../helpers/alert/alert';
+import { AlertHelper } from '../../libraries/alert/alert';
 
 export class Controller {
     #data = null;
