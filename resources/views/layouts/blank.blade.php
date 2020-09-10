@@ -11,7 +11,7 @@
             @yield('custom-css')
         {{-- end css --}}
     </head>
-    <body class="hold-transition sidebar-mini">
+    <body class="hold-transition sidebar-mini text-sm">
         <div class="wrapper">
             
             {{-- navbar --}}
