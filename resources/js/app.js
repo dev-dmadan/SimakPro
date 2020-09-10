@@ -1,6 +1,6 @@
 require('./bootstrap');
 
-import { AlertHelper } from './helpers/alert';
+import { AlertHelper } from './helpers/alert/alert';
 
 /** Init Global Function */
     window.Alert = (args) => AlertHelper.Alert(args);

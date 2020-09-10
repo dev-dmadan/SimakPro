@@ -1,7 +1,6 @@
 import Swal from 'sweetalert2';
 export class AlertHelper {
     constructor() {
-        
     }
 
     /** Alert Type */
@@ -59,7 +58,14 @@ export class AlertHelper {
             return 'bottom-end';
         }
     /** End Toastr Position */
-
+    
+    /**
+     * Alert with sweetAlert2 style
+     * @param {string} title 
+     * @param {string} message
+     * @param {string} type
+     * @returns {void}
+     */
     static Alert({
         title = null,
         message,
@@ -79,6 +85,13 @@ export class AlertHelper {
         });
     }
 
+    /**
+     * Toastr with sweetAlert2 mixin style
+     * @param {string} message 
+     * @param {string} type
+     * @param {string} position
+     * @returns {void}
+     */
     static Toastr({
         message,
         type = AlertHelper.Success,
@@ -109,6 +122,12 @@ export class AlertHelper {
         })
     }
 
+    /**
+     * Confirm alert with sweetAlert2 style
+     * @param {string} title
+     * @param {string} message
+     * @param {string} type 
+     */
     static async Confirm({
         title = null,
         message = null,
