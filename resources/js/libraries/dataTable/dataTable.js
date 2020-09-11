@@ -1,4 +1,6 @@
 import {HTTPClient} from '../httpClient/httpClient';
+import { AlertHelper } from "../alert/alert";
+
 export class DataTable {
     #_element;
     #_tableType;
@@ -38,7 +40,7 @@ export class DataTable {
                 this.init();
             }
         } catch (error) {
-            Alert({title: 'Error in DataTable', message: error, type: ALERT_TYPE.ERROR});
+            Alert({title: 'Error in DataTable', message: error, type: AlertHelper.Error});
             throw error;
         }
     }

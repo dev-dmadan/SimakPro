@@ -16,6 +16,10 @@ export class Controller {
         return this.#routeName;
     }
     
+    // autoCollect() {
+    //     throw new Error("Method 'autoCollect()' must be implemented.");
+    // }
+
     addProperty(name, value) {
         if(this.#data == undefined || this.#data == null) {
             this.#data = {};
