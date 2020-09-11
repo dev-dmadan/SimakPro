@@ -50409,22 +50409,22 @@ module.exports = function(module) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _helpers_alert__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./helpers/alert */ "./resources/js/helpers/alert.js");
+/* harmony import */ var _libraries_alert_alert__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./libraries/alert/alert */ "./resources/js/libraries/alert/alert.js");
 __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
 
 
 /** Init Global Function */
 
 window.Alert = function (args) {
-  return _helpers_alert__WEBPACK_IMPORTED_MODULE_0__["AlertHelper"].Alert(args);
+  return _libraries_alert_alert__WEBPACK_IMPORTED_MODULE_0__["AlertHelper"].Alert(args);
 };
 
 window.Toastr = function (args) {
-  return _helpers_alert__WEBPACK_IMPORTED_MODULE_0__["AlertHelper"].Toastr(args);
+  return _libraries_alert_alert__WEBPACK_IMPORTED_MODULE_0__["AlertHelper"].Toastr(args);
 };
 
 window.Confirm = function (args) {
-  return _helpers_alert__WEBPACK_IMPORTED_MODULE_0__["AlertHelper"].Confirm(args);
+  return _libraries_alert_alert__WEBPACK_IMPORTED_MODULE_0__["AlertHelper"].Confirm(args);
 };
 /** End Init Global Function */
 
@@ -50482,10 +50482,10 @@ __webpack_require__(/*! ../../node_modules/admin-lte/dist/js/adminlte */ "./node
 
 /***/ }),
 
-/***/ "./resources/js/helpers/alert.js":
-/*!***************************************!*\
-  !*** ./resources/js/helpers/alert.js ***!
-  \***************************************/
+/***/ "./resources/js/libraries/alert/alert.js":
+/*!***********************************************!*\
+  !*** ./resources/js/libraries/alert/alert.js ***!
+  \***********************************************/
 /*! exports provided: AlertHelper */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -50522,6 +50522,14 @@ var AlertHelper = /*#__PURE__*/function () {
     key: "Alert",
 
     /** End Toastr Position */
+
+    /**
+     * Alert with sweetAlert2 style
+     * @param {string} title 
+     * @param {string} message
+     * @param {string} type
+     * @returns {void}
+     */
     value: function Alert() {
       var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
           _ref$title = _ref.title,
@@ -50544,6 +50552,14 @@ var AlertHelper = /*#__PURE__*/function () {
         text: message_
       });
     }
+    /**
+     * Toastr with sweetAlert2 mixin style
+     * @param {string} message 
+     * @param {string} type
+     * @param {string} position
+     * @returns {void}
+     */
+
   }, {
     key: "Toastr",
     value: function Toastr() {
@@ -50578,6 +50594,13 @@ var AlertHelper = /*#__PURE__*/function () {
         title: message_
       });
     }
+    /**
+     * Confirm alert with sweetAlert2 style
+     * @param {string} title
+     * @param {string} message
+     * @param {string} type 
+     */
+
   }, {
     key: "Confirm",
     value: function () {
