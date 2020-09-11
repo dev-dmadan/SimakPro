@@ -76,7 +76,5 @@
         </div><!-- /.container-fluid -->
     </div>
     <!-- /.content -->
-
+    @yield('modal-content')
 @endsection
-
-@yield('modal-content')
