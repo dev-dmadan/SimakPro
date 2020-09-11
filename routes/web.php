@@ -62,3 +62,14 @@ use Illuminate\Support\Facades\Route;
         ]);
     });
 /** End Example */
+
+/** Project */
+    Route::get('/projects', 'ProjectController@index');
+    Route::get('/projects/create', 'ProjectController@create');
+    Route::post('/projects', 'ProjectController@store');
+    Route::get('/projects/list', 'ProjectController@showList');
+    Route::get('/projects/{id}', 'ProjectController@show');
+    Route::get('/projects/{id}/edit', 'ProjectController@edit');
+    Route::put('/projects/{id}', 'ProjectController@update');
+    Route::delete('/projects/{id}', 'ProjectController@destroy');
+/** End Project */
