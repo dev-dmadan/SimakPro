@@ -62,20 +62,20 @@
 
 @section('modal-content')
 
-{{-- your modals --}}
-{{-- can use include / code manualy here --}}
+    {{-- your modals --}}
+    {{-- can use include / code manualy here --}}
 
 @endsection
 
 @section('custom-css')
 
-{{-- your custom css --}}
-{{-- can use link href / style tag --}}
+    {{-- your custom css --}}
+    {{-- can use link href / style tag --}}
 
 @endsection
 
 @section('custom-js')
 
-{{-- your custom js --}}
+    {{-- your custom js --}}
 
 @endsection

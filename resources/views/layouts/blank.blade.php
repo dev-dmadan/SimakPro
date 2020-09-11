@@ -36,6 +36,11 @@
         <!-- ./wrapper -->
 
         {{-- js --}}
+            <script>
+                const APP_URL = @json(env('APP_URL'), JSON_PRETTY_PRINT);
+                const ADD_MODE = 'Add';
+                const EDIT_MODE = 'Edit';
+            </script>
             <script src="{{ asset('js/app.js') }}"></script>
             @yield('custom-js')
         {{-- end js --}}

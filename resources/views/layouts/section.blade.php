@@ -43,6 +43,7 @@
                                 </div>
                                 <div class="col-4">
                                     <div class="float-right">
+                                        <button class="btn btn-outline-secondary" type="button" id="refresh-button"><i class="fas fa-sync-alt"></i></button>
                                         <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="view-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">View</button>
                                         <div class="dropdown-menu" aria-labelledby="viewButton">
                                             <a class="dropdown-item disabled" href="javascript:void(0)">Show/hide columns <span class="badge badge-primary">Coming Soon</span></a>
