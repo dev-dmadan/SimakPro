@@ -16,6 +16,7 @@ try {
 
 /** Default Plugins */
     require('overlayscrollbars');
+    require("select2");
 /** End Default Plugins */
 
 require('../../node_modules/admin-lte/dist/js/adminlte');
@@ -36,9 +37,9 @@ require('../../node_modules/admin-lte/dist/js/adminlte');
  * allows your team to easily build robust real-time web applications.
  */
 
-// import Echo from 'laravel-echo';
+import Echo from 'laravel-echo';
 
-// window.Pusher = require('pusher-js');
+window.Pusher = require('pusher-js');
 
 // window.Echo = new Echo({
 //     broadcaster: 'pusher',
