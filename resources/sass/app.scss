@@ -16,12 +16,19 @@
     // iCheck
     @import '~icheck-bootstrap/icheck-bootstrap.css';
 
+    // boostrap slider
+    @import '~bootstrap-slider/dist/css/bootstrap-slider.min.css';
+
+    // select2
+    @import '~select2/dist/css/select2.min.css';
+
     // sweetalert2
     @import '~@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css';
 // End Default Plugins
 
 // AdminLTE
-@import '../../node_modules/admin-lte/dist/css/adminlte.css';
+@import '~admin-lte/dist/css/adminlte.css';
 
 // Custom CSS
+@import '../css/shimmer.css';
 @import '../css/style.css';
