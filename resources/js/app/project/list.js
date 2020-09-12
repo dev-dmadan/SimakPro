@@ -2,7 +2,7 @@ import { Project } from "./project";
 import { DataTable } from "../../libraries/dataTable/dataTable";
 import { AlertHelper } from "../../libraries/alert/alert";
 
-// showShimmer(true);
+Shimmer(true);
 const dataTable = new DataTable({
     element: '#project-table',
     mappingData: [
@@ -40,14 +40,14 @@ document.addEventListener('DOMContentLoaded', async (e) => {
         });
         isError = true;
     } finally {
-        // showShimmer(false);
+        Shimmer(false);
         if(isError) {
             return;
         }
     }
 
     document.querySelector('#project-new-button').addEventListener('click', () => {
-        
+        window.location.href = `${APP_URL}/projects/create`;
     });
 });
 

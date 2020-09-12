@@ -4069,8 +4069,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
 
 
- // showShimmer(true);
 
+Shimmer(true);
 var dataTable = new _libraries_dataTable_dataTable__WEBPACK_IMPORTED_MODULE_2__["DataTable"]({
   element: '#project-table',
   mappingData: ['date', 'name', 'owner', 'city', 'progress', 'total', 'sisa', 'project_status'],
@@ -4144,26 +4144,29 @@ document.addEventListener('DOMContentLoaded', /*#__PURE__*/function () {
 
           case 10:
             _context2.prev = 10;
+            Shimmer(false);
 
             if (!isError) {
-              _context2.next = 13;
+              _context2.next = 14;
               break;
             }
 
             return _context2.abrupt("return");
 
-          case 13:
+          case 14:
             return _context2.finish(10);
 
-          case 14:
-            document.querySelector('#project-new-button').addEventListener('click', function () {});
-
           case 15:
+            document.querySelector('#project-new-button').addEventListener('click', function () {
+              window.location.href = "".concat(APP_URL, "/projects/create");
+            });
+
+          case 16:
           case "end":
             return _context2.stop();
         }
       }
-    }, _callee2, null, [[1, 6, 10, 14]]);
+    }, _callee2, null, [[1, 6, 10, 15]]);
   }));
 
   return function (_x2) {
