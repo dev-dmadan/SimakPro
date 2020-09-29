@@ -78,7 +78,7 @@ export class AlertHelper {
             message_ = message;
         }
 
-        Swal.fire({
+        return Swal.fire({
             icon: type,
             title: title != undefined ? title : 'Information',
             text: message_
@@ -116,7 +116,7 @@ export class AlertHelper {
             }
         });
 
-        Toast.fire({
+        return Toast.fire({
             icon: type,
             title: message_
         })
