@@ -10,6 +10,10 @@ Simakpro (Sistem Informasi Managemen Proyek)
 5. DBMS MariaDB / MySQL
 
 ## Instalasi
+Check tutorial video berikut https://www.loom.com/share/e3cedeba4f7846559e304898bc247eb5
+
+Atau
+
 Berikut tata cara instalasi SimakPro:
 1. Pastikan composer sudah terinstall dan sudah terdaftar pada PATH environment.
     Jalankan syntax berikut pada terminal untuk mengechek composer sudah terinstall atau belum:
