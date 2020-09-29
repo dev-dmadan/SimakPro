@@ -18,98 +18,98 @@ class AccessSeeder extends Seeder
             "Home" => [
                 "id" => AccessConstant::Home,
                 "title" => "Beranda",
-                "icon" => "",
+                "icon" => '<i class="nav-icon fas fa-home"></i>',
                 "route" => "/",
                 "parent_id" => null
             ],
             "Bank" => [
                 "id" => AccessConstant::Bank,
                 "title" => "Bank",
-                "icon" => "",
+                "icon" => '<i class="nav-icon fas fa-university"></i>',
                 "route" => "/banks",
                 "parent_id" => null
             ],
             "Project" => [
                 "id" => AccessConstant::Project,
                 "title" => "Proyek",
-                "icon" => "",
+                "icon" => '<i class="nav-icon fas fa-project-diagram"></i>',
                 "route" => "/projects",
                 "parent_id" => null
             ],
             "ProjectOperational" => [
                 "id" => AccessConstant::ProjectOperational,
                 "title" => "Operasional Proyek",
-                "icon" => "",
+                "icon" => '<i class="nav-icon fas fa-money-check-alt"></i>',
                 "route" => "/project-operationals",
                 "parent_id" => null
             ],
             "CompanyOperational" => [
                 "id" => AccessConstant::CompanyOperational,
                 "title" => "Operasional Perusahaan",
-                "icon" => "",
+                "icon" => '<i class="nav-icon fas fa-funnel-dollar"></i>',
                 "route" => "/company-operationals",
                 "parent_id" => null
             ],
             "Operational" => [
                 "id" => AccessConstant::Operational,
                 "title" => "Operasional",
-                "icon" => "",
+                "icon" => '<i class="nav-icon fas fa-wallet"></i>',
                 "route" => "/oeprationals",
                 "parent_id" => null
             ],
             "KasKecilSubmission" => [
                 "id" => AccessConstant::KasKecilSubmission,
                 "title" => "Pengajuan Kas Kecil",
-                "icon" => "",
+                "icon" => '<i class="nav-icon fas fa-coins"></i>',
                 "route" => "/kas-kecil-submissions",
                 "parent_id" => null
             ],
             "SubKasKecilSubmission" => [
                 "id" => AccessConstant::SubKasKecilSubmission,
                 "title" => "Pengajuan Sub Kas Kecil",
-                "icon" => "",
+                "icon" => '<i class="nav-icon fas fa-coins"></i>',
                 "route" => "/sub-kas-kecil-submissions",
                 "parent_id" => null
             ],
             "Contact" => [
                 "id" => AccessConstant::Contact,
                 "title" => "Kontak",
-                "icon" => "",
+                "icon" => '<i class="nav-icon fas fa-users"></i>',
                 "route" => "/contacts",
                 "parent_id" => null
             ],
             "KasBesar" => [
                 "id" => AccessConstant::KasBesar,
                 "title" => "Kas Besar",
-                "icon" => "",
+                "icon" => '<i class="nav-icon fas fa-user-tie"></i>',
                 "route" => "/contacts/kas-besar",
                 "parent_id" => null
             ],
             "KasKecil" => [
                 "id" => AccessConstant::KasKecil,
                 "title" => "Kas Kecil",
-                "icon" => "",
+                "icon" => '<i class="nav-icon fas fa-user-friends"></i>',
                 "route" => "/contacts/kas-kecil",
                 "parent_id" => null
             ],
             "SubKasKecil" => [
                 "id" => AccessConstant::SubKasKecil,
                 "title" => "Sub Kas Kecil",
-                "icon" => "",
+                "icon" => '<i class="nav-icon fas fa-users-cog"></i>',
                 "route" => "/contacts/sub-kas-kecil",
                 "parent_id" => null
             ],
             "User" => [
                 "id" => AccessConstant::User,
                 "title" => "User",
-                "icon" => "",
+                "icon" => '<i class="nav-icon fas fa-user"></i>',
                 "route" => "/users",
                 "parent_id" => null
             ],
             "Lookup" => [
                 "id" => AccessConstant::Lookup,
                 "title" => "Lookup",
-                "icon" => "",
+                "icon" => '<i class="nav-icon fas fa-archive"></i>',
                 "route" => "/lookups",
                 "parent_id" => null
             ]
