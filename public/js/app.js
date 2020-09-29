@@ -9038,6 +9038,1578 @@ module.exports = __webpack_require__(/*! regenerator-runtime */ "./node_modules/
 
 /***/ }),
 
+/***/ "./node_modules/cleave.js/dist/cleave-esm.js":
+/*!***************************************************!*\
+  !*** ./node_modules/cleave.js/dist/cleave-esm.js ***!
+  \***************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* WEBPACK VAR INJECTION */(function(global) {var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+var NumeralFormatter = function (numeralDecimalMark,
+                                 numeralIntegerScale,
+                                 numeralDecimalScale,
+                                 numeralThousandsGroupStyle,
+                                 numeralPositiveOnly,
+                                 stripLeadingZeroes,
+                                 prefix,
+                                 signBeforePrefix,
+                                 tailPrefix,
+                                 delimiter) {
+    var owner = this;
+
+    owner.numeralDecimalMark = numeralDecimalMark || '.';
+    owner.numeralIntegerScale = numeralIntegerScale > 0 ? numeralIntegerScale : 0;
+    owner.numeralDecimalScale = numeralDecimalScale >= 0 ? numeralDecimalScale : 2;
+    owner.numeralThousandsGroupStyle = numeralThousandsGroupStyle || NumeralFormatter.groupStyle.thousand;
+    owner.numeralPositiveOnly = !!numeralPositiveOnly;
+    owner.stripLeadingZeroes = stripLeadingZeroes !== false;
+    owner.prefix = (prefix || prefix === '') ? prefix : '';
+    owner.signBeforePrefix = !!signBeforePrefix;
+    owner.tailPrefix = !!tailPrefix;
+    owner.delimiter = (delimiter || delimiter === '') ? delimiter : ',';
+    owner.delimiterRE = delimiter ? new RegExp('\\' + delimiter, 'g') : '';
+};
+
+NumeralFormatter.groupStyle = {
+    thousand: 'thousand',
+    lakh:     'lakh',
+    wan:      'wan',
+    none:     'none'    
+};
+
+NumeralFormatter.prototype = {
+    getRawValue: function (value) {
+        return value.replace(this.delimiterRE, '').replace(this.numeralDecimalMark, '.');
+    },
+
+    format: function (value) {
+        var owner = this, parts, partSign, partSignAndPrefix, partInteger, partDecimal = '';
+
+        // strip alphabet letters
+        value = value.replace(/[A-Za-z]/g, '')
+            // replace the first decimal mark with reserved placeholder
+            .replace(owner.numeralDecimalMark, 'M')
+
+            // strip non numeric letters except minus and "M"
+            // this is to ensure prefix has been stripped
+            .replace(/[^\dM-]/g, '')
+
+            // replace the leading minus with reserved placeholder
+            .replace(/^\-/, 'N')
+
+            // strip the other minus sign (if present)
+            .replace(/\-/g, '')
+
+            // replace the minus sign (if present)
+            .replace('N', owner.numeralPositiveOnly ? '' : '-')
+
+            // replace decimal mark
+            .replace('M', owner.numeralDecimalMark);
+
+        // strip any leading zeros
+        if (owner.stripLeadingZeroes) {
+            value = value.replace(/^(-)?0+(?=\d)/, '$1');
+        }
+
+        partSign = value.slice(0, 1) === '-' ? '-' : '';
+        if (typeof owner.prefix != 'undefined') {
+            if (owner.signBeforePrefix) {
+                partSignAndPrefix = partSign + owner.prefix;
+            } else {
+                partSignAndPrefix = owner.prefix + partSign;
+            }
+        } else {
+            partSignAndPrefix = partSign;
+        }
+        
+        partInteger = value;
+
+        if (value.indexOf(owner.numeralDecimalMark) >= 0) {
+            parts = value.split(owner.numeralDecimalMark);
+            partInteger = parts[0];
+            partDecimal = owner.numeralDecimalMark + parts[1].slice(0, owner.numeralDecimalScale);
+        }
+
+        if(partSign === '-') {
+            partInteger = partInteger.slice(1);
+        }
+
+        if (owner.numeralIntegerScale > 0) {
+          partInteger = partInteger.slice(0, owner.numeralIntegerScale);
+        }
+
+        switch (owner.numeralThousandsGroupStyle) {
+        case NumeralFormatter.groupStyle.lakh:
+            partInteger = partInteger.replace(/(\d)(?=(\d\d)+\d$)/g, '$1' + owner.delimiter);
+
+            break;
+
+        case NumeralFormatter.groupStyle.wan:
+            partInteger = partInteger.replace(/(\d)(?=(\d{4})+$)/g, '$1' + owner.delimiter);
+
+            break;
+
+        case NumeralFormatter.groupStyle.thousand:
+            partInteger = partInteger.replace(/(\d)(?=(\d{3})+$)/g, '$1' + owner.delimiter);
+
+            break;
+        }
+
+        if (owner.tailPrefix) {
+            return partSign + partInteger.toString() + (owner.numeralDecimalScale > 0 ? partDecimal.toString() : '') + owner.prefix;
+        }
+
+        return partSignAndPrefix + partInteger.toString() + (owner.numeralDecimalScale > 0 ? partDecimal.toString() : '');
+    }
+};
+
+var NumeralFormatter_1 = NumeralFormatter;
+
+var DateFormatter = function (datePattern, dateMin, dateMax) {
+    var owner = this;
+
+    owner.date = [];
+    owner.blocks = [];
+    owner.datePattern = datePattern;
+    owner.dateMin = dateMin
+      .split('-')
+      .reverse()
+      .map(function(x) {
+        return parseInt(x, 10);
+      });
+    if (owner.dateMin.length === 2) owner.dateMin.unshift(0);
+
+    owner.dateMax = dateMax
+      .split('-')
+      .reverse()
+      .map(function(x) {
+        return parseInt(x, 10);
+      });
+    if (owner.dateMax.length === 2) owner.dateMax.unshift(0);
+    
+    owner.initBlocks();
+};
+
+DateFormatter.prototype = {
+    initBlocks: function () {
+        var owner = this;
+        owner.datePattern.forEach(function (value) {
+            if (value === 'Y') {
+                owner.blocks.push(4);
+            } else {
+                owner.blocks.push(2);
+            }
+        });
+    },
+
+    getISOFormatDate: function () {
+        var owner = this,
+            date = owner.date;
+
+        return date[2] ? (
+            date[2] + '-' + owner.addLeadingZero(date[1]) + '-' + owner.addLeadingZero(date[0])
+        ) : '';
+    },
+
+    getBlocks: function () {
+        return this.blocks;
+    },
+
+    getValidatedDate: function (value) {
+        var owner = this, result = '';
+
+        value = value.replace(/[^\d]/g, '');
+
+        owner.blocks.forEach(function (length, index) {
+            if (value.length > 0) {
+                var sub = value.slice(0, length),
+                    sub0 = sub.slice(0, 1),
+                    rest = value.slice(length);
+
+                switch (owner.datePattern[index]) {
+                case 'd':
+                    if (sub === '00') {
+                        sub = '01';
+                    } else if (parseInt(sub0, 10) > 3) {
+                        sub = '0' + sub0;
+                    } else if (parseInt(sub, 10) > 31) {
+                        sub = '31';
+                    }
+
+                    break;
+
+                case 'm':
+                    if (sub === '00') {
+                        sub = '01';
+                    } else if (parseInt(sub0, 10) > 1) {
+                        sub = '0' + sub0;
+                    } else if (parseInt(sub, 10) > 12) {
+                        sub = '12';
+                    }
+
+                    break;
+                }
+
+                result += sub;
+
+                // update remaining string
+                value = rest;
+            }
+        });
+
+        return this.getFixedDateString(result);
+    },
+
+    getFixedDateString: function (value) {
+        var owner = this, datePattern = owner.datePattern, date = [],
+            dayIndex = 0, monthIndex = 0, yearIndex = 0,
+            dayStartIndex = 0, monthStartIndex = 0, yearStartIndex = 0,
+            day, month, year, fullYearDone = false;
+
+        // mm-dd || dd-mm
+        if (value.length === 4 && datePattern[0].toLowerCase() !== 'y' && datePattern[1].toLowerCase() !== 'y') {
+            dayStartIndex = datePattern[0] === 'd' ? 0 : 2;
+            monthStartIndex = 2 - dayStartIndex;
+            day = parseInt(value.slice(dayStartIndex, dayStartIndex + 2), 10);
+            month = parseInt(value.slice(monthStartIndex, monthStartIndex + 2), 10);
+
+            date = this.getFixedDate(day, month, 0);
+        }
+
+        // yyyy-mm-dd || yyyy-dd-mm || mm-dd-yyyy || dd-mm-yyyy || dd-yyyy-mm || mm-yyyy-dd
+        if (value.length === 8) {
+            datePattern.forEach(function (type, index) {
+                switch (type) {
+                case 'd':
+                    dayIndex = index;
+                    break;
+                case 'm':
+                    monthIndex = index;
+                    break;
+                default:
+                    yearIndex = index;
+                    break;
+                }
+            });
+
+            yearStartIndex = yearIndex * 2;
+            dayStartIndex = (dayIndex <= yearIndex) ? dayIndex * 2 : (dayIndex * 2 + 2);
+            monthStartIndex = (monthIndex <= yearIndex) ? monthIndex * 2 : (monthIndex * 2 + 2);
+
+            day = parseInt(value.slice(dayStartIndex, dayStartIndex + 2), 10);
+            month = parseInt(value.slice(monthStartIndex, monthStartIndex + 2), 10);
+            year = parseInt(value.slice(yearStartIndex, yearStartIndex + 4), 10);
+
+            fullYearDone = value.slice(yearStartIndex, yearStartIndex + 4).length === 4;
+
+            date = this.getFixedDate(day, month, year);
+        }
+
+        // mm-yy || yy-mm
+        if (value.length === 4 && (datePattern[0] === 'y' || datePattern[1] === 'y')) {
+            monthStartIndex = datePattern[0] === 'm' ? 0 : 2;
+            yearStartIndex = 2 - monthStartIndex;
+            month = parseInt(value.slice(monthStartIndex, monthStartIndex + 2), 10);
+            year = parseInt(value.slice(yearStartIndex, yearStartIndex + 2), 10);
+
+            fullYearDone = value.slice(yearStartIndex, yearStartIndex + 2).length === 2;
+
+            date = [0, month, year];
+        }
+
+        // mm-yyyy || yyyy-mm
+        if (value.length === 6 && (datePattern[0] === 'Y' || datePattern[1] === 'Y')) {
+            monthStartIndex = datePattern[0] === 'm' ? 0 : 4;
+            yearStartIndex = 2 - 0.5 * monthStartIndex;
+            month = parseInt(value.slice(monthStartIndex, monthStartIndex + 2), 10);
+            year = parseInt(value.slice(yearStartIndex, yearStartIndex + 4), 10);
+
+            fullYearDone = value.slice(yearStartIndex, yearStartIndex + 4).length === 4;
+
+            date = [0, month, year];
+        }
+
+        date = owner.getRangeFixedDate(date);
+        owner.date = date;
+
+        var result = date.length === 0 ? value : datePattern.reduce(function (previous, current) {
+            switch (current) {
+            case 'd':
+                return previous + (date[0] === 0 ? '' : owner.addLeadingZero(date[0]));
+            case 'm':
+                return previous + (date[1] === 0 ? '' : owner.addLeadingZero(date[1]));
+            case 'y':
+                return previous + (fullYearDone ? owner.addLeadingZeroForYear(date[2], false) : '');
+            case 'Y':
+                return previous + (fullYearDone ? owner.addLeadingZeroForYear(date[2], true) : '');
+            }
+        }, '');
+
+        return result;
+    },
+
+    getRangeFixedDate: function (date) {
+        var owner = this,
+            datePattern = owner.datePattern,
+            dateMin = owner.dateMin || [],
+            dateMax = owner.dateMax || [];
+
+        if (!date.length || (dateMin.length < 3 && dateMax.length < 3)) return date;
+
+        if (
+          datePattern.find(function(x) {
+            return x.toLowerCase() === 'y';
+          }) &&
+          date[2] === 0
+        ) return date;
+
+        if (dateMax.length && (dateMax[2] < date[2] || (
+          dateMax[2] === date[2] && (dateMax[1] < date[1] || (
+            dateMax[1] === date[1] && dateMax[0] < date[0]
+          ))
+        ))) return dateMax;
+
+        if (dateMin.length && (dateMin[2] > date[2] || (
+          dateMin[2] === date[2] && (dateMin[1] > date[1] || (
+            dateMin[1] === date[1] && dateMin[0] > date[0]
+          ))
+        ))) return dateMin;
+
+        return date;
+    },
+
+    getFixedDate: function (day, month, year) {
+        day = Math.min(day, 31);
+        month = Math.min(month, 12);
+        year = parseInt((year || 0), 10);
+
+        if ((month < 7 && month % 2 === 0) || (month > 8 && month % 2 === 1)) {
+            day = Math.min(day, month === 2 ? (this.isLeapYear(year) ? 29 : 28) : 30);
+        }
+
+        return [day, month, year];
+    },
+
+    isLeapYear: function (year) {
+        return ((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0);
+    },
+
+    addLeadingZero: function (number) {
+        return (number < 10 ? '0' : '') + number;
+    },
+
+    addLeadingZeroForYear: function (number, fullYearMode) {
+        if (fullYearMode) {
+            return (number < 10 ? '000' : (number < 100 ? '00' : (number < 1000 ? '0' : ''))) + number;
+        }
+
+        return (number < 10 ? '0' : '') + number;
+    }
+};
+
+var DateFormatter_1 = DateFormatter;
+
+var TimeFormatter = function (timePattern, timeFormat) {
+    var owner = this;
+
+    owner.time = [];
+    owner.blocks = [];
+    owner.timePattern = timePattern;
+    owner.timeFormat = timeFormat;
+    owner.initBlocks();
+};
+
+TimeFormatter.prototype = {
+    initBlocks: function () {
+        var owner = this;
+        owner.timePattern.forEach(function () {
+            owner.blocks.push(2);
+        });
+    },
+
+    getISOFormatTime: function () {
+        var owner = this,
+            time = owner.time;
+
+        return time[2] ? (
+            owner.addLeadingZero(time[0]) + ':' + owner.addLeadingZero(time[1]) + ':' + owner.addLeadingZero(time[2])
+        ) : '';
+    },
+
+    getBlocks: function () {
+        return this.blocks;
+    },
+
+    getTimeFormatOptions: function () {
+        var owner = this;
+        if (String(owner.timeFormat) === '12') {
+            return {
+                maxHourFirstDigit: 1,
+                maxHours: 12,
+                maxMinutesFirstDigit: 5,
+                maxMinutes: 60
+            };
+        }
+
+        return {
+            maxHourFirstDigit: 2,
+            maxHours: 23,
+            maxMinutesFirstDigit: 5,
+            maxMinutes: 60
+        };
+    },
+
+    getValidatedTime: function (value) {
+        var owner = this, result = '';
+
+        value = value.replace(/[^\d]/g, '');
+
+        var timeFormatOptions = owner.getTimeFormatOptions();
+
+        owner.blocks.forEach(function (length, index) {
+            if (value.length > 0) {
+                var sub = value.slice(0, length),
+                    sub0 = sub.slice(0, 1),
+                    rest = value.slice(length);
+
+                switch (owner.timePattern[index]) {
+
+                case 'h':
+                    if (parseInt(sub0, 10) > timeFormatOptions.maxHourFirstDigit) {
+                        sub = '0' + sub0;
+                    } else if (parseInt(sub, 10) > timeFormatOptions.maxHours) {
+                        sub = timeFormatOptions.maxHours + '';
+                    }
+
+                    break;
+
+                case 'm':
+                case 's':
+                    if (parseInt(sub0, 10) > timeFormatOptions.maxMinutesFirstDigit) {
+                        sub = '0' + sub0;
+                    } else if (parseInt(sub, 10) > timeFormatOptions.maxMinutes) {
+                        sub = timeFormatOptions.maxMinutes + '';
+                    }
+                    break;
+                }
+
+                result += sub;
+
+                // update remaining string
+                value = rest;
+            }
+        });
+
+        return this.getFixedTimeString(result);
+    },
+
+    getFixedTimeString: function (value) {
+        var owner = this, timePattern = owner.timePattern, time = [],
+            secondIndex = 0, minuteIndex = 0, hourIndex = 0,
+            secondStartIndex = 0, minuteStartIndex = 0, hourStartIndex = 0,
+            second, minute, hour;
+
+        if (value.length === 6) {
+            timePattern.forEach(function (type, index) {
+                switch (type) {
+                case 's':
+                    secondIndex = index * 2;
+                    break;
+                case 'm':
+                    minuteIndex = index * 2;
+                    break;
+                case 'h':
+                    hourIndex = index * 2;
+                    break;
+                }
+            });
+
+            hourStartIndex = hourIndex;
+            minuteStartIndex = minuteIndex;
+            secondStartIndex = secondIndex;
+
+            second = parseInt(value.slice(secondStartIndex, secondStartIndex + 2), 10);
+            minute = parseInt(value.slice(minuteStartIndex, minuteStartIndex + 2), 10);
+            hour = parseInt(value.slice(hourStartIndex, hourStartIndex + 2), 10);
+
+            time = this.getFixedTime(hour, minute, second);
+        }
+
+        if (value.length === 4 && owner.timePattern.indexOf('s') < 0) {
+            timePattern.forEach(function (type, index) {
+                switch (type) {
+                case 'm':
+                    minuteIndex = index * 2;
+                    break;
+                case 'h':
+                    hourIndex = index * 2;
+                    break;
+                }
+            });
+
+            hourStartIndex = hourIndex;
+            minuteStartIndex = minuteIndex;
+
+            second = 0;
+            minute = parseInt(value.slice(minuteStartIndex, minuteStartIndex + 2), 10);
+            hour = parseInt(value.slice(hourStartIndex, hourStartIndex + 2), 10);
+
+            time = this.getFixedTime(hour, minute, second);
+        }
+
+        owner.time = time;
+
+        return time.length === 0 ? value : timePattern.reduce(function (previous, current) {
+            switch (current) {
+            case 's':
+                return previous + owner.addLeadingZero(time[2]);
+            case 'm':
+                return previous + owner.addLeadingZero(time[1]);
+            case 'h':
+                return previous + owner.addLeadingZero(time[0]);
+            }
+        }, '');
+    },
+
+    getFixedTime: function (hour, minute, second) {
+        second = Math.min(parseInt(second || 0, 10), 60);
+        minute = Math.min(minute, 60);
+        hour = Math.min(hour, 60);
+
+        return [hour, minute, second];
+    },
+
+    addLeadingZero: function (number) {
+        return (number < 10 ? '0' : '') + number;
+    }
+};
+
+var TimeFormatter_1 = TimeFormatter;
+
+var PhoneFormatter = function (formatter, delimiter) {
+    var owner = this;
+
+    owner.delimiter = (delimiter || delimiter === '') ? delimiter : ' ';
+    owner.delimiterRE = delimiter ? new RegExp('\\' + delimiter, 'g') : '';
+
+    owner.formatter = formatter;
+};
+
+PhoneFormatter.prototype = {
+    setFormatter: function (formatter) {
+        this.formatter = formatter;
+    },
+
+    format: function (phoneNumber) {
+        var owner = this;
+
+        owner.formatter.clear();
+
+        // only keep number and +
+        phoneNumber = phoneNumber.replace(/[^\d+]/g, '');
+
+        // strip non-leading +
+        phoneNumber = phoneNumber.replace(/^\+/, 'B').replace(/\+/g, '').replace('B', '+');
+
+        // strip delimiter
+        phoneNumber = phoneNumber.replace(owner.delimiterRE, '');
+
+        var result = '', current, validated = false;
+
+        for (var i = 0, iMax = phoneNumber.length; i < iMax; i++) {
+            current = owner.formatter.inputDigit(phoneNumber.charAt(i));
+
+            // has ()- or space inside
+            if (/[\s()-]/g.test(current)) {
+                result = current;
+
+                validated = true;
+            } else {
+                if (!validated) {
+                    result = current;
+                }
+                // else: over length input
+                // it turns to invalid number again
+            }
+        }
+
+        // strip ()
+        // e.g. US: 7161234567 returns (716) 123-4567
+        result = result.replace(/[()]/g, '');
+        // replace library delimiter with user customized delimiter
+        result = result.replace(/[\s-]/g, owner.delimiter);
+
+        return result;
+    }
+};
+
+var PhoneFormatter_1 = PhoneFormatter;
+
+var CreditCardDetector = {
+    blocks: {
+        uatp:          [4, 5, 6],
+        amex:          [4, 6, 5],
+        diners:        [4, 6, 4],
+        discover:      [4, 4, 4, 4],
+        mastercard:    [4, 4, 4, 4],
+        dankort:       [4, 4, 4, 4],
+        instapayment:  [4, 4, 4, 4],
+        jcb15:         [4, 6, 5],
+        jcb:           [4, 4, 4, 4],
+        maestro:       [4, 4, 4, 4],
+        visa:          [4, 4, 4, 4],
+        mir:           [4, 4, 4, 4],
+        unionPay:      [4, 4, 4, 4],
+        general:       [4, 4, 4, 4]
+    },
+
+    re: {
+        // starts with 1; 15 digits, not starts with 1800 (jcb card)
+        uatp: /^(?!1800)1\d{0,14}/,
+
+        // starts with 34/37; 15 digits
+        amex: /^3[47]\d{0,13}/,
+
+        // starts with 6011/65/644-649; 16 digits
+        discover: /^(?:6011|65\d{0,2}|64[4-9]\d?)\d{0,12}/,
+
+        // starts with 300-305/309 or 36/38/39; 14 digits
+        diners: /^3(?:0([0-5]|9)|[689]\d?)\d{0,11}/,
+
+        // starts with 51-55/2221–2720; 16 digits
+        mastercard: /^(5[1-5]\d{0,2}|22[2-9]\d{0,1}|2[3-7]\d{0,2})\d{0,12}/,
+
+        // starts with 5019/4175/4571; 16 digits
+        dankort: /^(5019|4175|4571)\d{0,12}/,
+
+        // starts with 637-639; 16 digits
+        instapayment: /^63[7-9]\d{0,13}/,
+
+        // starts with 2131/1800; 15 digits
+        jcb15: /^(?:2131|1800)\d{0,11}/,
+
+        // starts with 2131/1800/35; 16 digits
+        jcb: /^(?:35\d{0,2})\d{0,12}/,
+
+        // starts with 50/56-58/6304/67; 16 digits
+        maestro: /^(?:5[0678]\d{0,2}|6304|67\d{0,2})\d{0,12}/,
+
+        // starts with 22; 16 digits
+        mir: /^220[0-4]\d{0,12}/,
+
+        // starts with 4; 16 digits
+        visa: /^4\d{0,15}/,
+
+        // starts with 62/81; 16 digits
+        unionPay: /^(62|81)\d{0,14}/
+    },
+
+    getStrictBlocks: function (block) {
+      var total = block.reduce(function (prev, current) {
+        return prev + current;
+      }, 0);
+
+      return block.concat(19 - total);
+    },
+
+    getInfo: function (value, strictMode) {
+        var blocks = CreditCardDetector.blocks,
+            re = CreditCardDetector.re;
+
+        // Some credit card can have up to 19 digits number.
+        // Set strictMode to true will remove the 16 max-length restrain,
+        // however, I never found any website validate card number like
+        // this, hence probably you don't want to enable this option.
+        strictMode = !!strictMode;
+
+        for (var key in re) {
+            if (re[key].test(value)) {
+                var matchedBlocks = blocks[key];
+                return {
+                    type: key,
+                    blocks: strictMode ? this.getStrictBlocks(matchedBlocks) : matchedBlocks
+                };
+            }
+        }
+
+        return {
+            type: 'unknown',
+            blocks: strictMode ? this.getStrictBlocks(blocks.general) : blocks.general
+        };
+    }
+};
+
+var CreditCardDetector_1 = CreditCardDetector;
+
+var Util = {
+    noop: function () {
+    },
+
+    strip: function (value, re) {
+        return value.replace(re, '');
+    },
+
+    getPostDelimiter: function (value, delimiter, delimiters) {
+        // single delimiter
+        if (delimiters.length === 0) {
+            return value.slice(-delimiter.length) === delimiter ? delimiter : '';
+        }
+
+        // multiple delimiters
+        var matchedDelimiter = '';
+        delimiters.forEach(function (current) {
+            if (value.slice(-current.length) === current) {
+                matchedDelimiter = current;
+            }
+        });
+
+        return matchedDelimiter;
+    },
+
+    getDelimiterREByDelimiter: function (delimiter) {
+        return new RegExp(delimiter.replace(/([.?*+^$[\]\\(){}|-])/g, '\\$1'), 'g');
+    },
+
+    getNextCursorPosition: function (prevPos, oldValue, newValue, delimiter, delimiters) {
+      // If cursor was at the end of value, just place it back.
+      // Because new value could contain additional chars.
+      if (oldValue.length === prevPos) {
+          return newValue.length;
+      }
+
+      return prevPos + this.getPositionOffset(prevPos, oldValue, newValue, delimiter ,delimiters);
+    },
+
+    getPositionOffset: function (prevPos, oldValue, newValue, delimiter, delimiters) {
+        var oldRawValue, newRawValue, lengthOffset;
+
+        oldRawValue = this.stripDelimiters(oldValue.slice(0, prevPos), delimiter, delimiters);
+        newRawValue = this.stripDelimiters(newValue.slice(0, prevPos), delimiter, delimiters);
+        lengthOffset = oldRawValue.length - newRawValue.length;
+
+        return (lengthOffset !== 0) ? (lengthOffset / Math.abs(lengthOffset)) : 0;
+    },
+
+    stripDelimiters: function (value, delimiter, delimiters) {
+        var owner = this;
+
+        // single delimiter
+        if (delimiters.length === 0) {
+            var delimiterRE = delimiter ? owner.getDelimiterREByDelimiter(delimiter) : '';
+
+            return value.replace(delimiterRE, '');
+        }
+
+        // multiple delimiters
+        delimiters.forEach(function (current) {
+            current.split('').forEach(function (letter) {
+                value = value.replace(owner.getDelimiterREByDelimiter(letter), '');
+            });
+        });
+
+        return value;
+    },
+
+    headStr: function (str, length) {
+        return str.slice(0, length);
+    },
+
+    getMaxLength: function (blocks) {
+        return blocks.reduce(function (previous, current) {
+            return previous + current;
+        }, 0);
+    },
+
+    // strip prefix
+    // Before type  |   After type    |     Return value
+    // PEFIX-...    |   PEFIX-...     |     ''
+    // PREFIX-123   |   PEFIX-123     |     123
+    // PREFIX-123   |   PREFIX-23     |     23
+    // PREFIX-123   |   PREFIX-1234   |     1234
+    getPrefixStrippedValue: function (value, prefix, prefixLength, prevResult, delimiter, delimiters, noImmediatePrefix, tailPrefix, signBeforePrefix) {
+        // No prefix
+        if (prefixLength === 0) {
+          return value;
+        }
+
+        // Value is prefix
+        if (value === prefix && value !== '') {
+          return '';
+        }
+
+        if (signBeforePrefix && (value.slice(0, 1) == '-')) {
+            var prev = (prevResult.slice(0, 1) == '-') ? prevResult.slice(1) : prevResult;
+            return '-' + this.getPrefixStrippedValue(value.slice(1), prefix, prefixLength, prev, delimiter, delimiters, noImmediatePrefix, tailPrefix, signBeforePrefix);
+        }
+
+        // Pre result prefix string does not match pre-defined prefix
+        if (prevResult.slice(0, prefixLength) !== prefix && !tailPrefix) {
+            // Check if the first time user entered something
+            if (noImmediatePrefix && !prevResult && value) return value;
+            return '';
+        } else if (prevResult.slice(-prefixLength) !== prefix && tailPrefix) {
+            // Check if the first time user entered something
+            if (noImmediatePrefix && !prevResult && value) return value;
+            return '';
+        }
+
+        var prevValue = this.stripDelimiters(prevResult, delimiter, delimiters);
+
+        // New value has issue, someone typed in between prefix letters
+        // Revert to pre value
+        if (value.slice(0, prefixLength) !== prefix && !tailPrefix) {
+            return prevValue.slice(prefixLength);
+        } else if (value.slice(-prefixLength) !== prefix && tailPrefix) {
+            return prevValue.slice(0, -prefixLength - 1);
+        }
+
+        // No issue, strip prefix for new value
+        return tailPrefix ? value.slice(0, -prefixLength) : value.slice(prefixLength);
+    },
+
+    getFirstDiffIndex: function (prev, current) {
+        var index = 0;
+
+        while (prev.charAt(index) === current.charAt(index)) {
+            if (prev.charAt(index++) === '') {
+                return -1;
+            }
+        }
+
+        return index;
+    },
+
+    getFormattedValue: function (value, blocks, blocksLength, delimiter, delimiters, delimiterLazyShow) {
+        var result = '',
+            multipleDelimiters = delimiters.length > 0,
+            currentDelimiter = '';
+
+        // no options, normal input
+        if (blocksLength === 0) {
+            return value;
+        }
+
+        blocks.forEach(function (length, index) {
+            if (value.length > 0) {
+                var sub = value.slice(0, length),
+                    rest = value.slice(length);
+
+                if (multipleDelimiters) {
+                    currentDelimiter = delimiters[delimiterLazyShow ? (index - 1) : index] || currentDelimiter;
+                } else {
+                    currentDelimiter = delimiter;
+                }
+
+                if (delimiterLazyShow) {
+                    if (index > 0) {
+                        result += currentDelimiter;
+                    }
+
+                    result += sub;
+                } else {
+                    result += sub;
+
+                    if (sub.length === length && index < blocksLength - 1) {
+                        result += currentDelimiter;
+                    }
+                }
+
+                // update remaining string
+                value = rest;
+            }
+        });
+
+        return result;
+    },
+
+    // move cursor to the end
+    // the first time user focuses on an input with prefix
+    fixPrefixCursor: function (el, prefix, delimiter, delimiters) {
+        if (!el) {
+            return;
+        }
+
+        var val = el.value,
+            appendix = delimiter || (delimiters[0] || ' ');
+
+        if (!el.setSelectionRange || !prefix || (prefix.length + appendix.length) <= val.length) {
+            return;
+        }
+
+        var len = val.length * 2;
+
+        // set timeout to avoid blink
+        setTimeout(function () {
+            el.setSelectionRange(len, len);
+        }, 1);
+    },
+
+    // Check if input field is fully selected
+    checkFullSelection: function(value) {
+      try {
+        var selection = window.getSelection() || document.getSelection() || {};
+        return selection.toString().length === value.length;
+      } catch (ex) {
+        // Ignore
+      }
+
+      return false;
+    },
+
+    setSelection: function (element, position, doc) {
+        if (element !== this.getActiveElement(doc)) {
+            return;
+        }
+
+        // cursor is already in the end
+        if (element && element.value.length <= position) {
+          return;
+        }
+
+        if (element.createTextRange) {
+            var range = element.createTextRange();
+
+            range.move('character', position);
+            range.select();
+        } else {
+            try {
+                element.setSelectionRange(position, position);
+            } catch (e) {
+                // eslint-disable-next-line
+                console.warn('The input element type does not support selection');
+            }
+        }
+    },
+
+    getActiveElement: function(parent) {
+        var activeElement = parent.activeElement;
+        if (activeElement && activeElement.shadowRoot) {
+            return this.getActiveElement(activeElement.shadowRoot);
+        }
+        return activeElement;
+    },
+
+    isAndroid: function () {
+        return navigator && /android/i.test(navigator.userAgent);
+    },
+
+    // On Android chrome, the keyup and keydown events
+    // always return key code 229 as a composition that
+    // buffers the user’s keystrokes
+    // see https://github.com/nosir/cleave.js/issues/147
+    isAndroidBackspaceKeydown: function (lastInputValue, currentInputValue) {
+        if (!this.isAndroid() || !lastInputValue || !currentInputValue) {
+            return false;
+        }
+
+        return currentInputValue === lastInputValue.slice(0, -1);
+    }
+};
+
+var Util_1 = Util;
+
+/**
+ * Props Assignment
+ *
+ * Separate this, so react module can share the usage
+ */
+var DefaultProperties = {
+    // Maybe change to object-assign
+    // for now just keep it as simple
+    assign: function (target, opts) {
+        target = target || {};
+        opts = opts || {};
+
+        // credit card
+        target.creditCard = !!opts.creditCard;
+        target.creditCardStrictMode = !!opts.creditCardStrictMode;
+        target.creditCardType = '';
+        target.onCreditCardTypeChanged = opts.onCreditCardTypeChanged || (function () {});
+
+        // phone
+        target.phone = !!opts.phone;
+        target.phoneRegionCode = opts.phoneRegionCode || 'AU';
+        target.phoneFormatter = {};
+
+        // time
+        target.time = !!opts.time;
+        target.timePattern = opts.timePattern || ['h', 'm', 's'];
+        target.timeFormat = opts.timeFormat || '24';
+        target.timeFormatter = {};
+
+        // date
+        target.date = !!opts.date;
+        target.datePattern = opts.datePattern || ['d', 'm', 'Y'];
+        target.dateMin = opts.dateMin || '';
+        target.dateMax = opts.dateMax || '';
+        target.dateFormatter = {};
+
+        // numeral
+        target.numeral = !!opts.numeral;
+        target.numeralIntegerScale = opts.numeralIntegerScale > 0 ? opts.numeralIntegerScale : 0;
+        target.numeralDecimalScale = opts.numeralDecimalScale >= 0 ? opts.numeralDecimalScale : 2;
+        target.numeralDecimalMark = opts.numeralDecimalMark || '.';
+        target.numeralThousandsGroupStyle = opts.numeralThousandsGroupStyle || 'thousand';
+        target.numeralPositiveOnly = !!opts.numeralPositiveOnly;
+        target.stripLeadingZeroes = opts.stripLeadingZeroes !== false;
+        target.signBeforePrefix = !!opts.signBeforePrefix;
+        target.tailPrefix = !!opts.tailPrefix;
+
+        // others
+        target.swapHiddenInput = !!opts.swapHiddenInput;
+        
+        target.numericOnly = target.creditCard || target.date || !!opts.numericOnly;
+
+        target.uppercase = !!opts.uppercase;
+        target.lowercase = !!opts.lowercase;
+
+        target.prefix = (target.creditCard || target.date) ? '' : (opts.prefix || '');
+        target.noImmediatePrefix = !!opts.noImmediatePrefix;
+        target.prefixLength = target.prefix.length;
+        target.rawValueTrimPrefix = !!opts.rawValueTrimPrefix;
+        target.copyDelimiter = !!opts.copyDelimiter;
+
+        target.initValue = (opts.initValue !== undefined && opts.initValue !== null) ? opts.initValue.toString() : '';
+
+        target.delimiter =
+            (opts.delimiter || opts.delimiter === '') ? opts.delimiter :
+                (opts.date ? '/' :
+                    (opts.time ? ':' :
+                        (opts.numeral ? ',' :
+                            (opts.phone ? ' ' :
+                                ' '))));
+        target.delimiterLength = target.delimiter.length;
+        target.delimiterLazyShow = !!opts.delimiterLazyShow;
+        target.delimiters = opts.delimiters || [];
+
+        target.blocks = opts.blocks || [];
+        target.blocksLength = target.blocks.length;
+
+        target.root = (typeof commonjsGlobal === 'object' && commonjsGlobal) ? commonjsGlobal : window;
+        target.document = opts.document || target.root.document;
+
+        target.maxLength = 0;
+
+        target.backspace = false;
+        target.result = '';
+
+        target.onValueChanged = opts.onValueChanged || (function () {});
+
+        return target;
+    }
+};
+
+var DefaultProperties_1 = DefaultProperties;
+
+/**
+ * Construct a new Cleave instance by passing the configuration object
+ *
+ * @param {String | HTMLElement} element
+ * @param {Object} opts
+ */
+var Cleave = function (element, opts) {
+    var owner = this;
+    var hasMultipleElements = false;
+
+    if (typeof element === 'string') {
+        owner.element = document.querySelector(element);
+        hasMultipleElements = document.querySelectorAll(element).length > 1;
+    } else {
+      if (typeof element.length !== 'undefined' && element.length > 0) {
+        owner.element = element[0];
+        hasMultipleElements = element.length > 1;
+      } else {
+        owner.element = element;
+      }
+    }
+
+    if (!owner.element) {
+        throw new Error('[cleave.js] Please check the element');
+    }
+
+    if (hasMultipleElements) {
+      try {
+        // eslint-disable-next-line
+        console.warn('[cleave.js] Multiple input fields matched, cleave.js will only take the first one.');
+      } catch (e) {
+        // Old IE
+      }
+    }
+
+    opts.initValue = owner.element.value;
+
+    owner.properties = Cleave.DefaultProperties.assign({}, opts);
+
+    owner.init();
+};
+
+Cleave.prototype = {
+    init: function () {
+        var owner = this, pps = owner.properties;
+
+        // no need to use this lib
+        if (!pps.numeral && !pps.phone && !pps.creditCard && !pps.time && !pps.date && (pps.blocksLength === 0 && !pps.prefix)) {
+            owner.onInput(pps.initValue);
+
+            return;
+        }
+
+        pps.maxLength = Cleave.Util.getMaxLength(pps.blocks);
+
+        owner.isAndroid = Cleave.Util.isAndroid();
+        owner.lastInputValue = '';
+        owner.isBackward = '';
+
+        owner.onChangeListener = owner.onChange.bind(owner);
+        owner.onKeyDownListener = owner.onKeyDown.bind(owner);
+        owner.onFocusListener = owner.onFocus.bind(owner);
+        owner.onCutListener = owner.onCut.bind(owner);
+        owner.onCopyListener = owner.onCopy.bind(owner);
+
+        owner.initSwapHiddenInput();
+
+        owner.element.addEventListener('input', owner.onChangeListener);
+        owner.element.addEventListener('keydown', owner.onKeyDownListener);
+        owner.element.addEventListener('focus', owner.onFocusListener);
+        owner.element.addEventListener('cut', owner.onCutListener);
+        owner.element.addEventListener('copy', owner.onCopyListener);
+
+
+        owner.initPhoneFormatter();
+        owner.initDateFormatter();
+        owner.initTimeFormatter();
+        owner.initNumeralFormatter();
+
+        // avoid touch input field if value is null
+        // otherwise Firefox will add red box-shadow for <input required />
+        if (pps.initValue || (pps.prefix && !pps.noImmediatePrefix)) {
+            owner.onInput(pps.initValue);
+        }
+    },
+
+    initSwapHiddenInput: function () {
+        var owner = this, pps = owner.properties;
+        if (!pps.swapHiddenInput) return;
+
+        var inputFormatter = owner.element.cloneNode(true);
+        owner.element.parentNode.insertBefore(inputFormatter, owner.element);
+
+        owner.elementSwapHidden = owner.element;
+        owner.elementSwapHidden.type = 'hidden';
+
+        owner.element = inputFormatter;
+        owner.element.id = '';
+    },
+
+    initNumeralFormatter: function () {
+        var owner = this, pps = owner.properties;
+
+        if (!pps.numeral) {
+            return;
+        }
+
+        pps.numeralFormatter = new Cleave.NumeralFormatter(
+            pps.numeralDecimalMark,
+            pps.numeralIntegerScale,
+            pps.numeralDecimalScale,
+            pps.numeralThousandsGroupStyle,
+            pps.numeralPositiveOnly,
+            pps.stripLeadingZeroes,
+            pps.prefix,
+            pps.signBeforePrefix,
+            pps.tailPrefix,
+            pps.delimiter
+        );
+    },
+
+    initTimeFormatter: function() {
+        var owner = this, pps = owner.properties;
+
+        if (!pps.time) {
+            return;
+        }
+
+        pps.timeFormatter = new Cleave.TimeFormatter(pps.timePattern, pps.timeFormat);
+        pps.blocks = pps.timeFormatter.getBlocks();
+        pps.blocksLength = pps.blocks.length;
+        pps.maxLength = Cleave.Util.getMaxLength(pps.blocks);
+    },
+
+    initDateFormatter: function () {
+        var owner = this, pps = owner.properties;
+
+        if (!pps.date) {
+            return;
+        }
+
+        pps.dateFormatter = new Cleave.DateFormatter(pps.datePattern, pps.dateMin, pps.dateMax);
+        pps.blocks = pps.dateFormatter.getBlocks();
+        pps.blocksLength = pps.blocks.length;
+        pps.maxLength = Cleave.Util.getMaxLength(pps.blocks);
+    },
+
+    initPhoneFormatter: function () {
+        var owner = this, pps = owner.properties;
+
+        if (!pps.phone) {
+            return;
+        }
+
+        // Cleave.AsYouTypeFormatter should be provided by
+        // external google closure lib
+        try {
+            pps.phoneFormatter = new Cleave.PhoneFormatter(
+                new pps.root.Cleave.AsYouTypeFormatter(pps.phoneRegionCode),
+                pps.delimiter
+            );
+        } catch (ex) {
+            throw new Error('[cleave.js] Please include phone-type-formatter.{country}.js lib');
+        }
+    },
+
+    onKeyDown: function (event) {
+        var owner = this,
+            charCode = event.which || event.keyCode;
+
+        owner.lastInputValue = owner.element.value;
+        owner.isBackward = charCode === 8;
+    },
+
+    onChange: function (event) {
+        var owner = this, pps = owner.properties,
+            Util = Cleave.Util;
+
+        owner.isBackward = owner.isBackward || event.inputType === 'deleteContentBackward';
+
+        var postDelimiter = Util.getPostDelimiter(owner.lastInputValue, pps.delimiter, pps.delimiters);
+
+        if (owner.isBackward && postDelimiter) {
+            pps.postDelimiterBackspace = postDelimiter;
+        } else {
+            pps.postDelimiterBackspace = false;
+        }
+
+        this.onInput(this.element.value);
+    },
+
+    onFocus: function () {
+        var owner = this,
+            pps = owner.properties;
+        owner.lastInputValue = owner.element.value;
+
+        if (pps.prefix && pps.noImmediatePrefix && !owner.element.value) {
+            this.onInput(pps.prefix);
+        }
+
+        Cleave.Util.fixPrefixCursor(owner.element, pps.prefix, pps.delimiter, pps.delimiters);
+    },
+
+    onCut: function (e) {
+        if (!Cleave.Util.checkFullSelection(this.element.value)) return;
+        this.copyClipboardData(e);
+        this.onInput('');
+    },
+
+    onCopy: function (e) {
+        if (!Cleave.Util.checkFullSelection(this.element.value)) return;
+        this.copyClipboardData(e);
+    },
+
+    copyClipboardData: function (e) {
+        var owner = this,
+            pps = owner.properties,
+            Util = Cleave.Util,
+            inputValue = owner.element.value,
+            textToCopy = '';
+
+        if (!pps.copyDelimiter) {
+            textToCopy = Util.stripDelimiters(inputValue, pps.delimiter, pps.delimiters);
+        } else {
+            textToCopy = inputValue;
+        }
+
+        try {
+            if (e.clipboardData) {
+                e.clipboardData.setData('Text', textToCopy);
+            } else {
+                window.clipboardData.setData('Text', textToCopy);
+            }
+
+            e.preventDefault();
+        } catch (ex) {
+            //  empty
+        }
+    },
+
+    onInput: function (value) {
+        var owner = this, pps = owner.properties,
+            Util = Cleave.Util;
+
+        // case 1: delete one more character "4"
+        // 1234*| -> hit backspace -> 123|
+        // case 2: last character is not delimiter which is:
+        // 12|34* -> hit backspace -> 1|34*
+        // note: no need to apply this for numeral mode
+        var postDelimiterAfter = Util.getPostDelimiter(value, pps.delimiter, pps.delimiters);
+        if (!pps.numeral && pps.postDelimiterBackspace && !postDelimiterAfter) {
+            value = Util.headStr(value, value.length - pps.postDelimiterBackspace.length);
+        }
+
+        // phone formatter
+        if (pps.phone) {
+            if (pps.prefix && (!pps.noImmediatePrefix || value.length)) {
+                pps.result = pps.prefix + pps.phoneFormatter.format(value).slice(pps.prefix.length);
+            } else {
+                pps.result = pps.phoneFormatter.format(value);
+            }
+            owner.updateValueState();
+
+            return;
+        }
+
+        // numeral formatter
+        if (pps.numeral) {
+            // Do not show prefix when noImmediatePrefix is specified
+            // This mostly because we need to show user the native input placeholder
+            if (pps.prefix && pps.noImmediatePrefix && value.length === 0) {
+                pps.result = '';
+            } else {
+                pps.result = pps.numeralFormatter.format(value);
+            }
+            owner.updateValueState();
+
+            return;
+        }
+
+        // date
+        if (pps.date) {
+            value = pps.dateFormatter.getValidatedDate(value);
+        }
+
+        // time
+        if (pps.time) {
+            value = pps.timeFormatter.getValidatedTime(value);
+        }
+
+        // strip delimiters
+        value = Util.stripDelimiters(value, pps.delimiter, pps.delimiters);
+
+        // strip prefix
+        value = Util.getPrefixStrippedValue(value, pps.prefix, pps.prefixLength, pps.result, pps.delimiter, pps.delimiters, pps.noImmediatePrefix, pps.tailPrefix, pps.signBeforePrefix);
+
+        // strip non-numeric characters
+        value = pps.numericOnly ? Util.strip(value, /[^\d]/g) : value;
+
+        // convert case
+        value = pps.uppercase ? value.toUpperCase() : value;
+        value = pps.lowercase ? value.toLowerCase() : value;
+
+        // prevent from showing prefix when no immediate option enabled with empty input value
+        if (pps.prefix) {
+            if (pps.tailPrefix) {
+                value = value + pps.prefix;
+            } else {
+                value = pps.prefix + value;
+            }
+
+
+            // no blocks specified, no need to do formatting
+            if (pps.blocksLength === 0) {
+                pps.result = value;
+                owner.updateValueState();
+
+                return;
+            }
+        }
+
+        // update credit card props
+        if (pps.creditCard) {
+            owner.updateCreditCardPropsByValue(value);
+        }
+
+        // strip over length characters
+        value = Util.headStr(value, pps.maxLength);
+
+        // apply blocks
+        pps.result = Util.getFormattedValue(
+            value,
+            pps.blocks, pps.blocksLength,
+            pps.delimiter, pps.delimiters, pps.delimiterLazyShow
+        );
+
+        owner.updateValueState();
+    },
+
+    updateCreditCardPropsByValue: function (value) {
+        var owner = this, pps = owner.properties,
+            Util = Cleave.Util,
+            creditCardInfo;
+
+        // At least one of the first 4 characters has changed
+        if (Util.headStr(pps.result, 4) === Util.headStr(value, 4)) {
+            return;
+        }
+
+        creditCardInfo = Cleave.CreditCardDetector.getInfo(value, pps.creditCardStrictMode);
+
+        pps.blocks = creditCardInfo.blocks;
+        pps.blocksLength = pps.blocks.length;
+        pps.maxLength = Util.getMaxLength(pps.blocks);
+
+        // credit card type changed
+        if (pps.creditCardType !== creditCardInfo.type) {
+            pps.creditCardType = creditCardInfo.type;
+
+            pps.onCreditCardTypeChanged.call(owner, pps.creditCardType);
+        }
+    },
+
+    updateValueState: function () {
+        var owner = this,
+            Util = Cleave.Util,
+            pps = owner.properties;
+
+        if (!owner.element) {
+            return;
+        }
+
+        var endPos = owner.element.selectionEnd;
+        var oldValue = owner.element.value;
+        var newValue = pps.result;
+
+        endPos = Util.getNextCursorPosition(endPos, oldValue, newValue, pps.delimiter, pps.delimiters);
+
+        // fix Android browser type="text" input field
+        // cursor not jumping issue
+        if (owner.isAndroid) {
+            window.setTimeout(function () {
+                owner.element.value = newValue;
+                Util.setSelection(owner.element, endPos, pps.document, false);
+                owner.callOnValueChanged();
+            }, 1);
+
+            return;
+        }
+
+        owner.element.value = newValue;
+        if (pps.swapHiddenInput) owner.elementSwapHidden.value = owner.getRawValue();
+
+        Util.setSelection(owner.element, endPos, pps.document, false);
+        owner.callOnValueChanged();
+    },
+
+    callOnValueChanged: function () {
+        var owner = this,
+            pps = owner.properties;
+
+        pps.onValueChanged.call(owner, {
+            target: {
+                name: owner.element.name,
+                value: pps.result,
+                rawValue: owner.getRawValue()
+            }
+        });
+    },
+
+    setPhoneRegionCode: function (phoneRegionCode) {
+        var owner = this, pps = owner.properties;
+
+        pps.phoneRegionCode = phoneRegionCode;
+        owner.initPhoneFormatter();
+        owner.onChange();
+    },
+
+    setRawValue: function (value) {
+        var owner = this, pps = owner.properties;
+
+        value = value !== undefined && value !== null ? value.toString() : '';
+
+        if (pps.numeral) {
+            value = value.replace('.', pps.numeralDecimalMark);
+        }
+
+        pps.postDelimiterBackspace = false;
+
+        owner.element.value = value;
+        owner.onInput(value);
+    },
+
+    getRawValue: function () {
+        var owner = this,
+            pps = owner.properties,
+            Util = Cleave.Util,
+            rawValue = owner.element.value;
+
+        if (pps.rawValueTrimPrefix) {
+            rawValue = Util.getPrefixStrippedValue(rawValue, pps.prefix, pps.prefixLength, pps.result, pps.delimiter, pps.delimiters, pps.noImmediatePrefix, pps.tailPrefix, pps.signBeforePrefix);
+        }
+
+        if (pps.numeral) {
+            rawValue = pps.numeralFormatter.getRawValue(rawValue);
+        } else {
+            rawValue = Util.stripDelimiters(rawValue, pps.delimiter, pps.delimiters);
+        }
+
+        return rawValue;
+    },
+
+    getISOFormatDate: function () {
+        var owner = this,
+            pps = owner.properties;
+
+        return pps.date ? pps.dateFormatter.getISOFormatDate() : '';
+    },
+
+    getISOFormatTime: function () {
+        var owner = this,
+            pps = owner.properties;
+
+        return pps.time ? pps.timeFormatter.getISOFormatTime() : '';
+    },
+
+    getFormattedValue: function () {
+        return this.element.value;
+    },
+
+    destroy: function () {
+        var owner = this;
+
+        owner.element.removeEventListener('input', owner.onChangeListener);
+        owner.element.removeEventListener('keydown', owner.onKeyDownListener);
+        owner.element.removeEventListener('focus', owner.onFocusListener);
+        owner.element.removeEventListener('cut', owner.onCutListener);
+        owner.element.removeEventListener('copy', owner.onCopyListener);
+    },
+
+    toString: function () {
+        return '[Cleave Object]';
+    }
+};
+
+Cleave.NumeralFormatter = NumeralFormatter_1;
+Cleave.DateFormatter = DateFormatter_1;
+Cleave.TimeFormatter = TimeFormatter_1;
+Cleave.PhoneFormatter = PhoneFormatter_1;
+Cleave.CreditCardDetector = CreditCardDetector_1;
+Cleave.Util = Util_1;
+Cleave.DefaultProperties = DefaultProperties_1;
+
+// for angular directive
+((typeof commonjsGlobal === 'object' && commonjsGlobal) ? commonjsGlobal : window)['Cleave'] = Cleave;
+
+// CommonJS
+var Cleave_1 = Cleave;
+
+/* harmony default export */ __webpack_exports__["default"] = (Cleave_1);
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
 /***/ "./node_modules/jquery/dist/jquery.js":
 /*!********************************************!*\
   !*** ./node_modules/jquery/dist/jquery.js ***!
@@ -62505,6 +64077,3010 @@ if (typeof this !== 'undefined' && this.Sweetalert2){  this.swal = this.sweetAle
 
 /***/ }),
 
+/***/ "./node_modules/vanillajs-datepicker/js/DateRangePicker.js":
+/*!*****************************************************************!*\
+  !*** ./node_modules/vanillajs-datepicker/js/DateRangePicker.js ***!
+  \*****************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return DateRangePicker; });
+/* harmony import */ var _lib_event_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./lib/event.js */ "./node_modules/vanillajs-datepicker/js/lib/event.js");
+/* harmony import */ var _lib_date_format_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./lib/date-format.js */ "./node_modules/vanillajs-datepicker/js/lib/date-format.js");
+/* harmony import */ var _Datepicker_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Datepicker.js */ "./node_modules/vanillajs-datepicker/js/Datepicker.js");
+
+
+
+
+// filter out the config options inapproprite to pass to Datepicker
+function filterOptions(options) {
+  const newOpts = Object.assign({}, options);
+
+  delete newOpts.inputs;
+  delete newOpts.allowOneSidedRange;
+  delete newOpts.maxNumberOfDates; // to ensure each datepicker handles a single date
+
+  return newOpts;
+}
+
+function setupDatepicker(rangepicker, changeDateListener, el, options) {
+  Object(_lib_event_js__WEBPACK_IMPORTED_MODULE_0__["registerListeners"])(rangepicker, [
+    [el, 'changeDate', changeDateListener],
+  ]);
+  return new _Datepicker_js__WEBPACK_IMPORTED_MODULE_2__["default"](el, options, rangepicker);
+}
+
+function onChangeDate(rangepicker, ev) {
+  // to prevent both datepickers trigger the other side's update each other
+  if (rangepicker.updating) {
+    return;
+  }
+  rangepicker.updating = true;
+
+  const target = ev.target;
+  if (target.datepicker === undefined) {
+    return;
+  }
+
+  const datepickers = rangepicker.datepickers;
+  const setDateOptions = {render: false};
+  const changedSide = rangepicker.inputs.indexOf(target);
+  const otherSide = changedSide === 0 ? 1 : 0;
+  const changedDate = datepickers[changedSide].dates[0];
+  const otherDate = datepickers[otherSide].dates[0];
+
+  if (changedDate !== undefined && otherDate !== undefined) {
+    // if the start of the range > the end, swap them
+    if (changedSide === 0 && changedDate > otherDate) {
+      datepickers[0].setDate(otherDate, setDateOptions);
+      datepickers[1].setDate(changedDate, setDateOptions);
+    } else if (changedSide === 1 && changedDate < otherDate) {
+      datepickers[0].setDate(changedDate, setDateOptions);
+      datepickers[1].setDate(otherDate, setDateOptions);
+    }
+  } else if (!rangepicker.allowOneSidedRange) {
+    // to prevent the range from becoming one-sided, copy changed side's
+    // selection (no matter if it's empty) to the other side
+    if (changedDate !== undefined || otherDate !== undefined) {
+      setDateOptions.clear = true;
+      datepickers[otherSide].setDate(datepickers[changedSide].dates, setDateOptions);
+    }
+  }
+  datepickers[0].picker.update().render();
+  datepickers[1].picker.update().render();
+  delete rangepicker.updating;
+}
+
+/**
+ * Class representing a date range picker
+ */
+class DateRangePicker  {
+  /**
+   * Create a date range picker
+   * @param  {Element} element - element to bind a date range picker
+   * @param  {Object} [options] - config options
+   */
+  constructor(element, options = {}) {
+    const inputs = Array.isArray(options.inputs)
+      ? options.inputs
+      : Array.from(element.querySelectorAll('input'));
+    if (inputs.length < 2) {
+      return;
+    }
+
+    element.rangepicker = this;
+    this.element = element;
+    this.inputs = inputs.slice(0, 2);
+    this.allowOneSidedRange = !!options.allowOneSidedRange;
+
+    const changeDateListener = onChangeDate.bind(null, this);
+    const cleanOptions = filterOptions(options);
+    this.datepickers = [
+      setupDatepicker(this, changeDateListener, this.inputs[0], cleanOptions),
+      setupDatepicker(this, changeDateListener, this.inputs[1], cleanOptions),
+    ];
+    // normalize the range if inital dates are given
+    if (this.dates[0] !== undefined) {
+      onChangeDate(this, {target: this.inputs[0]});
+    } else if (this.dates[1] !== undefined) {
+      onChangeDate(this, {target: this.inputs[1]});
+    }
+  }
+
+  /**
+   * @type {Array} - selected date of the linked date pickers
+   */
+  get dates() {
+    if (this.datepickers) {
+      return [
+        this.datepickers[0].dates[0],
+        this.datepickers[1].dates[0],
+      ];
+    }
+  }
+
+  /**
+   * Set new values to the config options
+   * @param {Object} options - config options to update
+   */
+  setOptions(options) {
+    this.allowOneSidedRange = !!options.allowOneSidedRange;
+
+    const cleanOptions = filterOptions(options);
+    this.datepickers[0].setOptions(cleanOptions);
+    this.datepickers[1].setOptions(cleanOptions);
+  }
+
+  /**
+   * Destroy the DateRangePicker instance
+   * @return {DateRangePicker} - the instance destroyed
+   */
+  destroy() {
+    this.datepickers[0].destroy();
+    this.datepickers[1].destroy();
+    Object(_lib_event_js__WEBPACK_IMPORTED_MODULE_0__["unregisterListeners"])(this);
+    delete this.element.rangepicker;
+  }
+
+  /**
+   * Get the start and end dates of the date range
+   *
+   * The method returns Date objects by default. If format string is passed,
+   * it returns date strings formatted in given format.
+   * The result array always contains 2 items (start date/end date) and
+   * undifined is used for unselected side. (e.g. If none is selected,
+   * the result will be [undifined, undifined]. If only the end date is set
+   * when allowOneSidedRange config option is true, [undifined, endDate] will
+   * be returned.)
+   *
+   * @param  {String} [format] - Format string to stringify the dates
+   * @return {Array} - Start and end dates
+   */
+  getDates(format = undefined) {
+    const callback = format
+      ? date => Object(_lib_date_format_js__WEBPACK_IMPORTED_MODULE_1__["formatDate"])(date, format, this.datepickers[0].config.locale)
+      : date => new Date(date);
+
+    return this.dates.map(date => date === undefined ? date : callback(date));
+  }
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/vanillajs-datepicker/js/Datepicker.js":
+/*!************************************************************!*\
+  !*** ./node_modules/vanillajs-datepicker/js/Datepicker.js ***!
+  \************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Datepicker; });
+/* harmony import */ var _lib_utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./lib/utils.js */ "./node_modules/vanillajs-datepicker/js/lib/utils.js");
+/* harmony import */ var _lib_date_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./lib/date.js */ "./node_modules/vanillajs-datepicker/js/lib/date.js");
+/* harmony import */ var _lib_date_format_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./lib/date-format.js */ "./node_modules/vanillajs-datepicker/js/lib/date-format.js");
+/* harmony import */ var _lib_event_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./lib/event.js */ "./node_modules/vanillajs-datepicker/js/lib/event.js");
+/* harmony import */ var _i18n_base_locales_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./i18n/base-locales.js */ "./node_modules/vanillajs-datepicker/js/i18n/base-locales.js");
+/* harmony import */ var _options_defaultOptions_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./options/defaultOptions.js */ "./node_modules/vanillajs-datepicker/js/options/defaultOptions.js");
+/* harmony import */ var _options_processOptions_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./options/processOptions.js */ "./node_modules/vanillajs-datepicker/js/options/processOptions.js");
+/* harmony import */ var _picker_Picker_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./picker/Picker.js */ "./node_modules/vanillajs-datepicker/js/picker/Picker.js");
+/* harmony import */ var _events_functions_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./events/functions.js */ "./node_modules/vanillajs-datepicker/js/events/functions.js");
+/* harmony import */ var _events_inputFieldListeners_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./events/inputFieldListeners.js */ "./node_modules/vanillajs-datepicker/js/events/inputFieldListeners.js");
+/* harmony import */ var _events_otherListeners_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./events/otherListeners.js */ "./node_modules/vanillajs-datepicker/js/events/otherListeners.js");
+
+
+
+
+
+
+
+
+
+
+
+
+function stringifyDates(dates, config) {
+  return dates
+    .map(dt => Object(_lib_date_format_js__WEBPACK_IMPORTED_MODULE_2__["formatDate"])(dt, config.format, config.locale))
+    .join(config.dateDelimiter);
+}
+
+// parse input dates and create an array of time values for selection
+// returns undefined if there are no valid dates in inputDates
+// when origDates (current selection) is passed, the function works to mix
+// the input dates into the current selection
+function processInputDates(inputDates, config, origDates = undefined) {
+  if (inputDates.length === 0) {
+    // empty input is considered valid unless origiDates is passed
+    return origDates ? undefined : [];
+  }
+
+  let newDates = inputDates.reduce((dates, dt) => {
+    const date = Object(_lib_date_format_js__WEBPACK_IMPORTED_MODULE_2__["parseDate"])(dt, config.format, config.locale);
+    if (
+      date !== undefined
+      && Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["isInRange"])(date, config.minDate, config.maxDate)
+      && !dates.includes(date)
+      && !config.datesDisabled.includes(date)
+      && !config.daysOfWeekDisabled.includes(new Date(date).getDay())
+    ) {
+      dates.push(date);
+    }
+    return dates;
+  }, []);
+  if (newDates.length === 0) {
+    return;
+  }
+  if (origDates && config.multidate) {
+    // get the synmetric difference between origDates and newDates
+    newDates = newDates.reduce((dates, date) => {
+      if (!origDates.includes(date)) {
+        dates.push(date);
+      }
+      return dates;
+    }, origDates.filter(date => !newDates.includes(date)));
+  }
+  // do length check always because user can input multiple dates regardless of the mode
+  return config.maxNumberOfDates && newDates.length > config.maxNumberOfDates
+    ? newDates.slice(config.maxNumberOfDates * -1)
+    : newDates;
+}
+
+/**
+ * Class representing a date picker
+ */
+class Datepicker {
+  /**
+   * Create a date picker
+   * @param  {Element} element - element to bind a date picker
+   * @param  {Object} [options] - config options
+   * @param  {DateRangePicker} [rangepicker] - DateRangePicker instance the
+   * date picker belongs to. Use this only when creating date picker as a part
+   * of date range picker
+   */
+  constructor(element, options = {}, rangepicker = undefined) {
+    element.datepicker = this;
+    this.element = element;
+
+    // set up config
+    const config = this.config = Object.assign({
+      buttonClass: (options.buttonClass && String(options.buttonClass)) || 'button',
+      container: document.body,
+      defaultViewDate: Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["today"])(),
+      maxDate: undefined,
+      minDate: undefined,
+    }, Object(_options_processOptions_js__WEBPACK_IMPORTED_MODULE_6__["default"])(_options_defaultOptions_js__WEBPACK_IMPORTED_MODULE_5__["default"], this));
+    this._options = options;
+    Object.assign(config, Object(_options_processOptions_js__WEBPACK_IMPORTED_MODULE_6__["default"])(options, this));
+
+    // configure by type
+    const inline = this.inline = element.tagName !== 'INPUT';
+    let inputField;
+    let initialDates;
+
+    if (inline) {
+      config.container = element;
+      initialDates = Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["stringToArray"])(element.dataset.date, config.dateDelimiter);
+      delete element.dataset.date;
+    } else {
+      const container = options.container ? document.querySelector(options.container) : null;
+      if (container) {
+        config.container = container;
+      }
+      inputField = this.inputField = element;
+      inputField.classList.add('datepicker-input');
+      initialDates = Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["stringToArray"])(inputField.value, config.dateDelimiter);
+    }
+    // set initial value
+    this.dates = processInputDates(initialDates, config) || [];
+
+    if (rangepicker && rangepicker.constructor.name === 'DateRangePicker') {
+      this.rangepicker = rangepicker;
+      // add getter for range
+      Object.defineProperty(this, 'range', {
+        get() {
+          return this.rangepicker.dates;
+        },
+      });
+    }
+
+    const picker = this.picker = new _picker_Picker_js__WEBPACK_IMPORTED_MODULE_7__["default"](this);
+
+    if (inline) {
+      this.show();
+    } else {
+      // set up event listeners in other modes
+      const onMousedownDocument = _events_otherListeners_js__WEBPACK_IMPORTED_MODULE_10__["onClickOutside"].bind(null, this);
+      const listeners = [
+        [inputField, 'keydown', _events_inputFieldListeners_js__WEBPACK_IMPORTED_MODULE_9__["onKeydown"].bind(null, this)],
+        [inputField, 'focus', _events_inputFieldListeners_js__WEBPACK_IMPORTED_MODULE_9__["onFocus"].bind(null, this)],
+        [inputField, 'mousedown', _events_inputFieldListeners_js__WEBPACK_IMPORTED_MODULE_9__["onMousedown"].bind(null, this)],
+        [inputField, 'click', _events_inputFieldListeners_js__WEBPACK_IMPORTED_MODULE_9__["onClickInput"].bind(null, this)],
+        [inputField, 'paste', _events_inputFieldListeners_js__WEBPACK_IMPORTED_MODULE_9__["onPaste"].bind(null, this)],
+        [document, 'mousedown', onMousedownDocument],
+        [document, 'touchstart', onMousedownDocument],
+        [window, 'resize', picker.place.bind(picker)]
+      ];
+      Object(_lib_event_js__WEBPACK_IMPORTED_MODULE_3__["registerListeners"])(this, listeners);
+    }
+  }
+
+  /**
+   * Format Date object or time value in given format and language
+   * @param  {Date|Number} date - date or time value to format
+   * @param  {String|Object} format - format string or object that contains
+   * toDisplay() custom formatter, whose signature is
+   * - args:
+   *   - date: {Date} - Date instance of the date passed to the method
+   *   - format: {Object} - the format object passed to the method
+   *   - locale: {Object} - locale for the language specified by `lang`
+   * - return:
+   *     {String} formatted date
+   * @param  {String} [lang=en] - language code for the locale to use
+   * @return {String} formatted date
+   */
+  static formatDate(date, format, lang) {
+    return Object(_lib_date_format_js__WEBPACK_IMPORTED_MODULE_2__["formatDate"])(date, format, lang && _i18n_base_locales_js__WEBPACK_IMPORTED_MODULE_4__["locales"][lang] || _i18n_base_locales_js__WEBPACK_IMPORTED_MODULE_4__["locales"].en);
+  }
+
+  /**
+   * Pasre date string
+   * @param  {String|Date|Number} dateStr - date string, Date object or time
+   * value to parse
+   * @param  {String|Object} format - format string or object that contains
+   * toValue() custom parser, whose signature is
+   * - args:
+   *   - dateStr: {String|Date|Number} - the dateStr passed to the method
+   *   - format: {Object} - the format object passed to the method
+   *   - locale: {Object} - locale for the language specified by `lang`
+   * - return:
+   *     {Date|Number} parsed date or its time value
+   * @param  {String} [lang=en] - language code for the locale to use
+   * @return {Number} time value of parsed date
+   */
+  static parseDate(dateStr, format, lang) {
+    return Object(_lib_date_format_js__WEBPACK_IMPORTED_MODULE_2__["parseDate"])(dateStr, format, lang && _i18n_base_locales_js__WEBPACK_IMPORTED_MODULE_4__["locales"][lang] || _i18n_base_locales_js__WEBPACK_IMPORTED_MODULE_4__["locales"].en);
+  }
+
+  /**
+   * @type {Object} - Installed locales in `[languageCode]: localeObject` format
+   * en`:_English (US)_ is pre-installed.
+   */
+  static get locales() {
+    return _i18n_base_locales_js__WEBPACK_IMPORTED_MODULE_4__["locales"];
+  }
+
+  /**
+   * @type {Boolean} - Whether the picker element is shown. `true` whne shown
+   */
+  get active() {
+    return !!(this.picker && this.picker.active);
+  }
+
+  /**
+   * Set new values to the config options
+   * @param {Object} options - config options to update
+   */
+  setOptions(options) {
+    const picker = this.picker;
+    const newOptions = Object(_options_processOptions_js__WEBPACK_IMPORTED_MODULE_6__["default"])(options, this);
+    Object.assign(this._options, options);
+    Object.assign(this.config, newOptions);
+    picker.setOptions(newOptions);
+
+    const currentViewId = picker.currentView.id;
+    if (newOptions.maxView < currentViewId) {
+      picker.changeView(newOptions.maxView);
+    } else if (
+      newOptions.startView !== undefined
+      && !picker.active
+      && newOptions.startView !== currentViewId
+    ) {
+      picker.changeView(newOptions.startView);
+    }
+
+    this.refresh();
+  }
+
+  /**
+   * Show the picker element
+   */
+  show() {
+    if (this.inputField && this.inputField.disabled) {
+      return;
+    }
+    this.picker.show();
+  }
+
+  /**
+   * Hide the picker element
+   * Not avilable on inline picker
+   */
+  hide() {
+    if (this.inline) {
+      return;
+    }
+    this.picker.hide();
+    this.picker.update().changeView(this.config.startView).render();
+  }
+
+  /**
+   * Destroy the Datepicker instance
+   * @return {Detepicker} - the instance destroyed
+   */
+  destroy() {
+    this.hide();
+    Object(_lib_event_js__WEBPACK_IMPORTED_MODULE_3__["unregisterListeners"])(this);
+    this.picker.detach();
+    if (!this.inline) {
+      this.inputField.classList.remove('datepicker-input');
+    }
+    delete this.element.datepicker;
+    return this;
+  }
+
+  /**
+   * Get the selected date(s)
+   *
+   * The method returns a Date object of selected date by default, and returns
+   * an array of selected dates in multidate mode. If format string is passed,
+   * it returns date string(s) formatted in given format.
+   *
+   * @param  {String} [format] - Format string to stringify the date(s)
+   * @return {Date|String|Date[]|String[]} - selected date(s), or if none is
+   * selected, empty array in multidate mode and untitled in sigledate mode
+   */
+  getDate(format = undefined) {
+    const callback = format
+      ? date => Object(_lib_date_format_js__WEBPACK_IMPORTED_MODULE_2__["formatDate"])(date, format, this.config.locale)
+      : date => new Date(date);
+
+    if (this.config.multidate) {
+      return this.dates.map(callback);
+    }
+    if (this.dates.length > 0) {
+      return callback(this.dates[0]);
+    }
+  }
+
+  /**
+   * Set selected date(s)
+   *
+   * In multidate mode, you can pass multiple dates as a series of arguments
+   * or an array. (Since each date is parsed individually, the type of the
+   * dates doesn't have to be the same.)
+   * The given dates are used to toggle the select status of each date. The
+   * number of selected dates is kept from exceeding the length set to
+   * maxNumberOfDates.
+   *
+   * With clear: true option, the method can be used to clear the selection
+   * and to replace the selection instead of toggling in multidate mode.
+   * If the option is passed with no date arguments or an empty dates array,
+   * it works as "clear" (clear the selection then set nothing), and if the
+   * option is passed with new dates to select, it works as "replace" (clear
+   * the selection then set the given dates)
+   *
+   * When render: false option is used, the method omits re-rendering the
+   * picker element. In this case, you need to call refresh() method later in
+   * order for the picker element to reflect the changes. The input field is
+   * refreshed always regardless of this option.
+   *
+   * When invalid (unparsable, repeated, disabled or out-of-range) dates are
+   * passed, the method ignores them and applies only valid ones. In the case
+   * that all the given dates are invalid, which is distiguished from passing
+   * no dates, the method considers it as an error and leaves the selection
+   * untouched.
+   *
+   * @param {...(Date|Number|String)|Array} [dates] - Date strings, Date
+   * objects, time values or mix of those for new selection
+   * @param {Object} [options] - function options
+   * - clear: {boolean} - Whether to clear the existing selection
+   *     defualt: false
+   * - render: {boolean} - Whether to re-render the picker element
+   *     default: true
+   * - autohide: {boolean} - Whether to hide the picker element after re-render
+   *     Ignored when used with render: false
+   *     default: config.autohide
+   */
+  setDate(...args) {
+    const dates = [...args];
+    const opts = {clear: false, render: true, autohide: this.config.autohide};
+    const lastArg = Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["lastItemOf"])(args);
+    if (
+      typeof lastArg === 'object'
+      && !Array.isArray(lastArg)
+      && !(lastArg instanceof Date)
+    ) {
+      Object.assign(opts, dates.pop());
+    }
+
+    const inputDates = Array.isArray(dates[0]) ? dates[0] : dates;
+    const origDates = opts.clear ? undefined : this.dates;
+    const newDates = processInputDates(inputDates, this.config, origDates);
+    if (!newDates) {
+      return;
+    }
+    if (newDates.toString() !== this.dates.toString()) {
+      this.dates = newDates;
+      if (opts.render) {
+        this.picker.update();
+        this.refresh();
+      } else {
+        this.refresh('input');
+      }
+      Object(_events_functions_js__WEBPACK_IMPORTED_MODULE_8__["triggerDatepickerEvent"])(this, 'changeDate');
+    } else {
+      this.refresh('input');
+    }
+    if (opts.render && opts.autohide) {
+      this.hide();
+    }
+  }
+
+  /**
+   * Update the selected date(s) with input field's value
+   * Not avilable on inline picker
+   *
+   * The input field will be refreshed with properly formatted date string.
+   *
+   * @param  {Object} [options] - function options
+   * - autohide: {boolean} - whether to hide the picker element after refresh
+   *     default: false
+   */
+  update(options = undefined) {
+    if (this.inline) {
+      return;
+    }
+
+    const opts = Object.assign({autohide: false}, options);
+    const inputDates = Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["stringToArray"])(this.inputField.value, this.config.dateDelimiter);
+    const newDates = processInputDates(inputDates, this.config);
+    if (!newDates) {
+      return;
+    }
+    if (newDates.toString() !== this.dates.toString()) {
+      this.dates = newDates;
+      this.picker.update();
+      this.refresh();
+      Object(_events_functions_js__WEBPACK_IMPORTED_MODULE_8__["triggerDatepickerEvent"])(this, 'changeDate');
+    } else {
+      this.refresh('input');
+    }
+    if (opts.autohide) {
+      this.hide();
+    }
+  }
+
+  /**
+   * Refresh the picker element and the associated input field
+   * @param {String} [target] - target item when refreshing one item only
+   * 'picker' or 'input'
+   */
+  refresh(target = undefined) {
+    if (target !== 'input') {
+      this.picker.render();
+    }
+    if (!this.inline && target !== 'picker') {
+      this.inputField.value = stringifyDates(this.dates, this.config);
+    }
+  }
+
+  /**
+   * Enter edit mode
+   * Not avilable on inline picker or when the picker element is hidden
+   */
+  enterEditMode() {
+    if (this.inline || !this.picker.active || this.editMode) {
+      return;
+    }
+    this.editMode = true;
+    this.inputField.classList.add('in-edit');
+  }
+
+  /**
+   * Exit from edit mode
+   * Not avilable on inline picker
+   * @param  {Object} [options] - function options
+   * - update: {boolean} - whether to call update() after exiting
+   *     If false, input field is revert to the existing selection
+   *     default: false
+   */
+  exitEditMode(options = undefined) {
+    if (this.inline || !this.editMode) {
+      return;
+    }
+    const opts = Object.assign({update: false}, options);
+    delete this.editMode;
+    this.inputField.classList.remove('in-edit');
+    if (opts.update) {
+      this.update(opts);
+    } else {
+      this.inputField.value = stringifyDates(this.dates, this.config);
+    }
+  }
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/vanillajs-datepicker/js/events/functions.js":
+/*!******************************************************************!*\
+  !*** ./node_modules/vanillajs-datepicker/js/events/functions.js ***!
+  \******************************************************************/
+/*! exports provided: triggerDatepickerEvent, goToPrevOrNext, switchView */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "triggerDatepickerEvent", function() { return triggerDatepickerEvent; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "goToPrevOrNext", function() { return goToPrevOrNext; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "switchView", function() { return switchView; });
+/* harmony import */ var _lib_utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../lib/utils.js */ "./node_modules/vanillajs-datepicker/js/lib/utils.js");
+/* harmony import */ var _lib_date_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../lib/date.js */ "./node_modules/vanillajs-datepicker/js/lib/date.js");
+
+
+
+function triggerDatepickerEvent(datepicker, type) {
+  const detail = {
+    date: datepicker.getDate(),
+    viewDate: new Date(datepicker.picker.viewDate),
+    viewId: datepicker.picker.currentView.id,
+    datepicker,
+  };
+  datepicker.element.dispatchEvent(new CustomEvent(type, {detail}));
+}
+
+// direction: -1 (to previous), 1 (to next)
+function goToPrevOrNext(datepicker, direction) {
+  const {minDate, maxDate} = datepicker.config;
+  const {currentView, viewDate} = datepicker.picker;
+  let newViewDate;
+  switch (currentView.id) {
+    case 0:
+      newViewDate = Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["addMonths"])(viewDate, direction);
+      break;
+    case 1:
+      newViewDate = Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["addYears"])(viewDate, direction);
+      break;
+    default:
+      newViewDate = Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["addYears"])(viewDate, direction * currentView.navStep);
+  }
+  newViewDate = Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["limitToRange"])(newViewDate, minDate, maxDate);
+  datepicker.picker.changeFocus(newViewDate).render();
+}
+
+function switchView(datepicker) {
+  const viewId = datepicker.picker.currentView.id;
+  if (viewId === datepicker.config.maxView) {
+    return;
+  }
+  datepicker.picker.changeView(viewId + 1).render();
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/vanillajs-datepicker/js/events/inputFieldListeners.js":
+/*!****************************************************************************!*\
+  !*** ./node_modules/vanillajs-datepicker/js/events/inputFieldListeners.js ***!
+  \****************************************************************************/
+/*! exports provided: onKeydown, onFocus, onMousedown, onClickInput, onPaste */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "onKeydown", function() { return onKeydown; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "onFocus", function() { return onFocus; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "onMousedown", function() { return onMousedown; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "onClickInput", function() { return onClickInput; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "onPaste", function() { return onPaste; });
+/* harmony import */ var _lib_utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../lib/utils.js */ "./node_modules/vanillajs-datepicker/js/lib/utils.js");
+/* harmony import */ var _lib_date_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../lib/date.js */ "./node_modules/vanillajs-datepicker/js/lib/date.js");
+/* harmony import */ var _functions_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./functions.js */ "./node_modules/vanillajs-datepicker/js/events/functions.js");
+
+
+
+
+// Find the closest date that doesn't meet the condition for unavailable date
+// Returns undefined if no available date is found
+// addFn: function to calculate the next date
+//   - args: time value, amount
+// increase: amount to pass to addFn
+// testFn: function to test the unavailablity of the date
+//   - args: time value; retun: true if unavailable
+function findNextAvailableOne(date, addFn, increase, testFn, min, max) {
+  if (!Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["isInRange"])(date, min, max)) {
+    return;
+  }
+  if (testFn(date)) {
+    const newDate = addFn(date, increase);
+    return findNextAvailableOne(newDate, addFn, increase, testFn, min, max);
+  }
+  return date;
+}
+
+// direction: -1 (left/up), 1 (right/down)
+// vertical: true for up/down, false for left/right
+function moveByArrowKey(datepicker, ev, direction, vertical) {
+  const currentView = datepicker.picker.currentView;
+  const step = currentView.step || 1;
+  let viewDate = datepicker.picker.viewDate;
+  let addFn;
+  let testFn;
+  switch (currentView.id) {
+    case 0:
+      if (vertical) {
+        viewDate = Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["addDays"])(viewDate, direction * 7);
+      } else if (ev.ctrlKey || ev.metaKey) {
+        viewDate = Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["addYears"])(viewDate, direction);
+      } else {
+        viewDate = Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["addDays"])(viewDate, direction);
+      }
+      addFn = _lib_date_js__WEBPACK_IMPORTED_MODULE_1__["addDays"];
+      testFn = (date) => currentView.disabled.includes(date);
+      break;
+    case 1:
+      viewDate = Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["addMonths"])(viewDate, vertical ? direction * 4 : direction);
+      addFn = _lib_date_js__WEBPACK_IMPORTED_MODULE_1__["addMonths"];
+      testFn = (date) => {
+        const dt = new Date(date);
+        const {year, disabled} = currentView;
+        return dt.getFullYear() === year && disabled.includes(dt.getMonth());
+      };
+      break;
+    default:
+      viewDate = Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["addYears"])(viewDate, direction * (vertical ? 4 : 1) * step);
+      addFn = _lib_date_js__WEBPACK_IMPORTED_MODULE_1__["addYears"];
+      testFn = date => currentView.disabled.includes(Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["startOfYearPeriod"])(date, step));
+  }
+  viewDate = findNextAvailableOne(
+    viewDate,
+    addFn,
+    direction < 0 ? -step : step,
+    testFn,
+    currentView.minDate,
+    currentView.maxDate
+  );
+  if (viewDate !== undefined) {
+    datepicker.picker.changeFocus(viewDate).render();
+  }
+}
+
+function onKeydown(datepicker, ev) {
+  if (ev.key === 'Tab') {
+    datepicker.refresh('input');
+    datepicker.hide();
+    return;
+  }
+
+  const viewId = datepicker.picker.currentView.id;
+  if (!datepicker.picker.active) {
+    switch (ev.key) {
+      case 'ArrowDown':
+      case 'Escape':
+        datepicker.picker.show();
+        break;
+      case 'Enter':
+        datepicker.update();
+        break;
+      default:
+        return;
+    }
+  } else if (datepicker.editMode) {
+    switch (ev.key) {
+      case 'Escape':
+        datepicker.exitEditMode();
+        break;
+      case 'Enter':
+        datepicker.exitEditMode({update: true, autohide: datepicker.config.autohide});
+        break;
+      default:
+        return;
+    }
+  } else {
+    switch (ev.key) {
+      case 'Escape':
+        if (ev.shiftKey) {
+          datepicker.enterEditMode();
+        } else {
+          datepicker.picker.hide();
+        }
+        break;
+      case 'ArrowLeft':
+        if (ev.ctrlKey || ev.metaKey) {
+          Object(_functions_js__WEBPACK_IMPORTED_MODULE_2__["goToPrevOrNext"])(datepicker, -1);
+        } else {
+          moveByArrowKey(datepicker, ev, -1, false);
+        }
+        break;
+      case 'ArrowRight':
+        if (ev.ctrlKey || ev.metaKey) {
+          Object(_functions_js__WEBPACK_IMPORTED_MODULE_2__["goToPrevOrNext"])(datepicker, 1);
+        } else {
+          moveByArrowKey(datepicker, ev, 1, false);
+        }
+        break;
+      case 'ArrowUp':
+        if (ev.ctrlKey || ev.metaKey) {
+          Object(_functions_js__WEBPACK_IMPORTED_MODULE_2__["switchView"])(datepicker);
+        } else {
+          moveByArrowKey(datepicker, ev, -1, true);
+        }
+        break;
+      case 'ArrowDown':
+        moveByArrowKey(datepicker, ev, 1, true);
+        break;
+      case 'Enter':
+        if (viewId === 0) {
+          datepicker.setDate(datepicker.picker.viewDate);
+        } else {
+          datepicker.picker.changeView(viewId - 1).render();
+        }
+        break;
+      case 'Backspace':
+      case 'Delete':
+        datepicker.enterEditMode();
+        return;
+      default:
+        if (ev.key.length === 1 && !ev.ctrlKey && !ev.metaKey) {
+          datepicker.enterEditMode();
+        }
+        return;
+    }
+  }
+  ev.preventDefault();
+  ev.stopPropagation();
+}
+
+function onFocus(datepicker) {
+  if (datepicker.config.showOnFocus) {
+    datepicker.show();
+  }
+}
+
+// for the prevention for entering edit mode while getting focus on click
+function onMousedown(datepicker, ev) {
+  const el = ev.target;
+  if (datepicker.picker.active) {
+    el._clicking = setTimeout(() => {
+      delete el._clicking;
+    }, 2000);
+  }
+}
+
+function onClickInput(datepicker, ev) {
+  const el = ev.target;
+  if (!el._clicking) {
+    return;
+  }
+  clearTimeout(el._clicking);
+  delete el._clicking;
+
+  datepicker.enterEditMode();
+}
+
+function onPaste(datepicker, ev) {
+  if (ev.clipboardData.types.includes('text/plain')) {
+    datepicker.enterEditMode();
+  }
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/vanillajs-datepicker/js/events/otherListeners.js":
+/*!***********************************************************************!*\
+  !*** ./node_modules/vanillajs-datepicker/js/events/otherListeners.js ***!
+  \***********************************************************************/
+/*! exports provided: onClickOutside */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "onClickOutside", function() { return onClickOutside; });
+/* harmony import */ var _lib_event_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../lib/event.js */ "./node_modules/vanillajs-datepicker/js/lib/event.js");
+
+
+// for the `document` to delegate the events from outside the picker/input field
+function onClickOutside(datepicker, ev) {
+  const element = datepicker.element;
+  const pickerElem = datepicker.picker.element;
+
+  if (Object(_lib_event_js__WEBPACK_IMPORTED_MODULE_0__["findElementInEventPath"])(ev, el => el === element || el === pickerElem)) {
+    return;
+  }
+  datepicker.refresh('input');
+  datepicker.hide();
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/vanillajs-datepicker/js/events/pickerListeners.js":
+/*!************************************************************************!*\
+  !*** ./node_modules/vanillajs-datepicker/js/events/pickerListeners.js ***!
+  \************************************************************************/
+/*! exports provided: onClickTodayBtn, onClickClearBtn, onClickViewSwitch, onClickPrevBtn, onClickNextBtn, onClickView, onClickPicker */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "onClickTodayBtn", function() { return onClickTodayBtn; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "onClickClearBtn", function() { return onClickClearBtn; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "onClickViewSwitch", function() { return onClickViewSwitch; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "onClickPrevBtn", function() { return onClickPrevBtn; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "onClickNextBtn", function() { return onClickNextBtn; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "onClickView", function() { return onClickView; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "onClickPicker", function() { return onClickPicker; });
+/* harmony import */ var _lib_date_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../lib/date.js */ "./node_modules/vanillajs-datepicker/js/lib/date.js");
+/* harmony import */ var _lib_event_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../lib/event.js */ "./node_modules/vanillajs-datepicker/js/lib/event.js");
+/* harmony import */ var _functions_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./functions.js */ "./node_modules/vanillajs-datepicker/js/events/functions.js");
+
+
+
+
+function goToSelectedMonthOrYear(datepicker, selection) {
+  const picker = datepicker.picker;
+  const viewDate = new Date(picker.viewDate);
+  const viewId = picker.currentView.id;
+  const newDate = viewId === 1
+    ? Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_0__["addMonths"])(viewDate, selection - viewDate.getMonth())
+    : Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_0__["addYears"])(viewDate, selection - viewDate.getFullYear());
+
+  picker.changeFocus(newDate).changeView(viewId - 1).render();
+}
+
+function onClickTodayBtn(datepicker) {
+  const picker = datepicker.picker;
+  const currentDate = Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_0__["today"])();
+  if (datepicker.config.todayBtnMode === 1) {
+    if (datepicker.config.autohide) {
+      datepicker.setDate(currentDate);
+      return;
+    }
+    datepicker.setDate(currentDate, {render: false});
+    picker.update();
+  }
+  if (picker.viewDate !== currentDate) {
+    picker.changeFocus(currentDate);
+  }
+  picker.changeView(0).render();
+}
+
+function onClickClearBtn(datepicker) {
+  datepicker.setDate({clear: true});
+}
+
+function onClickViewSwitch(datepicker) {
+  Object(_functions_js__WEBPACK_IMPORTED_MODULE_2__["switchView"])(datepicker);
+}
+
+function onClickPrevBtn(datepicker) {
+  Object(_functions_js__WEBPACK_IMPORTED_MODULE_2__["goToPrevOrNext"])(datepicker, -1);
+}
+
+function onClickNextBtn(datepicker) {
+  Object(_functions_js__WEBPACK_IMPORTED_MODULE_2__["goToPrevOrNext"])(datepicker, 1);
+}
+
+// For the picker's main block to delegete the events from `datepicker-cell`s
+function onClickView(datepicker, ev) {
+  const target = Object(_lib_event_js__WEBPACK_IMPORTED_MODULE_1__["findElementInEventPath"])(ev, '.datepicker-cell');
+  if (!target || target.classList.contains('disabled')) {
+    return;
+  }
+
+  switch (datepicker.picker.currentView.id) {
+    case 0:
+      datepicker.setDate(Number(target.dataset.date));
+      break;
+    case 1:
+      goToSelectedMonthOrYear(datepicker, Number(target.dataset.month));
+      break;
+    default:
+      goToSelectedMonthOrYear(datepicker, Number(target.dataset.year));
+  }
+}
+
+function onClickPicker(datepicker, ev) {
+  ev.preventDefault();
+  ev.stopPropagation();
+
+  // check if the picker is active in order to prevent the picker from being
+  // re-shown after auto-hide when showOnFocus: true
+  // it's caused by bubbled event from cells/buttons, but the bubbling cannot
+  // be disabled because it's needed to keep the focus on the input element
+  if (!datepicker.inline && datepicker.picker.active && !datepicker.config.disableTouchKeyboard) {
+    datepicker.inputField.focus();
+  }
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/vanillajs-datepicker/js/i18n/base-locales.js":
+/*!*******************************************************************!*\
+  !*** ./node_modules/vanillajs-datepicker/js/i18n/base-locales.js ***!
+  \*******************************************************************/
+/*! exports provided: locales */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "locales", function() { return locales; });
+// default locales
+const locales = {
+  en: {
+    days: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+    daysShort: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    daysMin: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+    months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    monthsShort: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    today: "Today",
+    clear: "Clear",
+    titleFormat: "MM y"
+  }
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/vanillajs-datepicker/js/lib/date-format.js":
+/*!*****************************************************************!*\
+  !*** ./node_modules/vanillajs-datepicker/js/lib/date-format.js ***!
+  \*****************************************************************/
+/*! exports provided: reFormatTokens, reNonDateParts, parseDate, formatDate */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "reFormatTokens", function() { return reFormatTokens; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "reNonDateParts", function() { return reNonDateParts; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "parseDate", function() { return parseDate; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "formatDate", function() { return formatDate; });
+/* harmony import */ var _date_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./date.js */ "./node_modules/vanillajs-datepicker/js/lib/date.js");
+/* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils.js */ "./node_modules/vanillajs-datepicker/js/lib/utils.js");
+
+
+
+// pattern for format parts
+const reFormatTokens = /dd?|DD?|mm?|MM?|yy?(?:yy)?/;
+// pattern for non date parts
+const reNonDateParts = /[\s!-/:-@[-`{-~年月日]+/;
+// cache for persed formats
+let knownFormats = {};
+// parse funtions for date parts
+const parseFns = {
+  y(date, year) {
+    return new Date(date).setFullYear(parseInt(year, 10));
+  },
+  M: undefined,  // placeholder to maintain the key order
+  m(date, month, locale) {
+    const newDate = new Date(date);
+    let monthIndex = parseInt(month, 10) - 1;
+
+    if (isNaN(monthIndex)) {
+      if (!month) {
+        return NaN;
+      }
+
+      const monthName = month.toLowerCase();
+      const compareNames = name => name.toLowerCase().startsWith(monthName);
+      // compare with both short and full names because some locales have periods
+      // in the short names (not equal to the first X letters of the full names)
+      monthIndex = locale.monthsShort.findIndex(compareNames);
+      if (monthIndex < 0) {
+        monthIndex = locale.months.findIndex(compareNames);
+      }
+      return monthIndex < 0 ? NaN : newDate.setMonth(monthIndex);
+    }
+
+    newDate.setMonth(monthIndex);
+    return newDate.getMonth() !== normalizeMonth(monthIndex)
+      ? newDate.setDate(0)
+      : newDate.getTime();
+  },
+  d(date, day) {
+    return new Date(date).setDate(parseInt(day, 10));
+  },
+};
+parseFns.M = parseFns.m;  // make "M" an alias of "m"
+// format functions for date parts
+const formatFns = {
+  d(date) {
+    return date.getDate();
+  },
+  dd(date) {
+    return padZero(date.getDate(), 2);
+  },
+  D(date, locale) {
+    return locale.daysShort[date.getDay()];
+  },
+  DD(date, locale) {
+    return locale.days[date.getDay()];
+  },
+  m(date) {
+    return date.getMonth() + 1;
+  },
+  mm(date) {
+    return padZero(date.getMonth() + 1, 2);
+  },
+  M(date, locale) {
+    return locale.monthsShort[date.getMonth()];
+  },
+  MM(date, locale) {
+    return locale.months[date.getMonth()];
+  },
+  y(date) {
+    return date.getFullYear();
+  },
+  yy(date) {
+    return padZero(date.getFullYear(), 2).slice(-2);
+  },
+  yyyy(date) {
+    return padZero(date.getFullYear(), 4);
+  },
+};
+
+// get month index in normal range (0 - 11) from any number
+function normalizeMonth(monthIndex) {
+  return monthIndex > -1 ? monthIndex % 12 : normalizeMonth(monthIndex + 12);
+}
+
+function padZero(num, length) {
+  return num.toString().padStart(length, '0');
+}
+
+function parseFormatString(format) {
+  if (typeof format !== 'string') {
+    throw new Error("Invalid date format.");
+  }
+  if (format in knownFormats) {
+    return knownFormats[format];
+  }
+
+  // sprit the format string into parts and seprators
+  const separators = format.split(reFormatTokens);
+  const parts = format.match(new RegExp(reFormatTokens, 'g'));
+  if (separators.length === 0 || !parts) {
+    throw new Error("Invalid date format.");
+  }
+
+  // collect format functions used in the format
+  const partFormatters = parts.map(token => formatFns[token]);
+
+  // collect parse functions used in the format
+  // iterate over parseFns' keys in order to keep the order of the keys.
+  const partParsers = Object.keys(parseFns).reduce((parsers, key) => {
+    const token = parts.find(part => part[0] === key);
+    if (!token) {
+      return parsers;
+    }
+    parsers[key] = parseFns[key];
+    return parsers;
+  }, {});
+  const partParserKeys = Object.keys(partParsers);
+
+  return knownFormats[format] = {
+    parser(dateStr, locale) {
+      const dateParts = dateStr.split(reNonDateParts).reduce((dtParts, part, index) => {
+        if (part.length > 0 && parts[index]) {
+          const token = parts[index][0];
+          if (parseFns[token] !== undefined) {
+            dtParts[token] = part;
+          }
+        }
+        return dtParts;
+      }, {});
+
+      // iterate over partParsers' keys so that the parsing is made in the oder
+      // of year, month and day to prevent the day parser from correcting last
+      // day of month wrongly
+      return partParserKeys.reduce((origDate, key) => {
+        const newDate = partParsers[key](origDate, dateParts[key], locale);
+        // ingnore the part failed to parse
+        return isNaN(newDate) ? origDate : newDate;
+      }, Object(_date_js__WEBPACK_IMPORTED_MODULE_0__["today"])());
+    },
+    formatter(date, locale) {
+      let dateStr = partFormatters.reduce((str, fn, index) => {
+        return str += `${separators[index]}${fn(date, locale)}`;
+      }, '');
+      // separators' length is always parts' length + 1,
+      return dateStr += Object(_utils_js__WEBPACK_IMPORTED_MODULE_1__["lastItemOf"])(separators);
+    },
+  };
+}
+
+function parseDate(dateStr, format, locale) {
+  if (dateStr instanceof Date || typeof dateStr === 'number') {
+    const date = Object(_date_js__WEBPACK_IMPORTED_MODULE_0__["stripTime"])(dateStr);
+    return isNaN(date) ? undefined : date;
+  }
+  if (!dateStr) {
+    return undefined;
+  }
+  if (dateStr === 'today') {
+    return Object(_date_js__WEBPACK_IMPORTED_MODULE_0__["today"])();
+  }
+
+  if (format && format.toValue) {
+    const date = format.toValue(dateStr, format, locale);
+    return isNaN(date) ? undefined : Object(_date_js__WEBPACK_IMPORTED_MODULE_0__["stripTime"])(date);
+  }
+
+  return parseFormatString(format).parser(dateStr, locale);
+}
+
+function formatDate(date, format, locale) {
+  if (isNaN(date) || (!date && date !== 0)) {
+    return '';
+  }
+
+  const dateObj = typeof date === 'number' ? new Date(date) : date;
+
+  if (format.toDisplay) {
+    return format.toDisplay(dateObj, format, locale);
+  }
+
+  return parseFormatString(format).formatter(dateObj, locale);
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/vanillajs-datepicker/js/lib/date.js":
+/*!**********************************************************!*\
+  !*** ./node_modules/vanillajs-datepicker/js/lib/date.js ***!
+  \**********************************************************/
+/*! exports provided: stripTime, today, dateValue, addDays, addWeeks, addMonths, addYears, dayOfTheWeekOf, getWeek, startOfYearPeriod */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "stripTime", function() { return stripTime; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "today", function() { return today; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "dateValue", function() { return dateValue; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "addDays", function() { return addDays; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "addWeeks", function() { return addWeeks; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "addMonths", function() { return addMonths; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "addYears", function() { return addYears; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "dayOfTheWeekOf", function() { return dayOfTheWeekOf; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getWeek", function() { return getWeek; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "startOfYearPeriod", function() { return startOfYearPeriod; });
+function stripTime(timeValue) {
+  return new Date(timeValue).setHours(0, 0, 0, 0);
+}
+
+function today() {
+  return new Date().setHours(0, 0, 0, 0);
+}
+
+// Get the time value of the start of given date or year, month and day
+function dateValue(...args) {
+  switch (args.length) {
+    case 0:
+      return today();
+    case 1:
+      return stripTime(args[0]);
+  }
+
+  // use setFullYear() to keep 2-digit year from being mapped to 1900-1999
+  const newDate = new Date(0);
+  newDate.setFullYear(...args);
+  return newDate.setHours(0, 0, 0, 0);
+}
+
+function addDays(date, amount) {
+  const newDate = new Date(date);
+  return newDate.setDate(newDate.getDate() + amount);
+}
+
+function addWeeks(date, amount) {
+  return addDays(date, amount * 7);
+}
+
+function addMonths(date, amount) {
+  // If the day of the date is not in the new month, the last day of the new
+  // month will be returned. e.g. Jan 31 + 1 month → Feb 28 (not Mar 03)
+  const newDate = new Date(date);
+  const monthsToSet = newDate.getMonth() + amount;
+  let expectedMonth = monthsToSet % 12;
+  if (expectedMonth < 0) {
+    expectedMonth += 12;
+  }
+
+  const time = newDate.setMonth(monthsToSet);
+  return newDate.getMonth() !== expectedMonth ? newDate.setDate(0) : time;
+}
+
+function addYears(date, amount) {
+  // If the date is Feb 29 and the new year is not a leap year, Feb 28 of the
+  // new year will be returned.
+  const newDate = new Date(date);
+  const expectedMonth = newDate.getMonth();
+  const time = newDate.setFullYear(newDate.getFullYear() + amount);
+  return expectedMonth === 1 && newDate.getMonth() === 2 ? newDate.setDate(0) : time;
+}
+
+// Calculate the distance bettwen 2 days of the week
+function dayDiff(day, from) {
+  return (day - from + 7) % 7;
+}
+
+// Get the date of the specified day of the week of given base date
+function dayOfTheWeekOf(baseDate, dayOfWeek, weekStart = 0) {
+  const baseDay = new Date(baseDate).getDay();
+  return addDays(baseDate, dayDiff(dayOfWeek, weekStart) - dayDiff(baseDay, weekStart));
+}
+
+// Get the ISO week of a date
+function getWeek(date) {
+  // start of ISO week is Monday
+  const thuOfTheWeek = dayOfTheWeekOf(date, 4, 1);
+  // 1st week == the week where the 4th of January is in
+  const firstThu = dayOfTheWeekOf(new Date(thuOfTheWeek).setMonth(0, 4), 4, 1);
+  return Math.round((thuOfTheWeek - firstThu) / 604800000) + 1;
+}
+
+// Get the start year of the period of years that includes given date
+// years: length of the year period
+function startOfYearPeriod(date, years) {
+  /* @see https://en.wikipedia.org/wiki/Year_zero#ISO_8601 */
+  const year = new Date(date).getFullYear();
+  return Math.floor(year / years) * years;
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/vanillajs-datepicker/js/lib/dom.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/vanillajs-datepicker/js/lib/dom.js ***!
+  \*********************************************************/
+/*! exports provided: parseHTML, isVisible, hideElement, showElement, emptyChildNodes, replaceChildNodes */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "parseHTML", function() { return parseHTML; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isVisible", function() { return isVisible; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "hideElement", function() { return hideElement; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "showElement", function() { return showElement; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "emptyChildNodes", function() { return emptyChildNodes; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "replaceChildNodes", function() { return replaceChildNodes; });
+const range = document.createRange();
+
+function parseHTML(html) {
+  return range.createContextualFragment(html);
+}
+
+// equivalent to jQuery's :visble
+function isVisible(el) {
+  return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
+}
+
+function hideElement(el) {
+  if (el.style.display === 'none') {
+    return;
+  }
+  // back up the existing display setting in data-style-display
+  if (el.style.display) {
+    el.dataset.styleDisplay = el.style.display;
+  }
+  el.style.display = 'none';
+}
+
+function showElement(el) {
+  if (el.style.display !== 'none') {
+    return;
+  }
+  if (el.dataset.styleDisplay) {
+    // restore backed-up dispay property
+    el.style.display = el.dataset.styleDisplay;
+    delete el.dataset.styleDisplay;
+  } else {
+    el.style.display = '';
+  }
+}
+
+function emptyChildNodes(el) {
+  if (el.firstChild) {
+    el.removeChild(el.firstChild);
+    emptyChildNodes(el);
+  }
+}
+
+function replaceChildNodes(el, newChildNodes) {
+  emptyChildNodes(el);
+  if (newChildNodes instanceof DocumentFragment) {
+    el.appendChild(newChildNodes);
+  } else if (typeof newChildNodes === 'string') {
+    el.appendChild(parseHTML(newChildNodes));
+  } else if (typeof newChildNodes.forEach === 'function') {
+    newChildNodes.forEach((node) => {
+      el.appendChild(node);
+    });
+  }
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/vanillajs-datepicker/js/lib/event.js":
+/*!***********************************************************!*\
+  !*** ./node_modules/vanillajs-datepicker/js/lib/event.js ***!
+  \***********************************************************/
+/*! exports provided: registerListeners, unregisterListeners, findElementInEventPath */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "registerListeners", function() { return registerListeners; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "unregisterListeners", function() { return unregisterListeners; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "findElementInEventPath", function() { return findElementInEventPath; });
+const listenerRegistry = new WeakMap();
+const {addEventListener, removeEventListener} = EventTarget.prototype;
+
+// Register event listeners to a key object
+// listeners: array of listener definitions;
+//   - each definition must be a flat array of event target and the arguments
+//     used to call addEventListener() on the target
+function registerListeners(keyObj, listeners) {
+  let registered = listenerRegistry.get(keyObj);
+  if (!registered) {
+    registered = [];
+    listenerRegistry.set(keyObj, registered);
+  }
+  listeners.forEach((listener) => {
+    addEventListener.call(...listener);
+    registered.push(listener);
+  });
+}
+
+function unregisterListeners(keyObj) {
+  let listeners = listenerRegistry.get(keyObj);
+  if (!listeners) {
+    return;
+  }
+  listeners.forEach((listener) => {
+    removeEventListener.call(...listener);
+  });
+  listenerRegistry.delete(keyObj);
+}
+
+// Event.composedPath() polyfill for Edge
+// based on https://gist.github.com/kleinfreund/e9787d73776c0e3750dcfcdc89f100ec
+if (!Event.prototype.composedPath) {
+  const getComposedPath = (node, path = []) => {
+    path.push(node);
+
+    let parent;
+    if (node.parentNode) {
+      parent = node.parentNode;
+    } else if (node.host) { // ShadowRoot
+      parent = node.host;
+    } else if (node.defaultView) {  // Document
+      parent = node.defaultView;
+    }
+    return parent ? getComposedPath(parent, path) : path;
+  };
+
+  Event.prototype.composedPath = function () {
+    return getComposedPath(this.target);
+  };
+}
+
+function findFromPath(path, criteria, currentTarget, index = 0) {
+  const el = path[index];
+  if (criteria(el)) {
+    return el;
+  } else if (el === currentTarget || !el.parentElement) {
+    // stop when reaching currentTarget or <html>
+    return;
+  }
+  return findFromPath(path, criteria, currentTarget, index + 1);
+}
+
+// Search for the actual target of a delegated event
+function findElementInEventPath(ev, selector) {
+  const criteria = typeof selector === 'function' ? selector : el => el.matches(selector);
+  return findFromPath(ev.composedPath(), criteria, ev.currentTarget);
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/vanillajs-datepicker/js/lib/utils.js":
+/*!***********************************************************!*\
+  !*** ./node_modules/vanillajs-datepicker/js/lib/utils.js ***!
+  \***********************************************************/
+/*! exports provided: hasProperty, lastItemOf, pushUnique, stringToArray, isInRange, limitToRange, createTagRepeat, optimizeTemplateHTML */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "hasProperty", function() { return hasProperty; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "lastItemOf", function() { return lastItemOf; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "pushUnique", function() { return pushUnique; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "stringToArray", function() { return stringToArray; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isInRange", function() { return isInRange; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "limitToRange", function() { return limitToRange; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createTagRepeat", function() { return createTagRepeat; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "optimizeTemplateHTML", function() { return optimizeTemplateHTML; });
+function hasProperty(obj, prop) {
+  return Object.prototype.hasOwnProperty.call(obj, prop);
+}
+
+function lastItemOf(arr) {
+  return arr[arr.length - 1];
+}
+
+// push only the items not included in the array
+function pushUnique(arr, ...items) {
+  items.forEach((item) => {
+    if (arr.includes(item)) {
+      return;
+    }
+    arr.push(item);
+  });
+  return arr;
+}
+
+function stringToArray(str, separator) {
+  // convert empty string to an empty array
+  return str ? str.split(separator) : [];
+}
+
+function isInRange(testVal, min, max) {
+  const minOK = min === undefined || testVal >= min;
+  const maxOK = max === undefined || testVal <= max;
+  return minOK && maxOK;
+}
+
+function limitToRange(val, min, max) {
+  if (val < min) {
+    return min;
+  }
+  if (val > max) {
+    return max;
+  }
+  return val;
+}
+
+function createTagRepeat(tagName, repeat, attributes = {}, index = 0, html = '') {
+  const openTagSrc = Object.keys(attributes).reduce((src, attr) => {
+    let val = attributes[attr];
+    if (typeof val === 'function') {
+      val = val(index);
+    }
+    return `${src} ${attr}="${val}"`;
+  }, tagName);
+  html += `<${openTagSrc}></${tagName}>`;
+
+  const next = index + 1;
+  return next < repeat
+    ? createTagRepeat(tagName, repeat, attributes, next, html)
+    : html;
+}
+
+// Remove the spacing surrounding tags for HTML parser not to create text nodes
+// before/after elements
+function optimizeTemplateHTML(html) {
+  return html.replace(/>\s+/g, '>').replace(/\s+</, '<');
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/vanillajs-datepicker/js/main.js":
+/*!******************************************************!*\
+  !*** ./node_modules/vanillajs-datepicker/js/main.js ***!
+  \******************************************************/
+/*! exports provided: Datepicker, DateRangePicker */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _Datepicker_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Datepicker.js */ "./node_modules/vanillajs-datepicker/js/Datepicker.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Datepicker", function() { return _Datepicker_js__WEBPACK_IMPORTED_MODULE_0__["default"]; });
+
+/* harmony import */ var _DateRangePicker_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./DateRangePicker.js */ "./node_modules/vanillajs-datepicker/js/DateRangePicker.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DateRangePicker", function() { return _DateRangePicker_js__WEBPACK_IMPORTED_MODULE_1__["default"]; });
+
+
+
+
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vanillajs-datepicker/js/options/defaultOptions.js":
+/*!************************************************************************!*\
+  !*** ./node_modules/vanillajs-datepicker/js/options/defaultOptions.js ***!
+  \************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// config options updatable by setOptions() and their default values
+const defaultOptions = {
+  autohide: false,
+  beforeShowDay: null,
+  beforeShowDecade: null,
+  beforeShowMonth: null,
+  beforeShowYear: null,
+  calendarWeeks: false,
+  clearBtn: false,
+  dateDelimiter: ',',
+  datesDisabled: [],
+  daysOfWeekDisabled: [],
+  daysOfWeekHighlighted: [],
+  defaultViewDate: undefined, // placeholder, defaults to today() by the program
+  disableTouchKeyboard: false,
+  format: 'mm/dd/yyyy',
+  language: 'en',
+  maxDate: null,
+  maxNumberOfDates: 1,
+  maxView: 3,
+  minDate: null,
+  nextArrow: '»',
+  orientation: 'auto',
+  prevArrow: '«',
+  showDaysOfWeek: true,
+  showOnFocus: true,
+  startView: 0,
+  title: '',
+  todayBtn: false,
+  todayBtnMode: 0,
+  todayHighlight: false,
+  weekStart: 0,
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (defaultOptions);
+
+
+/***/ }),
+
+/***/ "./node_modules/vanillajs-datepicker/js/options/processOptions.js":
+/*!************************************************************************!*\
+  !*** ./node_modules/vanillajs-datepicker/js/options/processOptions.js ***!
+  \************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return processOptions; });
+/* harmony import */ var _lib_utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../lib/utils.js */ "./node_modules/vanillajs-datepicker/js/lib/utils.js");
+/* harmony import */ var _lib_date_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../lib/date.js */ "./node_modules/vanillajs-datepicker/js/lib/date.js");
+/* harmony import */ var _lib_date_format_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../lib/date-format.js */ "./node_modules/vanillajs-datepicker/js/lib/date-format.js");
+/* harmony import */ var _lib_dom_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../lib/dom.js */ "./node_modules/vanillajs-datepicker/js/lib/dom.js");
+/* harmony import */ var _defaultOptions_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./defaultOptions.js */ "./node_modules/vanillajs-datepicker/js/options/defaultOptions.js");
+
+
+
+
+
+
+const {
+  language: defaultLang,
+  format: defaultFormat,
+  weekStart: defaultWeekStart,
+} = _defaultOptions_js__WEBPACK_IMPORTED_MODULE_4__["default"];
+
+// Reducer function to filter out invalid day-of-week from the input
+function sanitizeDOW(dow, day) {
+  return dow.length < 6 && day >= 0 && day < 7
+    ? Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["pushUnique"])(dow, day)
+    : dow;
+}
+
+function calcEndOfWeek(startOfWeek) {
+  return (startOfWeek + 6) % 7;
+}
+
+// validate input date. if invalid, fallback to the original value
+function validateDate(value, format, locale, origValue) {
+  const date = Object(_lib_date_format_js__WEBPACK_IMPORTED_MODULE_2__["parseDate"])(value, format, locale);
+  return date !== undefined ? date : origValue;
+}
+
+// Validate viewId. if invalid, fallback to the original value
+function validateViewId(value, origValue) {
+  const viewId = parseInt(value, 10);
+  return viewId >= 0 && viewId < 4 ? viewId : origValue;
+}
+
+// Create Datepicker configuration to set
+function processOptions(options, datepicker) {
+  const inOpts = Object.assign({}, options);
+  const config = {};
+  const locales = datepicker.constructor.locales;
+  let {
+    format,
+    language,
+    locale,
+    maxDate,
+    maxView,
+    minDate,
+    startView,
+    weekStart,
+  } = datepicker.config || {};
+
+  if (inOpts.language) {
+    let lang;
+    if (inOpts.language !== language) {
+      if (locales[inOpts.language]) {
+        lang = inOpts.language;
+      } else {
+        // Check if langauge + region tag can fallback to the one without
+        // region (e.g. fr-CA → fr)
+        lang = inOpts.language.split('-')[0];
+        if (locales[lang] === undefined) {
+          lang = false;
+        }
+      }
+    }
+    delete inOpts.language;
+    if (lang) {
+      language = config.language = lang;
+
+      // update locale as well when updating language
+      const origLocale = locale || locales[defaultLang];
+      // use default language's properties for the fallback
+      locale = Object.assign({
+        format: defaultFormat,
+        weekStart: defaultWeekStart
+      }, locales[defaultLang]);
+      if (language !== defaultLang) {
+        Object.assign(locale, locales[language]);
+      }
+      config.locale = locale;
+      // if format and/or weekStart are the same as old locale's defaults,
+      // update them to new locale's defaults
+      if (format === origLocale.format) {
+        format = config.format = locale.format;
+      }
+      if (weekStart === origLocale.weekStart) {
+        weekStart = config.weekStart = locale.weekStart;
+        config.weekEnd = calcEndOfWeek(locale.weekStart);
+      }
+    }
+  }
+
+  if (inOpts.format) {
+    const hasToDisplay = typeof inOpts.format.toDisplay === 'function';
+    const hasToValue = typeof inOpts.format.toValue === 'function';
+    const validFormatString = _lib_date_format_js__WEBPACK_IMPORTED_MODULE_2__["reFormatTokens"].test(inOpts.format);
+    if ((hasToDisplay && hasToValue) || validFormatString) {
+      format = config.format = inOpts.format;
+    }
+    delete inOpts.format;
+  }
+
+  //*** dates ***//
+  // while min and maxDate for "no limit" in the options are better to be null
+  // (especially when updating), the ones in the config have to be undefined
+  // because null is treated as 0 (= unix epoch) when comparing with time value
+  let minDt = minDate;
+  let maxDt = maxDate;
+  if (inOpts.minDate !== undefined) {
+    minDt = inOpts.minDate === null
+      ? Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["dateValue"])(0, 0, 1)  // set 0000-01-01 to prevent negative values for year
+      : validateDate(inOpts.minDate, format, locale, minDt);
+    delete inOpts.minDate;
+  }
+  if (inOpts.maxDate !== undefined) {
+    maxDt = inOpts.maxDate === null
+      ? undefined
+      : validateDate(inOpts.maxDate, format, locale, maxDt);
+    delete inOpts.maxDate;
+  }
+  if (maxDt < minDt) {
+    minDate = config.minDate = maxDt;
+    maxDate = config.maxDate = minDt;
+  } else {
+    if (minDate !== minDt) {
+      minDate = config.minDate = minDt;
+    }
+    if (maxDate !== maxDt) {
+      maxDate = config.maxDate = maxDt;
+    }
+  }
+
+  if (inOpts.datesDisabled) {
+    config.datesDisabled = inOpts.datesDisabled.reduce((dates, dt) => {
+      const date = Object(_lib_date_format_js__WEBPACK_IMPORTED_MODULE_2__["parseDate"])(dt, format, locale);
+      return date !== undefined ? Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["pushUnique"])(dates, date) : dates;
+    }, []);
+    delete inOpts.datesDisabled;
+  }
+  if (inOpts.defaultViewDate !== undefined) {
+    const viewDate = Object(_lib_date_format_js__WEBPACK_IMPORTED_MODULE_2__["parseDate"])(inOpts.defaultViewDate, format, locale);
+    if (viewDate !== undefined) {
+      config.defaultViewDate = viewDate;
+    }
+    delete inOpts.defaultViewDate;
+  }
+
+  //*** days of week ***//
+  if (inOpts.weekStart !== undefined) {
+    const wkStart = Number(inOpts.weekStart) % 7;
+    if (!isNaN(wkStart)) {
+      weekStart = config.weekStart = wkStart;
+      config.weekEnd = calcEndOfWeek(wkStart);
+    }
+    delete inOpts.weekStart;
+  }
+  if (inOpts.daysOfWeekDisabled) {
+    config.daysOfWeekDisabled = inOpts.daysOfWeekDisabled.reduce(sanitizeDOW, []);
+    delete inOpts.daysOfWeekDisabled;
+  }
+  if (inOpts.daysOfWeekHighlighted) {
+    config.daysOfWeekHighlighted = inOpts.daysOfWeekHighlighted.reduce(sanitizeDOW, []);
+    delete inOpts.daysOfWeekHighlighted;
+  }
+
+  //*** multi date ***//
+  if (inOpts.maxNumberOfDates !== undefined) {
+    const maxNumberOfDates = parseInt(inOpts.maxNumberOfDates, 10);
+    if (maxNumberOfDates >= 0) {
+      config.maxNumberOfDates = maxNumberOfDates;
+      config.multidate = maxNumberOfDates !== 1;
+    }
+    delete inOpts.maxNumberOfDates;
+  }
+  if (inOpts.dateDelimiter) {
+    config.dateDelimiter = String(inOpts.dateDelimiter);
+    delete inOpts.dateDelimiter;
+  }
+
+  //*** view mode ***//
+  let newMaxView = maxView;
+  if (inOpts.maxView !== undefined) {
+    newMaxView = validateViewId(inOpts.maxView, maxView);
+    delete inOpts.maxView;
+  }
+  if (newMaxView !== maxView) {
+    maxView = config.maxView = newMaxView;
+  }
+
+  let newStartView = startView;
+  if (inOpts.startView !== undefined) {
+    newStartView = validateViewId(inOpts.startView, newStartView);
+    delete inOpts.startView;
+  }
+  // ensure start view < max
+  newStartView = maxView < newStartView ? maxView : newStartView;
+  if (newStartView !== startView) {
+    config.startView = newStartView;
+  }
+
+  //*** template ***//
+  if (inOpts.prevArrow) {
+    const prevArrow = Object(_lib_dom_js__WEBPACK_IMPORTED_MODULE_3__["parseHTML"])(inOpts.prevArrow);
+    if (prevArrow.childNodes.length > 0) {
+      config.prevArrow = prevArrow.childNodes;
+    }
+    delete inOpts.prevArrow;
+  }
+  if (inOpts.nextArrow) {
+    const nextArrow = Object(_lib_dom_js__WEBPACK_IMPORTED_MODULE_3__["parseHTML"])(inOpts.nextArrow);
+    if (nextArrow.childNodes.length > 0) {
+      config.nextArrow = nextArrow.childNodes;
+    }
+    delete inOpts.nextArrow;
+  }
+
+  //*** misc ***//
+  if (inOpts.disableTouchKeyboard !== undefined) {
+    config.disableTouchKeyboard = 'ontouchstart' in document && !!inOpts.disableTouchKeyboard;
+    delete inOpts.disableTouchKeyboard;
+  }
+  if (inOpts.orientation) {
+    const orientation = inOpts.orientation.toLowerCase().split(/\s+/g);
+    config.orientation = {
+      x: orientation.find(x => (x === 'left' || x === 'right')) || 'auto',
+      y: orientation.find(y => (y === 'top' || y === 'bottom')) || 'auto',
+    };
+    delete inOpts.orientation;
+  }
+  if (inOpts.todayBtnMode !== undefined) {
+    switch(inOpts.todayBtnMode) {
+      case 0:
+      case 1:
+        config.todayBtnMode = inOpts.todayBtnMode;
+    }
+    delete inOpts.todayBtnMode;
+  }
+
+  //*** copy the rest ***//
+  Object.keys(inOpts).forEach((key) => {
+    if (inOpts[key] !== undefined && Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["hasProperty"])(_defaultOptions_js__WEBPACK_IMPORTED_MODULE_4__["default"], key)) {
+      config[key] = inOpts[key];
+    }
+  });
+
+  return config;
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/vanillajs-datepicker/js/picker/Picker.js":
+/*!***************************************************************!*\
+  !*** ./node_modules/vanillajs-datepicker/js/picker/Picker.js ***!
+  \***************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Picker; });
+/* harmony import */ var _lib_utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../lib/utils.js */ "./node_modules/vanillajs-datepicker/js/lib/utils.js");
+/* harmony import */ var _lib_date_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../lib/date.js */ "./node_modules/vanillajs-datepicker/js/lib/date.js");
+/* harmony import */ var _lib_dom_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../lib/dom.js */ "./node_modules/vanillajs-datepicker/js/lib/dom.js");
+/* harmony import */ var _lib_event_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../lib/event.js */ "./node_modules/vanillajs-datepicker/js/lib/event.js");
+/* harmony import */ var _templates_pickerTemplate_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./templates/pickerTemplate.js */ "./node_modules/vanillajs-datepicker/js/picker/templates/pickerTemplate.js");
+/* harmony import */ var _views_DaysView_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./views/DaysView.js */ "./node_modules/vanillajs-datepicker/js/picker/views/DaysView.js");
+/* harmony import */ var _views_MonthsView_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./views/MonthsView.js */ "./node_modules/vanillajs-datepicker/js/picker/views/MonthsView.js");
+/* harmony import */ var _views_YearsView_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./views/YearsView.js */ "./node_modules/vanillajs-datepicker/js/picker/views/YearsView.js");
+/* harmony import */ var _events_functions_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../events/functions.js */ "./node_modules/vanillajs-datepicker/js/events/functions.js");
+/* harmony import */ var _events_pickerListeners_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../events/pickerListeners.js */ "./node_modules/vanillajs-datepicker/js/events/pickerListeners.js");
+
+
+
+
+
+
+
+
+
+
+
+function processPickerOptions(picker, options) {
+  if (options.title !== undefined) {
+    if (options.title) {
+      picker.controls.title.textContent = options.title;
+      Object(_lib_dom_js__WEBPACK_IMPORTED_MODULE_2__["showElement"])(picker.controls.title);
+    } else {
+      picker.controls.title.textContent = '';
+      Object(_lib_dom_js__WEBPACK_IMPORTED_MODULE_2__["hideElement"])(picker.controls.title);
+    }
+  }
+  if (options.prevArrow) {
+    const prevBtn = picker.controls.prevBtn;
+    Object(_lib_dom_js__WEBPACK_IMPORTED_MODULE_2__["emptyChildNodes"])(prevBtn);
+    options.prevArrow.forEach((node) => {
+      prevBtn.appendChild(node.cloneNode(true));
+    });
+  }
+  if (options.nextArrow) {
+    const nextBtn = picker.controls.nextBtn;
+    Object(_lib_dom_js__WEBPACK_IMPORTED_MODULE_2__["emptyChildNodes"])(nextBtn);
+    options.nextArrow.forEach((node) => {
+      nextBtn.appendChild(node.cloneNode(true));
+    });
+  }
+  if (options.locale) {
+    picker.controls.todayBtn.textContent = options.locale.today;
+    picker.controls.clearBtn.textContent = options.locale.clear;
+  }
+  if (options.todayBtn !== undefined) {
+    if (options.todayBtn) {
+      Object(_lib_dom_js__WEBPACK_IMPORTED_MODULE_2__["showElement"])(picker.controls.todayBtn);
+    } else {
+      Object(_lib_dom_js__WEBPACK_IMPORTED_MODULE_2__["hideElement"])(picker.controls.todayBtn);
+    }
+  }
+  if (Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["hasProperty"])(options, 'minDate') || Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["hasProperty"])(options, 'maxDate')) {
+    const {minDate, maxDate} = picker.datepicker.config;
+    picker.controls.todayBtn.disabled = !Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["isInRange"])(Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["today"])(), minDate, maxDate);
+  }
+  if (options.clearBtn !== undefined) {
+    if (options.clearBtn) {
+      Object(_lib_dom_js__WEBPACK_IMPORTED_MODULE_2__["showElement"])(picker.controls.clearBtn);
+    } else {
+      Object(_lib_dom_js__WEBPACK_IMPORTED_MODULE_2__["hideElement"])(picker.controls.clearBtn);
+    }
+  }
+}
+
+// Compute view date to reset, which will be...
+// - the last item of the selected dates or defaultViewDate if no selection
+// - limitted to minDate or maxDate if it exceeds the range
+function computeResetViewDate(datepicker) {
+  const {dates, config} = datepicker;
+  const viewDate = dates.length > 0 ? Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["lastItemOf"])(dates) : config.defaultViewDate;
+  return Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["limitToRange"])(viewDate, config.minDate, config.maxDate);
+}
+
+// Change current view's view date
+function setViewDate(picker, newDate) {
+  const oldViewDate = new Date(picker.viewDate);
+  const newViewDate = new Date(newDate);
+  const {id, year, first, last} = picker.currentView;
+  const viewYear = newViewDate.getFullYear();
+
+  picker.viewDate = newDate;
+  if (viewYear !== oldViewDate.getFullYear()) {
+    Object(_events_functions_js__WEBPACK_IMPORTED_MODULE_8__["triggerDatepickerEvent"])(picker.datepicker, 'changeYear');
+  }
+  if (newViewDate.getMonth() !== oldViewDate.getMonth()) {
+    Object(_events_functions_js__WEBPACK_IMPORTED_MODULE_8__["triggerDatepickerEvent"])(picker.datepicker, 'changeMonth');
+  }
+
+  // return whether the new date is in different period on time from the one
+  // displayed in the current view
+  // when true, the view needs to be re-rendered on the next UI refresh.
+  switch (id) {
+    case 0:
+      return newDate < first || newDate > last;
+    case 1:
+      return viewYear !== year;
+    default:
+      return viewYear < first || viewYear > last;
+  }
+}
+
+function getTextDirection(el) {
+  return window.getComputedStyle(el).direction;
+}
+
+// Class representing the picker UI
+class Picker {
+  constructor(datepicker) {
+    this.datepicker = datepicker;
+
+    const template = _templates_pickerTemplate_js__WEBPACK_IMPORTED_MODULE_4__["default"].replace(/%buttonClass%/g, datepicker.config.buttonClass);
+    const element = this.element = Object(_lib_dom_js__WEBPACK_IMPORTED_MODULE_2__["parseHTML"])(template).firstChild;
+    const [header, main, footer] = element.firstChild.children;
+    const title = header.firstElementChild;
+    const [prevBtn, viewSwitch, nextBtn] = header.lastElementChild.children;
+    const [todayBtn, clearBtn] = footer.firstChild.children;
+    const controls = {
+      title,
+      prevBtn,
+      viewSwitch,
+      nextBtn,
+      todayBtn,
+      clearBtn,
+    };
+    this.main = main;
+    this.controls = controls;
+
+    const elementClass = datepicker.inline ? 'inline' : 'dropdown';
+    element.classList.add(`datepicker-${elementClass}`);
+
+    processPickerOptions(this, datepicker.config);
+    this.viewDate = computeResetViewDate(datepicker);
+
+    // set up event listeners
+    Object(_lib_event_js__WEBPACK_IMPORTED_MODULE_3__["registerListeners"])(datepicker, [
+      [element, 'click', _events_pickerListeners_js__WEBPACK_IMPORTED_MODULE_9__["onClickPicker"].bind(null, datepicker)],
+      [main, 'click', _events_pickerListeners_js__WEBPACK_IMPORTED_MODULE_9__["onClickView"].bind(null, datepicker)],
+      [controls.viewSwitch, 'click', _events_pickerListeners_js__WEBPACK_IMPORTED_MODULE_9__["onClickViewSwitch"].bind(null, datepicker)],
+      [controls.prevBtn, 'click', _events_pickerListeners_js__WEBPACK_IMPORTED_MODULE_9__["onClickPrevBtn"].bind(null, datepicker)],
+      [controls.nextBtn, 'click', _events_pickerListeners_js__WEBPACK_IMPORTED_MODULE_9__["onClickNextBtn"].bind(null, datepicker)],
+      [controls.todayBtn, 'click', _events_pickerListeners_js__WEBPACK_IMPORTED_MODULE_9__["onClickTodayBtn"].bind(null, datepicker)],
+      [controls.clearBtn, 'click', _events_pickerListeners_js__WEBPACK_IMPORTED_MODULE_9__["onClickClearBtn"].bind(null, datepicker)],
+    ]);
+
+    // set up views
+    this.views = [
+      new _views_DaysView_js__WEBPACK_IMPORTED_MODULE_5__["default"](this),
+      new _views_MonthsView_js__WEBPACK_IMPORTED_MODULE_6__["default"](this),
+      new _views_YearsView_js__WEBPACK_IMPORTED_MODULE_7__["default"](this, {id: 2, name: 'years', cellClass: 'year', step: 1}),
+      new _views_YearsView_js__WEBPACK_IMPORTED_MODULE_7__["default"](this, {id: 3, name: 'decades', cellClass: 'decade', step: 10}),
+    ];
+    this.currentView = this.views[datepicker.config.startView];
+
+    this.currentView.render();
+    this.main.appendChild(this.currentView.element);
+    datepicker.config.container.appendChild(this.element);
+  }
+
+  setOptions(options) {
+    processPickerOptions(this, options);
+    this.views.forEach((view) => {
+      view.init(options, false);
+    });
+    this.currentView.render();
+  }
+
+  detach(){
+    this.datepicker.config.container.removeChild(this.element);
+  }
+
+  show() {
+    if (this.active) {
+      return;
+    }
+    this.element.classList.add('active');
+    this.active = true;
+
+    const datepicker = this.datepicker;
+    if (!datepicker.inline) {
+      // ensure picker's direction matches input's
+      const inputDirection = getTextDirection(datepicker.inputField);
+      if (inputDirection !== getTextDirection(datepicker.config.container)) {
+        this.element.dir = inputDirection;
+      } else if (this.element.dir) {
+        this.element.removeAttribute('dir');
+      }
+
+      this.place();
+      if (datepicker.config.disableTouchKeyboard) {
+        datepicker.inputField.blur();
+      }
+    }
+    Object(_events_functions_js__WEBPACK_IMPORTED_MODULE_8__["triggerDatepickerEvent"])(datepicker, 'show');
+  }
+
+  hide() {
+    if (!this.active) {
+      return;
+    }
+    this.datepicker.exitEditMode();
+    this.element.classList.remove('active');
+    this.active = false;
+    Object(_events_functions_js__WEBPACK_IMPORTED_MODULE_8__["triggerDatepickerEvent"])(this.datepicker, 'hide');
+  }
+
+  place() {
+    const {classList, style} = this.element;
+    const {config, inputField} = this.datepicker;
+    const container = config.container;
+    const {
+      width: calendarWidth,
+      height: calendarHeight,
+    } = this.element.getBoundingClientRect();
+    const {
+      left: containerLeft,
+      top: containerTop,
+      width: containerWidth,
+    } = container.getBoundingClientRect();
+    const {
+      left: inputLeft,
+      top: inputTop,
+      width: inputWidth,
+      height: inputHeight
+    } = inputField.getBoundingClientRect();
+    let {x: orientX, y: orientY} = config.orientation;
+    let scrollTop;
+    let left;
+    let top;
+
+    if (container === document.body) {
+      scrollTop = window.scrollY;
+      left = inputLeft + window.scrollX;
+      top = inputTop + scrollTop;
+    } else {
+      scrollTop = container.scrollTop;
+      left = inputLeft - containerLeft;
+      top = inputTop - containerTop + scrollTop;
+    }
+
+    if (orientX === 'auto') {
+      if (left < 0) {
+        // align to the left and move into visible area if input's left edge < window's
+        orientX = 'left';
+        left = 10;
+      } else if (left + calendarWidth > containerWidth) {
+        // align to the right if canlendar's right edge > container's
+        orientX = 'right';
+      } else {
+        orientX = getTextDirection(inputField) === 'rtl' ? 'right' : 'left';
+      }
+    }
+    if (orientX === 'right') {
+      left -= calendarWidth - inputWidth;
+    }
+
+    if (orientY === 'auto') {
+      orientY = top - calendarHeight < scrollTop ? 'bottom' : 'top';
+    }
+    if (orientY === 'top') {
+      top -= calendarHeight;
+    } else {
+      top += inputHeight;
+    }
+
+    classList.remove(
+      'datepicker-orient-top',
+      'datepicker-orient-bottom',
+      'datepicker-orient-right',
+      'datepicker-orient-left'
+    );
+    classList.add(`datepicker-orient-${orientY}`, `datepicker-orient-${orientX}`);
+
+    style.top = top ? `${top}px` : top;
+    style.left = left ? `${left}px` : left;
+  }
+
+  setViewSwitchLabel(labelText) {
+    this.controls.viewSwitch.textContent = labelText;
+  }
+
+  setPrevBtnDisabled(disabled) {
+    this.controls.prevBtn.disabled = disabled;
+  }
+
+  setNextBtnDisabled(disabled) {
+    this.controls.nextBtn.disabled = disabled;
+  }
+
+  changeView(viewId) {
+    const oldView = this.currentView;
+    const newView =  this.views[viewId];
+    if (newView.id !== oldView.id) {
+      this.currentView = newView;
+      this._renderMethod = 'render';
+      Object(_events_functions_js__WEBPACK_IMPORTED_MODULE_8__["triggerDatepickerEvent"])(this.datepicker, 'changeView');
+      this.main.replaceChild(newView.element, oldView.element);
+    }
+    return this;
+  }
+
+  // Change the focused date (view date)
+  changeFocus(newViewDate) {
+    this._renderMethod = setViewDate(this, newViewDate) ? 'render' : 'refreshFocus';
+    this.views.forEach((view) => {
+      view.updateFocus();
+    });
+    return this;
+  }
+
+  // Apply the change of the selected dates
+  update() {
+    const newViewDate = computeResetViewDate(this.datepicker);
+    this._renderMethod = setViewDate(this, newViewDate) ? 'render' : 'refresh';
+    this.views.forEach((view) => {
+      view.updateFocus();
+      view.updateSelection();
+    });
+    return this;
+  }
+
+  // Refresh the picker UI
+  render() {
+    const renderMethod = this._renderMethod || 'render';
+    delete this._renderMethod;
+
+    this.currentView[renderMethod]();
+  }
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/vanillajs-datepicker/js/picker/templates/calendarWeeksTemplate.js":
+/*!****************************************************************************************!*\
+  !*** ./node_modules/vanillajs-datepicker/js/picker/templates/calendarWeeksTemplate.js ***!
+  \****************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _lib_utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../lib/utils.js */ "./node_modules/vanillajs-datepicker/js/lib/utils.js");
+
+
+const calendarWeeksTemplate = Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["optimizeTemplateHTML"])(`<div class="calendar-weeks">
+  <div class="days-of-week"><span class="dow"></span></div>
+  <div class="weeks">${Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["createTagRepeat"])('span', 6, {class: 'week'})}</div>
+</div>`);
+
+/* harmony default export */ __webpack_exports__["default"] = (calendarWeeksTemplate);
+
+
+/***/ }),
+
+/***/ "./node_modules/vanillajs-datepicker/js/picker/templates/daysTemplate.js":
+/*!*******************************************************************************!*\
+  !*** ./node_modules/vanillajs-datepicker/js/picker/templates/daysTemplate.js ***!
+  \*******************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _lib_utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../lib/utils.js */ "./node_modules/vanillajs-datepicker/js/lib/utils.js");
+
+
+const daysTemplate = Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["optimizeTemplateHTML"])(`<div class="days">
+  <div class="days-of-week">${Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["createTagRepeat"])('span', 7, {class: 'dow'})}</div>
+  <div class="datepicker-grid">${Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["createTagRepeat"])('span', 42)}</div>
+</div>`);
+
+/* harmony default export */ __webpack_exports__["default"] = (daysTemplate);
+
+
+/***/ }),
+
+/***/ "./node_modules/vanillajs-datepicker/js/picker/templates/pickerTemplate.js":
+/*!*********************************************************************************!*\
+  !*** ./node_modules/vanillajs-datepicker/js/picker/templates/pickerTemplate.js ***!
+  \*********************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _lib_utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../lib/utils.js */ "./node_modules/vanillajs-datepicker/js/lib/utils.js");
+
+
+const pickerTemplate = Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["optimizeTemplateHTML"])(`<div class="datepicker">
+  <div class="datepicker-picker">
+    <div class="datepicker-header">
+      <div class="datepicker-title"></div>
+      <div class="datepicker-controls">
+        <button class="%buttonClass% prev-btn"></button>
+        <button class="%buttonClass% view-switch"></button>
+        <button class="%buttonClass% next-btn"></button>
+      </div>
+    </div>
+    <div class="datepicker-main"></div>
+    <div class="datepicker-footer">
+      <div class="datepicker-controls">
+        <button class="%buttonClass% today-btn"></button>
+        <button class="%buttonClass% clear-btn"></button>
+      </div>
+    </div>
+  </div>
+</div>`);
+
+/* harmony default export */ __webpack_exports__["default"] = (pickerTemplate);
+
+
+/***/ }),
+
+/***/ "./node_modules/vanillajs-datepicker/js/picker/views/DaysView.js":
+/*!***********************************************************************!*\
+  !*** ./node_modules/vanillajs-datepicker/js/picker/views/DaysView.js ***!
+  \***********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return DaysView; });
+/* harmony import */ var _lib_utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../lib/utils.js */ "./node_modules/vanillajs-datepicker/js/lib/utils.js");
+/* harmony import */ var _lib_date_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../lib/date.js */ "./node_modules/vanillajs-datepicker/js/lib/date.js");
+/* harmony import */ var _lib_date_format_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../lib/date-format.js */ "./node_modules/vanillajs-datepicker/js/lib/date-format.js");
+/* harmony import */ var _lib_dom_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../lib/dom.js */ "./node_modules/vanillajs-datepicker/js/lib/dom.js");
+/* harmony import */ var _templates_daysTemplate_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../templates/daysTemplate.js */ "./node_modules/vanillajs-datepicker/js/picker/templates/daysTemplate.js");
+/* harmony import */ var _templates_calendarWeeksTemplate_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../templates/calendarWeeksTemplate.js */ "./node_modules/vanillajs-datepicker/js/picker/templates/calendarWeeksTemplate.js");
+/* harmony import */ var _View_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./View.js */ "./node_modules/vanillajs-datepicker/js/picker/views/View.js");
+
+
+
+
+
+
+
+
+class DaysView extends _View_js__WEBPACK_IMPORTED_MODULE_6__["default"] {
+  constructor(picker) {
+    super(picker, {
+      id: 0,
+      name: 'days',
+      cellClass: 'day',
+    });
+  }
+
+  init(options, onConstruction = true) {
+    if (onConstruction) {
+      const inner = Object(_lib_dom_js__WEBPACK_IMPORTED_MODULE_3__["parseHTML"])(_templates_daysTemplate_js__WEBPACK_IMPORTED_MODULE_4__["default"]).firstChild;
+      this.dow = inner.firstChild;
+      this.grid = inner.lastChild;
+      this.element.appendChild(inner);
+    }
+    super.init(options);
+  }
+
+  setOptions(options) {
+    let updateDOW;
+
+    if (Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["hasProperty"])(options, 'minDate')) {
+      this.minDate = options.minDate;
+    }
+    if (Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["hasProperty"])(options, 'maxDate')) {
+      this.maxDate = options.maxDate;
+    }
+    if (options.datesDisabled) {
+      this.datesDisabled = options.datesDisabled;
+    }
+    if (options.daysOfWeekDisabled) {
+      this.daysOfWeekDisabled = options.daysOfWeekDisabled;
+      updateDOW = true;
+    }
+    if (options.daysOfWeekHighlighted) {
+      this.daysOfWeekHighlighted = options.daysOfWeekHighlighted;
+    }
+    if (options.todayHighlight !== undefined) {
+      this.todayHighlight = options.todayHighlight;
+    }
+    if (options.weekStart !== undefined) {
+      this.weekStart = options.weekStart;
+      this.weekEnd = options.weekEnd;
+      updateDOW = true;
+    }
+    if (options.locale) {
+      const locale = this.locale = options.locale;
+      this.dayNames = locale.daysMin;
+      this.switchLabelFormat = locale.titleFormat;
+      this.switchLabel = Object(_lib_date_format_js__WEBPACK_IMPORTED_MODULE_2__["formatDate"])(this.picker.viewDate, locale.titleFormat, locale);
+      updateDOW = true;
+    }
+    if (options.beforeShowDay !== undefined) {
+      this.beforeShow = typeof options.beforeShowDay === 'function'
+        ? options.beforeShowDay
+        : undefined;
+    }
+
+    if (options.calendarWeeks !== undefined) {
+      if (options.calendarWeeks && !this.calendarWeeks) {
+        const weeksElem = Object(_lib_dom_js__WEBPACK_IMPORTED_MODULE_3__["parseHTML"])(_templates_calendarWeeksTemplate_js__WEBPACK_IMPORTED_MODULE_5__["default"]).firstChild;
+        this.calendarWeeks = {
+          element: weeksElem,
+          dow: weeksElem.firstChild,
+          weeks: weeksElem.lastChild,
+        };
+        this.element.insertBefore(weeksElem, this.element.firstChild);
+      } else if (this.calendarWeeks && !options.calendarWeeks) {
+        this.element.removeChild(this.calendarWeeks.element);
+        this.calendarWeeks = null;
+      }
+    }
+    if (options.showDaysOfWeek !== undefined) {
+      if (options.showDaysOfWeek) {
+        Object(_lib_dom_js__WEBPACK_IMPORTED_MODULE_3__["showElement"])(this.dow);
+        if (this.calendarWeeks) {
+          Object(_lib_dom_js__WEBPACK_IMPORTED_MODULE_3__["showElement"])(this.calendarWeeks.dow);
+        }
+      } else {
+        Object(_lib_dom_js__WEBPACK_IMPORTED_MODULE_3__["hideElement"])(this.dow);
+        if (this.calendarWeeks) {
+          Object(_lib_dom_js__WEBPACK_IMPORTED_MODULE_3__["hideElement"])(this.calendarWeeks.dow);
+        }
+      }
+    }
+
+    // update days-of-week when locale, daysOfweekDisabled or weekStart is changed
+    if (updateDOW) {
+      Array.from(this.dow.children).forEach((el, index) => {
+        const dow = (this.weekStart + index) % 7;
+        el.textContent = this.dayNames[dow];
+        el.className = this.daysOfWeekDisabled.includes(dow) ? 'dow disabled' : 'dow';
+      });
+    }
+  }
+
+  // Apply update on the focused date to view's settings
+  updateFocus() {
+    const viewDate = new Date(this.picker.viewDate);
+    const viewYear = viewDate.getFullYear();
+    const viewMonth = viewDate.getMonth();
+    const firstOfMonth = Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["dateValue"])(viewYear, viewMonth, 1);
+    const start = Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["dayOfTheWeekOf"])(firstOfMonth, this.weekStart, this.weekStart);
+
+    this.first = firstOfMonth;
+    this.last = Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["dateValue"])(viewYear, viewMonth + 1, 0);
+    this.start = start;
+
+    this.switchLabel = Object(_lib_date_format_js__WEBPACK_IMPORTED_MODULE_2__["formatDate"])(viewDate, this.switchLabelFormat, this.locale);
+    this.focused = this.picker.viewDate;
+  }
+
+  // Apply update on the selected dates to view's settings
+  updateSelection() {
+    const {dates, range} = this.picker.datepicker;
+    this.selected = dates;
+    this.range = range;
+  }
+
+   // Update the entire view UI
+  render() {
+    // update today marker on ever render
+    this.today = this.todayHighlight ? Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["today"])() : undefined;
+    // refresh disabled dates on every render in order to clear the ones added
+    // by beforeShow hook at previous render
+    this.disabled = [...this.datesDisabled];
+
+    this.picker.setViewSwitchLabel(this.switchLabel);
+    this.picker.setPrevBtnDisabled(this.first <= this.minDate);
+    this.picker.setNextBtnDisabled(this.last >= this.maxDate);
+
+    if (this.calendarWeeks) {
+      // start of the UTC week (Monday) of the 1st of the month
+      const startOfWeek = Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["dayOfTheWeekOf"])(this.first, 1, 1);
+      Array.from(this.calendarWeeks.weeks.children).forEach((el, index) => {
+        el.textContent = Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["getWeek"])(Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["addWeeks"])(startOfWeek, index));
+      });
+    }
+    Array.from(this.grid.children).forEach((el, index) => {
+      const classList = el.classList;
+      const current = Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["addDays"])(this.start, index);
+      const date = new Date(current);
+      const day = date.getDay();
+
+      el.className = `datepicker-cell ${this.cellClass}`;
+      el.dataset.date = current;
+      el.textContent = date.getDate();
+
+      if (current < this.first) {
+        classList.add('prev');
+      } else if (current > this.last) {
+        classList.add('next');
+      }
+      if (this.today === current) {
+        classList.add('today');
+      }
+      if (current < this.minDate || current > this.maxDate || this.disabled.includes(current)) {
+        classList.add('disabled');
+      }
+      if (this.daysOfWeekDisabled.includes(day)) {
+        classList.add('disabled');
+        Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["pushUnique"])(this.disabled, current);
+      }
+      if (this.daysOfWeekHighlighted.includes(day)) {
+        classList.add('highlighted');
+      }
+      if (this.range){
+        const [rangeStart, rangeEnd] = this.range;
+        if (current > rangeStart && current < rangeEnd) {
+          classList.add('range');
+        }
+        if (current === rangeStart) {
+          classList.add('range-start');
+        }
+        if (current === rangeEnd) {
+          classList.add('range-end');
+        }
+      }
+      if (this.selected.includes(current)) {
+        classList.add('selected');
+      }
+      if (current === this.focused) {
+        classList.add('focused');
+      }
+
+      if (this.beforeShow) {
+        this.performBeforeHook(el, current, current);
+      }
+    });
+  }
+
+  // Update the view UI by applying the changes of selected and focused items
+  refresh() {
+    const [rangeStart, rangeEnd] = this.range || [];
+    this.grid
+      .querySelectorAll('.range, .range-start, .range-end, .selected, .focused')
+      .forEach((el) => {
+        el.classList.remove('range', 'range-start', 'range-end', 'selected', 'focused');
+      });
+    Array.from(this.grid.children).forEach((el) => {
+      const current = Number(el.dataset.date);
+      const classList = el.classList;
+      if (current > rangeStart && current < rangeEnd) {
+        classList.add('range');
+      }
+      if (current === rangeStart) {
+        classList.add('range-start');
+      }
+      if (current === rangeEnd) {
+        classList.add('range-end');
+      }
+      if (this.selected.includes(current)) {
+        classList.add('selected');
+      }
+      if (current === this.focused) {
+        classList.add('focused');
+      }
+    });
+  }
+
+  // Update the view UI by applying the change of focused item
+  refreshFocus() {
+    const index = Math.round((this.focused - this.start) / 86400000);
+    this.grid.querySelectorAll('.focused').forEach((el) => {
+      el.classList.remove('focused');
+    });
+    this.grid.children[index].classList.add('focused');
+  }
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/vanillajs-datepicker/js/picker/views/MonthsView.js":
+/*!*************************************************************************!*\
+  !*** ./node_modules/vanillajs-datepicker/js/picker/views/MonthsView.js ***!
+  \*************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return MonthsView; });
+/* harmony import */ var _lib_utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../lib/utils.js */ "./node_modules/vanillajs-datepicker/js/lib/utils.js");
+/* harmony import */ var _lib_date_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../lib/date.js */ "./node_modules/vanillajs-datepicker/js/lib/date.js");
+/* harmony import */ var _lib_dom_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../lib/dom.js */ "./node_modules/vanillajs-datepicker/js/lib/dom.js");
+/* harmony import */ var _View_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./View.js */ "./node_modules/vanillajs-datepicker/js/picker/views/View.js");
+
+
+
+
+
+class MonthsView extends _View_js__WEBPACK_IMPORTED_MODULE_3__["default"] {
+  constructor(picker) {
+    super(picker, {
+      id: 1,
+      name: 'months',
+      cellClass: 'month',
+    });
+  }
+
+  init(options, onConstruction = true) {
+    if (onConstruction) {
+      this.grid = this.element;
+      this.element.classList.add('months', 'datepicker-grid');
+      this.grid.appendChild(Object(_lib_dom_js__WEBPACK_IMPORTED_MODULE_2__["parseHTML"])(Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["createTagRepeat"])('span', 12, {'data-month': ix => ix})));
+    }
+    super.init(options);
+  }
+
+  setOptions(options) {
+    if (options.locale) {
+      this.monthNames = options.locale.monthsShort;
+    }
+    if (Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["hasProperty"])(options, 'minDate')) {
+      if (options.minDate === undefined) {
+        this.minYear = this.minMonth = this.minDate = undefined;
+      } else {
+        const minDateObj = new Date(options.minDate);
+        this.minYear = minDateObj.getFullYear();
+        this.minMonth = minDateObj.getMonth();
+        this.minDate = minDateObj.setDate(1);
+      }
+    }
+    if (Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["hasProperty"])(options, 'maxDate')) {
+      if (options.maxDate === undefined) {
+        this.maxYear = this.maxMonth = this.maxDate = undefined;
+      } else {
+        const maxDateObj = new Date(options.maxDate);
+        this.maxYear = maxDateObj.getFullYear();
+        this.maxMonth = maxDateObj.getMonth();
+        this.maxDate = Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["dateValue"])(this.maxYear, this.maxMonth + 1, 0);
+      }
+    }
+    if (options.beforeShowMonth !== undefined) {
+      this.beforeShow = typeof options.beforeShowMonth === 'function'
+        ? options.beforeShowMonth
+        : undefined;
+    }
+  }
+
+  // Update view's settings to reflect the viewDate set on the picker
+  updateFocus() {
+    const viewDate = new Date(this.picker.viewDate);
+    this.year = viewDate.getFullYear();
+    this.switchLabel = this.year;
+    this.focused = viewDate.getMonth();
+  }
+
+  // Update view's settings to reflect the selected dates
+  updateSelection() {
+    this.selected = this.picker.datepicker.dates.reduce((selected, timeValue) => {
+      const date = new Date(timeValue);
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      if (selected[year] === undefined) {
+        selected[year] = [month];
+      } else {
+        Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["pushUnique"])(selected[year], month);
+      }
+      return selected;
+    }, {});
+  }
+
+  // Update the entire view UI
+  render() {
+    // refresh disabled months on every render in order to clear the ones added
+    // by beforeShow hook at previous render
+    this.disabled = [];
+
+    this.picker.setViewSwitchLabel(this.switchLabel);
+    this.picker.setPrevBtnDisabled(this.year <= this.minYear);
+    this.picker.setNextBtnDisabled(this.year >= this.maxYear);
+
+    const selected = this.selected[this.year] || [];
+    const yrOutOfRange = this.year < this.minYear || this.year > this.maxYear;
+    const isMinYear = this.year === this.minYear;
+    const isMaxYear = this.year === this.maxYear;
+    Array.from(this.grid.children).forEach((el, index) => {
+      const classList = el.classList;
+
+      el.className = `datepicker-cell ${this.cellClass}`;
+      // reset text on every render to clear the custom content set
+      // by beforeShow hook at previous render
+      el.textContent = this.monthNames[index];
+
+      if (
+        yrOutOfRange
+        || isMinYear && index < this.minMonth
+        || isMaxYear && index > this.maxMonth
+      ) {
+        classList.add('disabled');
+      }
+      if (selected.includes(index)) {
+        classList.add('selected');
+      }
+      if (index === this.focused) {
+        classList.add('focused');
+      }
+
+      if (this.beforeShow) {
+        this.performBeforeHook(el, index, Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["dateValue"])(this.year, index, 1));
+      }
+    });
+  }
+
+  // Update the view UI by applying the changes of selected and focused items
+  refresh() {
+    const selected = this.selected[this.year] || [];
+    this.grid.querySelectorAll('.selected, .focused').forEach((el) => {
+      el.classList.remove('selected', 'focused');
+    });
+    Array.from(this.grid.children).forEach((el, index) => {
+      const classList = el.classList;
+      if (selected.includes(index)) {
+        classList.add('selected');
+      }
+      if (index === this.focused) {
+        classList.add('focused');
+      }
+    });
+  }
+
+  // Update the view UI by applying the change of focused item
+  refreshFocus() {
+    this.grid.querySelectorAll('.focused').forEach((el) => {
+      el.classList.remove('focused');
+    });
+    this.grid.children[this.focused].classList.add('focused');
+  }
+}
+
+/***/ }),
+
+/***/ "./node_modules/vanillajs-datepicker/js/picker/views/View.js":
+/*!*******************************************************************!*\
+  !*** ./node_modules/vanillajs-datepicker/js/picker/views/View.js ***!
+  \*******************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return View; });
+/* harmony import */ var _lib_utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../lib/utils.js */ "./node_modules/vanillajs-datepicker/js/lib/utils.js");
+/* harmony import */ var _lib_dom_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../lib/dom.js */ "./node_modules/vanillajs-datepicker/js/lib/dom.js");
+
+
+
+// Base class of the view classes
+class View {
+  constructor(picker, config) {
+    Object.assign(this, config, {
+      picker,
+      element: Object(_lib_dom_js__WEBPACK_IMPORTED_MODULE_1__["parseHTML"])(`<div class="datepicker-view"></div>`).firstChild,
+      selected: [],
+    });
+    this.init(this.picker.datepicker.config);
+  }
+
+  init(options) {
+    this.setOptions(options);
+    this.updateFocus();
+    this.updateSelection();
+  }
+
+  // Execute beforeShow() callback and apply the result to the element
+  // args:
+  // - current - current value on the iteration on view rendering
+  // - timeValue - time value of the date to pass to beforeShow()
+  performBeforeHook(el, current, timeValue) {
+    let result = this.beforeShow(new Date(timeValue));
+    switch (typeof result) {
+      case 'boolean':
+        result = {enabled: result};
+        break;
+      case 'string':
+        result = {classes: result};
+    }
+
+    if (result) {
+      if (result.enabled === false) {
+        el.classList.add('disabled');
+        Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["pushUnique"])(this.disabled, current);
+      }
+      if (result.classes) {
+        const extraClasses = result.classes.split(/\s+/);
+        el.classList.add(...extraClasses);
+        if (extraClasses.includes('disabled')) {
+          Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["pushUnique"])(this.disabled, current);
+        }
+      }
+      if (result.content) {
+        Object(_lib_dom_js__WEBPACK_IMPORTED_MODULE_1__["replaceChildNodes"])(el, result.content);
+      }
+    }
+  }
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/vanillajs-datepicker/js/picker/views/YearsView.js":
+/*!************************************************************************!*\
+  !*** ./node_modules/vanillajs-datepicker/js/picker/views/YearsView.js ***!
+  \************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return YearsView; });
+/* harmony import */ var _lib_utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../lib/utils.js */ "./node_modules/vanillajs-datepicker/js/lib/utils.js");
+/* harmony import */ var _lib_date_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../lib/date.js */ "./node_modules/vanillajs-datepicker/js/lib/date.js");
+/* harmony import */ var _lib_dom_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../lib/dom.js */ "./node_modules/vanillajs-datepicker/js/lib/dom.js");
+/* harmony import */ var _View_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./View.js */ "./node_modules/vanillajs-datepicker/js/picker/views/View.js");
+
+
+
+
+
+function toTitleCase(word) {
+  return [...word].reduce((str, ch, ix) => str += ix ? ch : ch.toUpperCase(), '');
+}
+
+// Class representing the years and decades view elements
+class YearsView extends _View_js__WEBPACK_IMPORTED_MODULE_3__["default"] {
+  constructor(picker, config) {
+    super(picker, config);
+  }
+
+  init(options, onConstruction = true) {
+    if (onConstruction) {
+      this.navStep = this.step * 10;
+      this.beforeShowOption = `beforeShow${toTitleCase(this.cellClass)}`;
+      this.grid = this.element;
+      this.element.classList.add(this.name, 'datepicker-grid');
+      this.grid.appendChild(Object(_lib_dom_js__WEBPACK_IMPORTED_MODULE_2__["parseHTML"])(Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["createTagRepeat"])('span', 12)));
+    }
+    super.init(options);
+  }
+
+  setOptions(options) {
+    if (Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["hasProperty"])(options, 'minDate')) {
+      if (options.minDate === undefined) {
+        this.minYear = this.minDate = undefined;
+      } else {
+        this.minYear = Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["startOfYearPeriod"])(options.minDate, this.step);
+        this.minDate = Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["dateValue"])(this.minYear, 0, 1);
+      }
+    }
+    if (Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["hasProperty"])(options, 'maxDate')) {
+      if (options.maxDate === undefined) {
+        this.maxYear = this.maxDate = undefined;
+      } else {
+        this.maxYear = Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["startOfYearPeriod"])(options.maxDate, this.step);
+        this.maxDate = Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["dateValue"])(this.maxYear, 11, 31);
+      }
+    }
+    if (options[this.beforeShowOption] !== undefined) {
+      const beforeShow = options[this.beforeShowOption];
+      this.beforeShow = typeof beforeShow === 'function' ? beforeShow : undefined;
+    }
+  }
+
+  // Update view's settings to reflect the viewDate set on the picker
+  updateFocus() {
+    const viewDate = new Date(this.picker.viewDate);
+    const first = Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["startOfYearPeriod"])(viewDate, this.navStep);
+    const last = first + 9 * this.step;
+
+    this.first = first;
+    this.last = last;
+    this.start = first - this.step;
+    this.switchLabel = `${first}-${last}`;
+    this.focused = Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["startOfYearPeriod"])(viewDate, this.step);
+  }
+
+  // Update view's settings to reflect the selected dates
+  updateSelection() {
+    this.selected = this.picker.datepicker.dates.reduce((years, timeValue) => {
+      return Object(_lib_utils_js__WEBPACK_IMPORTED_MODULE_0__["pushUnique"])(years, Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["startOfYearPeriod"])(timeValue, this.step));
+    }, []);
+  }
+
+  // Update the entire view UI
+  render() {
+    // refresh disabled years on every render in order to clear the ones added
+    // by beforeShow hook at previous render
+    this.disabled = [];
+
+    this.picker.setViewSwitchLabel(this.switchLabel);
+    this.picker.setPrevBtnDisabled(this.first <= this.minYear);
+    this.picker.setNextBtnDisabled(this.last >= this.maxYear);
+
+    Array.from(this.grid.children).forEach((el, index) => {
+      const classList = el.classList;
+      const current = this.start + (index * this.step);
+
+      el.className = `datepicker-cell ${this.cellClass}`;
+      el.textContent = el.dataset.year = current;
+
+      if (index === 0) {
+        classList.add('prev');
+      } else if (index === 11) {
+        classList.add('next');
+      }
+      if (current < this.minYear || current > this.maxYear) {
+        classList.add('disabled');
+      }
+      if (this.selected.includes(current)) {
+        classList.add('selected');
+      }
+      if (current === this.focused) {
+        classList.add('focused');
+      }
+
+      if (this.beforeShow) {
+        this.performBeforeHook(el, current, Object(_lib_date_js__WEBPACK_IMPORTED_MODULE_1__["dateValue"])(current, 0, 1));
+      }
+    });
+  }
+
+  // Update the view UI by applying the changes of selected and focused items
+  refresh() {
+    this.grid.querySelectorAll('.selected, .focused').forEach((el) => {
+      el.classList.remove('selected', 'focused');
+    });
+    Array.from(this.grid.children).forEach((el) => {
+      const current = Number(el.textContent);
+      const classList = el.classList;
+      if (this.selected.includes(current)) {
+        classList.add('selected');
+      }
+      if (current === this.focused) {
+        classList.add('focused');
+      }
+    });
+  }
+
+  // Update the view UI by applying the change of focused item
+  refreshFocus() {
+    const index = Math.round((this.focused - this.start) / this.step);
+    this.grid.querySelectorAll('.focused').forEach((el) => {
+      el.classList.remove('focused');
+    });
+    this.grid.children[index].classList.add('focused');
+  }
+}
+
+
+/***/ }),
+
 /***/ "./node_modules/webpack/buildin/global.js":
 /*!***********************************!*\
   !*** (webpack)/buildin/global.js ***!
@@ -62581,11 +67157,20 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _libraries_alert_alert__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./libraries/alert/alert */ "./resources/js/libraries/alert/alert.js");
 /* harmony import */ var _libraries_loading_loading__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./libraries/loading/loading */ "./resources/js/libraries/loading/loading.js");
 /* harmony import */ var _libraries_collapseDetail__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./libraries/collapseDetail */ "./resources/js/libraries/collapseDetail.js");
-__webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
+/* harmony import */ var vanillajs_datepicker__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! vanillajs-datepicker */ "./node_modules/vanillajs-datepicker/js/main.js");
+/* harmony import */ var cleave_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! cleave.js */ "./node_modules/cleave.js/dist/cleave-esm.js");
+__webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js"); // import { HTTPClient } from './libraries/httpClient/httpClient';
 
 
 
 
+
+
+ // window.HTTPClient = HTTPClient;
+
+window.AlertHelper = _libraries_alert_alert__WEBPACK_IMPORTED_MODULE_0__["AlertHelper"];
+window.Datepicker = vanillajs_datepicker__WEBPACK_IMPORTED_MODULE_3__["Datepicker"];
+window.Cleave = cleave_js__WEBPACK_IMPORTED_MODULE_4__["default"];
 /** Init Global Function */
 
 window.Alert = function (args) {
@@ -62740,7 +67325,7 @@ var AlertHelper = /*#__PURE__*/function () {
         message_ = message;
       }
 
-      sweetalert2__WEBPACK_IMPORTED_MODULE_1___default.a.fire({
+      return sweetalert2__WEBPACK_IMPORTED_MODULE_1___default.a.fire({
         icon: type,
         title: title != undefined ? title : 'Information',
         text: message_
@@ -62783,7 +67368,7 @@ var AlertHelper = /*#__PURE__*/function () {
           toast.addEventListener('mouseleave', sweetalert2__WEBPACK_IMPORTED_MODULE_1___default.a.resumeTimer);
         }
       });
-      Toast.fire({
+      return Toast.fire({
         icon: type,
         title: message_
       });

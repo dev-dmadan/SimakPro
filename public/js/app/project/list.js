@@ -4060,13 +4060,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _project__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./project */ "./resources/js/app/project/project.js");
 /* harmony import */ var _libraries_dataTable_dataTable__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../libraries/dataTable/dataTable */ "./resources/js/libraries/dataTable/dataTable.js");
-/* harmony import */ var _libraries_alert_alert__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../libraries/alert/alert */ "./resources/js/libraries/alert/alert.js");
 
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
 
 
 
@@ -4138,7 +4136,7 @@ document.addEventListener('DOMContentLoaded', /*#__PURE__*/function () {
             Alert({
               title: 'Something wrong happen',
               message: _context2.t0,
-              type: _libraries_alert_alert__WEBPACK_IMPORTED_MODULE_3__["AlertHelper"].Error
+              type: AlertHelper.Error
             });
             isError = true;
 
@@ -4160,8 +4158,11 @@ document.addEventListener('DOMContentLoaded', /*#__PURE__*/function () {
             document.querySelector('#project-new-button').addEventListener('click', function () {
               window.location.href = "".concat(APP_URL, "/projects/create");
             });
+            document.querySelector('#refresh-button').addEventListener('click', function () {
+              dataTable.reload();
+            });
 
-          case 16:
+          case 17:
           case "end":
             return _context2.stop();
         }
@@ -4231,7 +4232,9 @@ function _renderModal() {
   return _renderModal.apply(this, arguments);
 }
 
-function editRecord(id) {}
+function editRecord(id) {
+  window.location.href = "".concat(APP_URL, "/projects/").concat(id, "/edit");
+}
 
 /***/ }),
 
@@ -4303,9 +4306,7 @@ var Project = /*#__PURE__*/function (_Controller) {
         dp = _ref.dp,
         sisa = _ref.sisa,
         progress = _ref.progress,
-        project_status = _ref.project_status,
-        _ref$autoInit = _ref.autoInit,
-        autoInit = _ref$autoInit === void 0 ? false : _ref$autoInit;
+        project_status = _ref.project_status;
 
     _classCallCheck(this, Project);
 
@@ -4357,46 +4358,10 @@ var Project = /*#__PURE__*/function (_Controller) {
       _this.sisa = sisa;
       _this.progress = progress;
       _this.project_status = project_status;
-    } // if(autoInit) {
-    //     this.autoCollect();
-    // }
-
+    }
 
     return _this;
-  } // get attribute() {
-  //     return {
-  //         page: {
-  //             name: 'project-page-name',
-  //             code: 'project-page-code',
-  //             owner: 'project-page-owner',
-  //             date: 'project-page-date',
-  //             city: 'project-page-city',
-  //             address: 'project-page-address',
-  //             luas_area: 'project-page-luas_area',
-  //             estimasi: 'project-page-estimasi',
-  //             sub_total: 'project-page-sub_total',
-  //             cco: 'project-page-cco',
-  //             total: 'project-page-total',
-  //             dp: 'project-page-dp',
-  //             sisa: 'project-page-sisa',
-  //             progress: 'project-page-progress',
-  //             project_status: 'project-page-project_status'
-  //         },
-  //     };
-  // }
-  // autoCollect() {
-  //     const attributeList = this.attribute.page;
-  //     for(const attribute in attributeList) {
-  //         if (!attributeList.hasOwnProperty(attribute)) {
-  //             continue;
-  //         }
-  //         const element = document.querySelector(`#${attributeList[attribute]}`);
-  //         if(element != undefined) {
-  //             Project[attribute] = element.value;
-  //         }
-  //     }
-  // }
-
+  }
 
   _createClass(Project, [{
     key: "name",
@@ -4470,7 +4435,7 @@ var Project = /*#__PURE__*/function (_Controller) {
       return this._luas_area;
     },
     set: function set(value) {
-      var _value = value != undefined ? parseFloat(value.trim()) : 0;
+      var _value = value != undefined && value.trim() != '' && !isNaN(value) ? parseFloat(value.trim()) : 0;
 
       this.addProperty('luas_area', _value);
       this._luas_area = _value;
@@ -4481,7 +4446,7 @@ var Project = /*#__PURE__*/function (_Controller) {
       return this._estimasi;
     },
     set: function set(value) {
-      var _value = value != undefined ? parseInt(value.trim()) : 0;
+      var _value = value != undefined && value.trim() != '' && !isNaN(value) ? parseInt(value.trim()) : 0;
 
       this.addProperty('estimasi', _value);
       this._estimasi = _value;
@@ -4492,7 +4457,7 @@ var Project = /*#__PURE__*/function (_Controller) {
       return this._sub_total;
     },
     set: function set(value) {
-      var _value = value != undefined ? parseFloat(value.trim()) : 0;
+      var _value = value != undefined && value.trim() != '' && !isNaN(value) ? parseFloat(value.trim()) : 0;
 
       this.addProperty('sub_total', _value);
       this._sub_total = _value;
@@ -4503,7 +4468,7 @@ var Project = /*#__PURE__*/function (_Controller) {
       return this._cco;
     },
     set: function set(value) {
-      var _value = value != undefined ? parseFloat(value.trim()) : 0;
+      var _value = value != undefined && value.trim() != '' && !isNaN(value) ? parseFloat(value.trim()) : 0;
 
       this.addProperty('cco', _value);
       this._cco = _value;
@@ -4514,7 +4479,7 @@ var Project = /*#__PURE__*/function (_Controller) {
       return this._total;
     },
     set: function set(value) {
-      var _value = value != undefined ? parseFloat(value.trim()) : 0;
+      var _value = value != undefined && value.trim() != '' && !isNaN(value) ? parseFloat(value.trim()) : 0;
 
       this.addProperty('total', _value);
       this._total = _value;
@@ -4525,7 +4490,7 @@ var Project = /*#__PURE__*/function (_Controller) {
       return this._dp;
     },
     set: function set(value) {
-      var _value = value != undefined ? parseFloat(value.trim()) : 0;
+      var _value = value != undefined && value.trim() != '' && !isNaN(value) ? parseFloat(value.trim()) : 0;
 
       this.addProperty('dp', _value);
       this._dp = _value;
@@ -4536,7 +4501,7 @@ var Project = /*#__PURE__*/function (_Controller) {
       return this._sisa;
     },
     set: function set(value) {
-      var _value = value != undefined ? parseFloat(value.trim()) : 0;
+      var _value = value != undefined && value.trim() != '' && !isNaN(value) ? parseFloat(value.trim()) : 0;
 
       this.addProperty('sisa', _value);
       this._sisa = _value;
@@ -4547,7 +4512,7 @@ var Project = /*#__PURE__*/function (_Controller) {
       return this._progress;
     },
     set: function set(value) {
-      var _value = value != undefined ? parseInt(value.trim()) : 0;
+      var _value = value != undefined && value.trim() != '' && !isNaN(value) ? parseInt(value.trim()) : 0;
 
       this.addProperty('progress', _value);
       this._progress = _value;
@@ -4561,10 +4526,33 @@ var Project = /*#__PURE__*/function (_Controller) {
       var _value = value != undefined && _typeof(value) == 'object' ? {
         id: value.id.trim(),
         name: value.name.trim()
-      } : null;
+      } : value != undefined && typeof value == 'string' ? value.trim() : null;
 
       this.addProperty('project_status_id', _value);
       this._project_status = _value;
+    }
+  }], [{
+    key: "attribute",
+    get: function get() {
+      return {
+        page: {
+          name: '#project-page-name',
+          code: '#project-page-code',
+          owner: '#project-page-owner',
+          date: '#project-page-date',
+          city: '#project-page-city',
+          address: '#project-page-address',
+          luas_area: '#project-page-luas_area',
+          estimasi: '#project-page-estimasi',
+          sub_total: '#project-page-sub_total',
+          cco: '#project-page-cco',
+          total: '#project-page-total',
+          dp: '#project-page-dp',
+          sisa: '#project-page-sisa',
+          progress: '#project-page-progress',
+          project_status: '#project-page-project_status'
+        }
+      };
     }
   }]);
 
@@ -4637,7 +4625,7 @@ var AlertHelper = /*#__PURE__*/function () {
         message_ = message;
       }
 
-      sweetalert2__WEBPACK_IMPORTED_MODULE_1___default.a.fire({
+      return sweetalert2__WEBPACK_IMPORTED_MODULE_1___default.a.fire({
         icon: type,
         title: title != undefined ? title : 'Information',
         text: message_
@@ -4680,7 +4668,7 @@ var AlertHelper = /*#__PURE__*/function () {
           toast.addEventListener('mouseleave', sweetalert2__WEBPACK_IMPORTED_MODULE_1___default.a.resumeTimer);
         }
       });
-      Toast.fire({
+      return Toast.fire({
         icon: type,
         title: message_
       });
@@ -4844,6 +4832,8 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
+function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(receiver)) { throw new TypeError("attempted to get private field on non-instance"); } return fn; }
+
 function _classPrivateFieldGet(receiver, privateMap) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to get private field on non-instance"); } if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
 
 function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to set private field on non-instance"); } if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } return value; }
@@ -4855,9 +4845,25 @@ var _data = new WeakMap();
 
 var _routeName = new WeakMap();
 
+var _getValueFromElement = new WeakSet();
+
+var _getValueInputElement = new WeakSet();
+
+var _getValueSelectElement = new WeakSet();
+
+var _getValuTextAreaElement = new WeakSet();
+
 var Controller = /*#__PURE__*/function () {
   function Controller(routeName) {
     _classCallCheck(this, Controller);
+
+    _getValuTextAreaElement.add(this);
+
+    _getValueSelectElement.add(this);
+
+    _getValueInputElement.add(this);
+
+    _getValueFromElement.add(this);
 
     _data.set(this, {
       writable: true,
@@ -4878,9 +4884,6 @@ var Controller = /*#__PURE__*/function () {
 
   _createClass(Controller, [{
     key: "addProperty",
-    // autoCollect() {
-    //     throw new Error("Method 'autoCollect()' must be implemented.");
-    // }
     value: function addProperty(name, value) {
       if (_classPrivateFieldGet(this, _data) == undefined || _classPrivateFieldGet(this, _data) == null) {
         _classPrivateFieldSet(this, _data, {});
@@ -4889,9 +4892,24 @@ var Controller = /*#__PURE__*/function () {
       _classPrivateFieldGet(this, _data)[name] = _typeof(value) == 'object' && value != undefined ? value.id : value;
     }
   }, {
-    key: "getAllProperty",
-    value: function getAllProperty() {
-      return _classPrivateFieldGet(this, _data);
+    key: "setAllProperty",
+    value: function setAllProperty(attributes) {
+      try {
+        for (var key in attributes) {
+          if (!attributes.hasOwnProperty(key)) {
+            continue;
+          }
+
+          var element = document.querySelector(attributes[key]);
+
+          if (element != undefined) {
+            this[key] = _classPrivateMethodGet(this, _getValueFromElement, _getValueFromElement2).call(this, element);
+          }
+        }
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
     }
   }, {
     key: "save",
@@ -5034,6 +5052,25 @@ var Controller = /*#__PURE__*/function () {
       return _classPrivateFieldGet(this, _routeName);
     }
   }], [{
+    key: "getAllProperty",
+    value: function getAllProperty(attributes) {
+      var data = {};
+
+      for (var key in attributes) {
+        if (!attributes.hasOwnProperty(key)) {
+          continue;
+        }
+
+        var element = document.querySelector(attributes[key]);
+
+        if (element != undefined) {
+          data[key] = element;
+        }
+      }
+
+      return data;
+    }
+  }, {
     key: "getCSRF",
     value: function getCSRF() {
       return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -5251,6 +5288,62 @@ var Controller = /*#__PURE__*/function () {
   return Controller;
 }();
 
+var _getValueFromElement2 = function _getValueFromElement2(element) {
+  var value;
+  var elementType = element.nodeName;
+
+  switch (elementType) {
+    case 'SELECT':
+      value = _classPrivateMethodGet(this, _getValueSelectElement, _getValueSelectElement2).call(this, element);
+      break;
+
+    case 'TEXTAREA':
+      value = _classPrivateMethodGet(this, _getValuTextAreaElement, _getValuTextAreaElement2).call(this, element);
+      break;
+
+    case 'INPUT':
+    default:
+      value = _classPrivateMethodGet(this, _getValueInputElement, _getValueInputElement2).call(this, element);
+      break;
+  }
+
+  return value;
+};
+
+var _getValueInputElement2 = function _getValueInputElement2(element) {
+  var value;
+  var inputType = element.type;
+
+  switch (inputType) {
+    case 'radio':
+      break;
+
+    case 'checkbox':
+      break;
+
+    case 'text':
+    case 'number':
+    default:
+      value = element.value;
+      break;
+  }
+
+  return value;
+};
+
+var _getValueSelectElement2 = function _getValueSelectElement2(element) {
+  var value;
+  value = element.value == null || element.value.trim() == '' ? null : {
+    id: value.value,
+    name: value.selectedOptions[0].text
+  };
+  return value;
+};
+
+var _getValuTextAreaElement2 = function _getValuTextAreaElement2(element) {
+  return element.value;
+};
+
 /***/ }),
 
 /***/ "./resources/js/libraries/dataTable/dataTable.js":
@@ -5312,15 +5405,25 @@ var _onEdit = new WeakMap();
 
 var _onDelete = new WeakMap();
 
+var _renderRow = new WeakMap();
+
+var _renderTile = new WeakMap();
+
 var _pagination = new WeakMap();
 
 var _showMoreId = new WeakMap();
 
 var _selected = new WeakMap();
 
+var _filter = new WeakMap();
+
+var _icons = new WeakMap();
+
 var _renderTheadAction = new WeakSet();
 
 var _renderMenuAction = new WeakSet();
+
+var _renderTileAction = new WeakSet();
 
 var _setDisableEditAction = new WeakSet();
 
@@ -5342,15 +5445,19 @@ var DataTable = /*#__PURE__*/function () {
   function DataTable(_ref) {
     var element = _ref.element,
         _ref$tableType = _ref.tableType,
-        tableType = _ref$tableType === void 0 ? DataTable.TABLE_DEFAULT : _ref$tableType,
+        tableType = _ref$tableType === void 0 ? DataTable.TableType.List : _ref$tableType,
         _ref$paginationType = _ref.paginationType,
-        paginationType = _ref$paginationType === void 0 ? DataTable.PAGINATION_SHOW_MORE : _ref$paginationType,
+        paginationType = _ref$paginationType === void 0 ? DataTable.PaginationType.ShowMore : _ref$paginationType,
         mappingData = _ref.mappingData,
         url = _ref.url,
         _ref$event = _ref.event,
         event = _ref$event === void 0 ? null : _ref$event,
         _ref$action = _ref.action,
         action = _ref$action === void 0 ? null : _ref$action,
+        _ref$renderRow = _ref.renderRow,
+        renderRow = _ref$renderRow === void 0 ? null : _ref$renderRow,
+        _ref$renderTile = _ref.renderTile,
+        renderTile = _ref$renderTile === void 0 ? null : _ref$renderTile,
         _ref$isAutoInit = _ref.isAutoInit,
         isAutoInit = _ref$isAutoInit === void 0 ? true : _ref$isAutoInit;
 
@@ -5371,6 +5478,8 @@ var DataTable = /*#__PURE__*/function () {
     _setDisableDeleteAction.add(this);
 
     _setDisableEditAction.add(this);
+
+    _renderTileAction.add(this);
 
     _renderMenuAction.add(this);
 
@@ -5431,6 +5540,16 @@ var DataTable = /*#__PURE__*/function () {
       value: void 0
     });
 
+    _renderRow.set(this, {
+      writable: true,
+      value: void 0
+    });
+
+    _renderTile.set(this, {
+      writable: true,
+      value: void 0
+    });
+
     _pagination.set(this, {
       writable: true,
       value: void 0
@@ -5446,11 +5565,36 @@ var DataTable = /*#__PURE__*/function () {
       value: void 0
     });
 
+    _filter.set(this, {
+      writable: true,
+      value: void 0
+    });
+
+    _icons.set(this, {
+      writable: true,
+      value: {
+        menu: '<i class="fa fa-ellipsis-v"></i>',
+        showMore: '<i class="fas fa-angle-double-down"></i>',
+        edit: '<i class="far fa-edit"></i>',
+        "delete": '<i class="far fa-trash-alt"></i>',
+        view: '',
+        asc: '',
+        desc: ''
+      }
+    });
+
     try {
-      this.element = element;
       this.tableType = tableType;
+      this.element = element;
+
+      if (tableType == DataTable.TableType.List) {
+        this.mappingData = mappingData;
+        this.renderRow = renderRow;
+      } else {
+        this.renderTile = renderTile;
+      }
+
       this.paginationType = paginationType;
-      this.mappingData = mappingData;
       this.url = url;
       this.event = event;
       this.action = action;
@@ -5472,68 +5616,75 @@ var DataTable = /*#__PURE__*/function () {
     key: "init",
     value: function () {
       var _init = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee() {
-        var totalHeading, totalMappingData, data;
+        var data, totalHeading, totalMappingData;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
+                _context.prev = 0;
+                _context.t0 = _classPrivateFieldGet(this, _paginationType);
+                _context.next = _context.t0 === DataTable.PaginationType.Default ? 4 : _context.t0 === DataTable.PaginationType.ShowMore ? 5 : _context.t0 === DataTable.PaginationType.Infinite ? 7 : 8;
+                break;
+
+              case 4:
+                return _context.abrupt("break", 9);
+
+              case 5:
+                _classPrivateMethodGet(this, _renderShowMore, _renderShowMore2).call(this);
+
+                return _context.abrupt("break", 9);
+
+              case 7:
+                return _context.abrupt("break", 9);
+
+              case 8:
+                return _context.abrupt("break", 9);
+
+              case 9:
+                _context.next = 11;
+                return this.getData(1);
+
+              case 11:
+                data = _context.sent;
+
+                if (!(_classPrivateFieldGet(this, _tableType) == DataTable.TableType.List)) {
+                  _context.next = 18;
+                  break;
+                }
+
                 totalHeading = _classPrivateFieldGet(this, _element).tHead.children[0].childElementCount;
                 totalMappingData = _classPrivateFieldGet(this, _mappingData).length;
-                _context.prev = 2;
 
                 if (!(totalHeading != totalMappingData)) {
-                  _context.next = 5;
+                  _context.next = 17;
                   break;
                 }
 
                 throw "The number of column don't match the number of headings";
 
-              case 5:
-                _context.t0 = _classPrivateFieldGet(this, _paginationType);
-                _context.next = _context.t0 === DataTable.PAGINATION_DEFAULT ? 8 : _context.t0 === DataTable.PAGINATION_SHOW_MORE ? 9 : _context.t0 === DataTable.PAGINATION_INFINITE ? 11 : 12;
-                break;
-
-              case 8:
-                return _context.abrupt("break", 13);
-
-              case 9:
-                _classPrivateMethodGet(this, _renderShowMore, _renderShowMore2).call(this);
-
-                return _context.abrupt("break", 13);
-
-              case 11:
-                return _context.abrupt("break", 13);
-
-              case 12:
-                return _context.abrupt("break", 13);
-
-              case 13:
-                if (_classPrivateFieldGet(this, _actionType) == DataTable.DEFAULT_ACTION_TYPE) {
+              case 17:
+                if (_classPrivateFieldGet(this, _actionType) == DataTable.ActionType.Default) {
                   _classPrivateMethodGet(this, _renderTheadAction, _renderTheadAction2).call(this);
                 } else {
                   _classPrivateMethodGet(this, _renderMenuAction, _renderMenuAction2).call(this);
                 }
 
-                _context.next = 16;
-                return this.getData(1);
-
-              case 16:
-                data = _context.sent;
+              case 18:
                 this.addRows(data);
-                _context.next = 23;
+                _context.next = 24;
                 break;
 
-              case 20:
-                _context.prev = 20;
-                _context.t1 = _context["catch"](2);
+              case 21:
+                _context.prev = 21;
+                _context.t1 = _context["catch"](0);
                 throw new Error(_context.t1);
 
-              case 23:
+              case 24:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, this, [[2, 20]]);
+        }, _callee, this, [[0, 21]]);
       }));
 
       function init() {
@@ -5542,6 +5693,11 @@ var DataTable = /*#__PURE__*/function () {
 
       return init;
     }()
+    /**
+     * addRow
+     * @param {object} data 
+     */
+
   }, {
     key: "addRow",
     value: function addRow(data) {
@@ -5549,10 +5705,9 @@ var DataTable = /*#__PURE__*/function () {
 
       var tbody = _classPrivateFieldGet(this, _element).tBodies[0];
 
-      var tr = document.createElement('tr');
-      var tr_data_id = document.createAttribute("data-id");
-      tr_data_id.value = data.Id || data.id;
-      tr.setAttributeNode(tr_data_id);
+      var tr = document.createElement('tr'); // const tr_data_id = document.createAttribute("data-id");
+      // tr_data_id.value = data.Id || data.id;
+      // tr.setAttributeNode(tr_data_id);
 
       _classPrivateFieldGet(this, _mappingData).forEach(function (item) {
         var td = document.createElement('td');
@@ -5565,11 +5720,11 @@ var DataTable = /*#__PURE__*/function () {
 
           _classPrivateFieldSet(_this, _selected, data.Id || data.id);
 
-          if (_classPrivateFieldGet(_this, _onEdit) != undefined && _classPrivateFieldGet(_this, _actionType) == DataTable.MENU_ACTION_TYPE) {
+          if (_classPrivateFieldGet(_this, _onEdit) != undefined && _classPrivateFieldGet(_this, _actionType) == DataTable.ActionType.Menu) {
             _classPrivateMethodGet(_this, _setDisableEditAction, _setDisableEditAction2).call(_this, false);
           }
 
-          if (_classPrivateFieldGet(_this, _onDelete) != undefined && _classPrivateFieldGet(_this, _actionType) == DataTable.MENU_ACTION_TYPE) {
+          if (_classPrivateFieldGet(_this, _onDelete) != undefined && _classPrivateFieldGet(_this, _actionType) == DataTable.ActionType.Menu) {
             _classPrivateMethodGet(_this, _setDisableDeleteAction, _setDisableDeleteAction2).call(_this, false);
           }
         });
@@ -5577,12 +5732,16 @@ var DataTable = /*#__PURE__*/function () {
       });
 
       if (_classPrivateFieldGet(this, _onEdit) != undefined || _classPrivateFieldGet(this, _onDelete) != undefined) {
-        if (_classPrivateFieldGet(this, _actionType) == DataTable.DEFAULT_ACTION_TYPE) {
+        if (_classPrivateFieldGet(this, _actionType) == DataTable.ActionType.Default) {
           tr.appendChild(_classPrivateMethodGet(this, _renderButtonAction, _renderButtonAction2).call(this, data.Id || data.id));
         }
       }
 
       tbody.appendChild(tr);
+
+      if (_classPrivateFieldGet(this, _renderRow) != undefined) {
+        _classPrivateFieldGet(this, _renderRow).call(this, tr, tr.cells, data);
+      }
 
       if (_classPrivateFieldGet(this, _onClick) != undefined) {
         tr.classList.toggle('clickable-row', true);
@@ -5598,13 +5757,125 @@ var DataTable = /*#__PURE__*/function () {
         });
       }
     }
+    /**
+     * addTile
+     * @param {object} data 
+     */
+
+  }, {
+    key: "addTile",
+    value: function addTile(data) {
+      var _this2 = this;
+
+      var card = document.createElement('div');
+      card.setAttribute('class', 'card card-custom-shadow-tile');
+      var cardBody = document.createElement('div');
+      cardBody.setAttribute('class', 'card-body');
+
+      var renderTile = _classPrivateFieldGet(this, _renderTile).call(this, data, {
+        edit: _classPrivateFieldGet(this, _onEdit),
+        "delete": _classPrivateFieldGet(this, _onDelete)
+      });
+
+      if (_classPrivateFieldGet(this, _onEdit) != undefined || _classPrivateFieldGet(this, _onDelete) != undefined) {
+        if (_classPrivateFieldGet(this, _actionType) == DataTable.ActionType.Custom) {
+          if (typeof renderTile == 'string') {
+            cardBody.innerHTML += renderTile;
+          } else {
+            cardBody.appendChild(renderTile);
+          }
+        } else {
+          var contentCardBody = document.createElement('div');
+          contentCardBody.setAttribute('class', 'row align-items-md-center');
+          contentCardBody.appendChild(_classPrivateMethodGet(this, _renderTileAction, _renderTileAction2).call(this));
+
+          if (typeof renderTile == 'string') {
+            contentCardBody.innerHTML += '<div class="col">' + renderTile + '</div>';
+          } else {
+            var _div = document.createElement('div');
+
+            _div.setAttribute('class', 'col');
+
+            _div.appendChild(renderTile);
+
+            contentCardBody.appendChild(_div);
+          }
+
+          if (_classPrivateFieldGet(this, _onEdit) != undefined) {
+            contentCardBody.querySelector('.action-edit').addEventListener('click', function () {
+              if (!data.id) {
+                return;
+              }
+
+              _classPrivateFieldGet(_this2, _onEdit).call(_this2, data.id);
+            });
+          }
+
+          if (_classPrivateFieldGet(this, _onDelete) != undefined) {
+            contentCardBody.querySelector('.action-delete').addEventListener('click', function () {
+              if (!data.id) {
+                return;
+              }
+
+              _classPrivateFieldGet(_this2, _onDelete).call(_this2, data.id).then(function (res) {
+                if (res) {
+                  _this2.reload();
+                }
+              });
+            });
+          }
+
+          cardBody.appendChild(contentCardBody);
+        }
+      } else {
+        if (typeof renderTile == 'string') {
+          cardBody.innerHTML += renderTile;
+        } else {
+          cardBody.appendChild(renderTile);
+        }
+      }
+
+      card.appendChild(cardBody);
+      card.addEventListener('click', function () {
+        _classPrivateMethodGet(_this2, _removeSelectedRow, _removeSelectedRow2).call(_this2);
+
+        card.classList.toggle('selected-row');
+
+        _classPrivateFieldSet(_this2, _selected, data.Id || data.id);
+      });
+
+      _classPrivateFieldGet(this, _element).appendChild(card);
+
+      if (_classPrivateFieldGet(this, _onClick) != undefined) {
+        card.classList.toggle('clickable-row', true);
+        card.addEventListener('click', function (event) {
+          _classPrivateFieldGet(_this2, _onClick).call(_this2, event, data.Id || data.id);
+        });
+      }
+
+      if (_classPrivateFieldGet(this, _onDoubleClick) != undefined) {
+        card.classList.toggle('clickable-row', true);
+        card.addEventListener('dblclick', function (event) {
+          _classPrivateFieldGet(_this2, _onDoubleClick).call(_this2, event, data.Id || data.id);
+        });
+      }
+    }
+    /**
+     * addRows
+     * @param {[object]} data 
+     */
+
   }, {
     key: "addRows",
     value: function addRows(data) {
-      var _this2 = this;
+      var _this3 = this;
 
       data.forEach(function (item) {
-        _this2.addRow(item);
+        if (_classPrivateFieldGet(_this3, _tableType) == DataTable.TableType.List) {
+          _this3.addRow(item);
+        } else {
+          _this3.addTile(item);
+        }
       });
     }
   }, {
@@ -5613,6 +5884,7 @@ var DataTable = /*#__PURE__*/function () {
       var _getData = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2() {
         var page,
             res,
+            filter,
             _args2 = arguments;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee2$(_context2) {
           while (1) {
@@ -5620,15 +5892,41 @@ var DataTable = /*#__PURE__*/function () {
               case 0:
                 page = _args2.length > 0 && _args2[0] !== undefined ? _args2[0] : 1;
                 _context2.prev = 1;
-                _context2.next = 4;
+                filter = _classPrivateFieldGet(this, _filter) != undefined ? _classPrivateFieldGet(this, _filter) : null;
+
+                if (!filter) {
+                  _context2.next = 9;
+                  break;
+                }
+
+                _context2.next = 6;
+                return _httpClient_httpClient__WEBPACK_IMPORTED_MODULE_1__["HTTPClient"].Request({
+                  uri: _classPrivateFieldGet(this, _url) + page,
+                  method: _httpClient_httpClient__WEBPACK_IMPORTED_MODULE_1__["HTTPClient"].POST,
+                  headers: {
+                    "Content-Type": "application/json"
+                  },
+                  body: {
+                    filters: filter
+                  }
+                });
+
+              case 6:
+                res = _context2.sent;
+                _context2.next = 12;
+                break;
+
+              case 9:
+                _context2.next = 11;
                 return _httpClient_httpClient__WEBPACK_IMPORTED_MODULE_1__["HTTPClient"].Request({
                   uri: _classPrivateFieldGet(this, _url) + page,
                   method: _httpClient_httpClient__WEBPACK_IMPORTED_MODULE_1__["HTTPClient"].GET
                 });
 
-              case 4:
+              case 11:
                 res = _context2.sent;
 
+              case 12:
                 _classPrivateMethodGet(this, _setPagination, _setPagination2).call(this, {
                   total: res.total,
                   perPage: res.per_page,
@@ -5641,17 +5939,17 @@ var DataTable = /*#__PURE__*/function () {
 
                 return _context2.abrupt("return", res.data);
 
-              case 9:
-                _context2.prev = 9;
+              case 16:
+                _context2.prev = 16;
                 _context2.t0 = _context2["catch"](1);
                 throw _context2.t0;
 
-              case 12:
+              case 19:
               case "end":
                 return _context2.stop();
             }
           }
-        }, _callee2, this, [[1, 9]]);
+        }, _callee2, this, [[1, 16]]);
       }));
 
       function getData() {
@@ -5663,7 +5961,13 @@ var DataTable = /*#__PURE__*/function () {
   }, {
     key: "clearData",
     value: function clearData() {
-      _classPrivateFieldGet(this, _element).replaceChild(document.createElement('tbody'), _classPrivateFieldGet(this, _element).tBodies[0]);
+      if (_classPrivateFieldGet(this, _tableType) == DataTable.TableType.List) {
+        _classPrivateFieldGet(this, _element).replaceChild(document.createElement('tbody'), _classPrivateFieldGet(this, _element).tBodies[0]);
+      } else {
+        while (_classPrivateFieldGet(this, _element).firstChild) {
+          _classPrivateFieldGet(this, _element).removeChild(_classPrivateFieldGet(this, _element).firstChild);
+        }
+      }
     }
   }, {
     key: "nextPage",
@@ -5677,40 +5981,39 @@ var DataTable = /*#__PURE__*/function () {
                 _context3.prev = 0;
                 page = this.currentPage;
 
-                if (_classPrivateFieldGet(this, _paginationType) == DataTable.PAGINATION_DEFAULT) {
-                  page = 1;
+                if (_classPrivateFieldGet(this, _paginationType) == DataTable.PaginationType.Default) {
                   this.clearData();
-                } else {
-                  page += 1;
                 }
 
+                page += 1;
+
                 if (!(this.currentPage < this.lastPage)) {
-                  _context3.next = 9;
+                  _context3.next = 10;
                   break;
                 }
 
-                _context3.next = 6;
+                _context3.next = 7;
                 return this.getData(page);
 
-              case 6:
+              case 7:
                 data = _context3.sent;
                 this.addRows(data);
                 return _context3.abrupt("return", true);
 
-              case 9:
+              case 10:
                 return _context3.abrupt("return", false);
 
-              case 12:
-                _context3.prev = 12;
+              case 13:
+                _context3.prev = 13;
                 _context3.t0 = _context3["catch"](0);
                 throw new Error(_context3.t0);
 
-              case 15:
+              case 16:
               case "end":
                 return _context3.stop();
             }
           }
-        }, _callee3, this, [[0, 12]]);
+        }, _callee3, this, [[0, 13]]);
       }));
 
       function nextPage() {
@@ -5752,7 +6055,7 @@ var DataTable = /*#__PURE__*/function () {
                 data = _context4.sent;
                 this.addRows(data);
 
-                if (_classPrivateFieldGet(this, _actionType) == DataTable.MENU_ACTION_TYPE) {
+                if (_classPrivateFieldGet(this, _actionType) == DataTable.ActionType.Menu) {
                   _classPrivateMethodGet(this, _setDisableEditAction, _setDisableEditAction2).call(this, true);
 
                   _classPrivateMethodGet(this, _setDisableDeleteAction, _setDisableDeleteAction2).call(this, true);
@@ -5780,24 +6083,17 @@ var DataTable = /*#__PURE__*/function () {
       return reload;
     }()
   }, {
-    key: "element",
-    set: function set(value) {
-      if (typeof value == 'string') {
-        _classPrivateFieldSet(this, _element, document.querySelector(value));
-      } else if (value.nodeName && value.nodeName == 'TABLE') {
-        _classPrivateFieldSet(this, _element, value);
-      } else {
-        throw new Error('Element must be Id of table element or table element');
-      }
-    }
-  }, {
     key: "tableType",
+
+    /**
+     * @param {string} value
+     */
     set: function set(value) {
       if (typeof value != 'string' || value != undefined && value.trim() == '') {
         throw new Error('Table Type must be string');
       }
 
-      var isCorrectTableType = [DataTable.TABLE_DEFAULT, DataTable.TABLE_TILE].filter(function (item) {
+      var isCorrectTableType = [DataTable.TableType.List, DataTable.TableType.Tile].filter(function (item) {
         return item == value;
       }).length > 0 ? true : false;
 
@@ -5807,6 +6103,35 @@ var DataTable = /*#__PURE__*/function () {
 
       _classPrivateFieldSet(this, _tableType, value);
     }
+    /**
+     * @param {string} value
+     */
+
+  }, {
+    key: "element",
+    set: function set(value) {
+      if (typeof value == 'string') {
+        _classPrivateFieldSet(this, _element, document.querySelector(value));
+      } else if (_classPrivateFieldGet(this, _tableType) == DataTable.TableType.Default) {
+        if (value.nodeName && value.nodeName == 'TABLE') {
+          _classPrivateFieldSet(this, _element, value);
+        } else {
+          throw new Error('Element must be Id of table element or table element');
+        }
+      } else if (_classPrivateFieldGet(this, _tableType) == DataTable.TableType.Tile) {
+        if (value.nodeName && value.nodeName != 'TABLE') {
+          _classPrivateFieldSet(this, _element, value);
+        } else {
+          throw new Error('Element must be Id of tile element or tile element (not table)');
+        }
+      } else {
+        throw new Error("Element can't be empty");
+      }
+    }
+    /**
+     * @param {string} value
+     */
+
   }, {
     key: "paginationType",
     set: function set(value) {
@@ -5814,7 +6139,7 @@ var DataTable = /*#__PURE__*/function () {
         throw new Error('Pagination Type must be string');
       }
 
-      var isCorrectPaginationType = [DataTable.PAGINATION_DEFAULT, DataTable.PAGINATION_SHOW_MORE, DataTable.PAGINATION_INFINITE].filter(function (item) {
+      var isCorrectPaginationType = [DataTable.PaginationType.Default, DataTable.PaginationType.ShowMore, DataTable.PaginationType.Infinite].filter(function (item) {
         return item == value;
       }).length > 0 ? true : false;
 
@@ -5824,6 +6149,10 @@ var DataTable = /*#__PURE__*/function () {
 
       _classPrivateFieldSet(this, _paginationType, value);
     }
+    /**
+     * @param {[string]} value
+     */
+
   }, {
     key: "mappingData",
     set: function set(value) {
@@ -5833,6 +6162,10 @@ var DataTable = /*#__PURE__*/function () {
 
       _classPrivateFieldSet(this, _mappingData, value);
     }
+    /**
+     * @param {string} value
+     */
+
   }, {
     key: "url",
     set: function set(value) {
@@ -5840,8 +6173,12 @@ var DataTable = /*#__PURE__*/function () {
         throw new Error('Url must be string');
       }
 
-      _classPrivateFieldSet(this, _url, "".concat(APP_URL, "/").concat(value.trim(), "?page="));
+      _classPrivateFieldSet(this, _url, value.includes(APP_URL) ? value : "".concat(APP_URL, "/").concat(value.trim(), "?page="));
     }
+    /**
+     * @param {{ onClick: void; onDoubleClick: void; }} value
+     */
+
   }, {
     key: "event",
     set: function set(value) {
@@ -5866,6 +6203,10 @@ var DataTable = /*#__PURE__*/function () {
 
       }
     }
+    /**
+     * @param {{ type: string; onEdit: void; onDelete: promise; }} value
+     */
+
   }, {
     key: "action",
     set: function set(value) {
@@ -5875,13 +6216,18 @@ var DataTable = /*#__PURE__*/function () {
 
       if (value != undefined && _typeof(value) == 'object') {
         if (value.hasOwnProperty('type') && value.type != undefined && typeof value.type == 'string') {
-          if (value.type != DataTable.DEFAULT_ACTION_TYPE && value.type != DataTable.MENU_ACTION_TYPE) {
-            throw new Error('Action Type must be object DEFAULT or MENU');
+          var actionList = [DataTable.ActionType.Default, DataTable.ActionType.Menu, DataTable.ActionType.Menu];
+          var isExist = actionList.filter(function (item) {
+            return item = value.type;
+          }).length > 0 ? true : false;
+
+          if (!isExist) {
+            throw new Error('Action Type must be object Default or Menu or Custom');
           }
 
           _classPrivateFieldSet(this, _actionType, value.type);
         } else {
-          _classPrivateFieldSet(this, _actionType, DataTable.DEFAULT_ACTION_TYPE);
+          _classPrivateFieldSet(this, _actionType, DataTable.ActionType.Default);
         }
 
         if (value.hasOwnProperty('onEdit') && value.onEdit != undefined) {
@@ -5893,6 +6239,10 @@ var DataTable = /*#__PURE__*/function () {
         }
       }
     }
+    /**
+     * @param {void} value
+     */
+
   }, {
     key: "onClick",
     set: function set(value) {
@@ -5902,6 +6252,10 @@ var DataTable = /*#__PURE__*/function () {
 
       _classPrivateFieldSet(this, _onClick, value);
     }
+    /**
+     * @param {void} value
+     */
+
   }, {
     key: "onDoubleClick",
     set: function set(value) {
@@ -5913,6 +6267,10 @@ var DataTable = /*#__PURE__*/function () {
     } // set onRightClick() {
     // }
 
+    /**
+     * @param {void} value
+     */
+
   }, {
     key: "onEdit",
     set: function set(value) {
@@ -5922,6 +6280,10 @@ var DataTable = /*#__PURE__*/function () {
 
       _classPrivateFieldSet(this, _onEdit, value);
     }
+    /**
+     * @param {promise} value
+     */
+
   }, {
     key: "onDelete",
     set: function set(value) {
@@ -5930,6 +6292,34 @@ var DataTable = /*#__PURE__*/function () {
       }
 
       _classPrivateFieldSet(this, _onDelete, value);
+    }
+    /**
+     * @param {void} value
+     */
+
+  }, {
+    key: "renderRow",
+    set: function set(value) {
+      if (value != undefined && _typeof(value) != 'object') {
+        if (typeof value != 'function') {
+          throw new Error('Render Row must be function');
+        }
+      }
+
+      _classPrivateFieldSet(this, _renderRow, value);
+    }
+    /**
+     * @param {void} value
+     */
+
+  }, {
+    key: "renderTile",
+    set: function set(value) {
+      if (typeof value != 'function') {
+        throw new Error('Render Tile must be function');
+      }
+
+      _classPrivateFieldSet(this, _renderTile, value);
     }
   }, {
     key: "selected",
@@ -5957,39 +6347,30 @@ var DataTable = /*#__PURE__*/function () {
       return _classPrivateFieldGet(this, _pagination) && _classPrivateFieldGet(this, _pagination).isCanNext ? _classPrivateFieldGet(this, _pagination).isCanNext : false;
     }
   }], [{
-    key: "TABLE_DEFAULT",
+    key: "TableType",
     get: function get() {
-      return 'LIST';
+      return {
+        List: 'List',
+        Tile: 'Tile'
+      };
     }
   }, {
-    key: "TABLE_TILE",
+    key: "PaginationType",
     get: function get() {
-      return 'TILE';
+      return {
+        Default: 'Default',
+        ShowMore: 'Show More',
+        Infinite: 'Infinite Scroll'
+      };
     }
   }, {
-    key: "PAGINATION_DEFAULT",
+    key: "ActionType",
     get: function get() {
-      return 'DEFAULT';
-    }
-  }, {
-    key: "PAGINATION_SHOW_MORE",
-    get: function get() {
-      return 'SHOW_MORE';
-    }
-  }, {
-    key: "PAGINATION_INFINITE",
-    get: function get() {
-      return 'INFINITE_SCROLL';
-    }
-  }, {
-    key: "DEFAULT_ACTION_TYPE",
-    get: function get() {
-      return 'DEFAULT';
-    }
-  }, {
-    key: "MENU_ACTION_TYPE",
-    get: function get() {
-      return 'MENU';
+      return {
+        Default: 'Default',
+        Menu: 'Menu',
+        Custom: 'Custom'
+      };
     }
   }]);
 
@@ -5997,7 +6378,7 @@ var DataTable = /*#__PURE__*/function () {
 }();
 
 var _renderTheadAction2 = function _renderTheadAction2() {
-  if ((_classPrivateFieldGet(this, _onEdit) != undefined || _classPrivateFieldGet(this, _onDelete) != undefined) && _classPrivateFieldGet(this, _actionType) == DataTable.DEFAULT_ACTION_TYPE) {
+  if ((_classPrivateFieldGet(this, _onEdit) != undefined || _classPrivateFieldGet(this, _onDelete) != undefined) && _classPrivateFieldGet(this, _actionType) == DataTable.ActionType.Default) {
     var tHead = _classPrivateFieldGet(this, _element).tHead.children[0];
 
     var th = document.createElement('th');
@@ -6007,12 +6388,13 @@ var _renderTheadAction2 = function _renderTheadAction2() {
 };
 
 var _renderMenuAction2 = function _renderMenuAction2() {
-  var _this3 = this;
+  var _this4 = this;
 
-  if ((_classPrivateFieldGet(this, _onEdit) != undefined || _classPrivateFieldGet(this, _onDelete) != undefined) && _classPrivateFieldGet(this, _actionType) == DataTable.MENU_ACTION_TYPE) {
+  if ((_classPrivateFieldGet(this, _onEdit) != undefined || _classPrivateFieldGet(this, _onDelete) != undefined) && _classPrivateFieldGet(this, _actionType) == DataTable.ActionType.Menu) {
     var btnGroup = _classPrivateFieldGet(this, _element).parentElement.parentElement.previousElementSibling;
 
-    var icon = '<i class="fa fa-ellipsis-v"></i>';
+    var icon = _classPrivateFieldGet(this, _icons).menu;
+
     var listAction = [];
 
     if (_classPrivateFieldGet(this, _onEdit) != undefined) {
@@ -6022,13 +6404,13 @@ var _renderMenuAction2 = function _renderMenuAction2() {
       aEdit.href = 'javascript:void(0)';
       aEdit.textContent = 'Edit';
       aEdit.addEventListener('click', function () {
-        var id = _this3.selected || null;
+        var id = _this4.selected || null;
 
         if (!id) {
           return;
         }
 
-        _classPrivateFieldGet(_this3, _onEdit).call(_this3, id);
+        _classPrivateFieldGet(_this4, _onEdit).call(_this4, id);
       });
       listAction.push(aEdit);
     }
@@ -6040,15 +6422,15 @@ var _renderMenuAction2 = function _renderMenuAction2() {
       aDelete.href = 'javascript:void(0)';
       aDelete.textContent = 'Delete';
       aDelete.addEventListener('click', function () {
-        var id = _this3.selected || null;
+        var id = _this4.selected || null;
 
         if (!id) {
           return;
         }
 
-        _classPrivateFieldGet(_this3, _onDelete).call(_this3, id).then(function (res) {
+        _classPrivateFieldGet(_this4, _onDelete).call(_this4, id).then(function (res) {
           if (res) {
-            _this3.reload();
+            _this4.reload();
           }
         });
       });
@@ -6070,6 +6452,52 @@ var _renderMenuAction2 = function _renderMenuAction2() {
     btnGroup.appendChild(menuAction);
     btnGroup.appendChild(dropdownAction);
   }
+};
+
+var _renderTileAction2 = function _renderTileAction2() {
+  var groupAction = document.createElement('div');
+
+  if ((_classPrivateFieldGet(this, _onEdit) != undefined || _classPrivateFieldGet(this, _onDelete) != undefined) && _classPrivateFieldGet(this, _tableType) == DataTable.TableType.Tile) {
+    groupAction.setAttribute('class', 'col-3 col-md-auto order-md-last text-right');
+    var listAction = [];
+
+    if (_classPrivateFieldGet(this, _onEdit) != undefined) {
+      var aEdit = document.createElement('a');
+      var aEditClass = 'dropdown-item action-edit';
+      aEdit.setAttribute('class', aEditClass);
+      aEdit.href = 'javascript:void(0)';
+      aEdit.textContent = 'Edit';
+      listAction.push(aEdit);
+    }
+
+    if (_classPrivateFieldGet(this, _onDelete) != undefined) {
+      var aDelete = document.createElement('a');
+      var aDeleteClass = 'dropdown-item action-delete';
+      aDelete.setAttribute('class', aDeleteClass);
+      aDelete.href = 'javascript:void(0)';
+      aDelete.textContent = 'Delete';
+      listAction.push(aDelete);
+    }
+
+    var menuAction = document.createElement('button');
+    menuAction.setAttribute('class', 'btn btn-icons btn-rounded btn-light');
+    menuAction.setAttribute('data-toggle', 'dropdown');
+    menuAction.setAttribute('aria-haspopup', 'true');
+    menuAction.setAttribute('aria-expanded', "false");
+    menuAction.innerHTML = '<i class="fa fa-ellipsis-v pt-1"></i>';
+    var dropdownAction = document.createElement('div');
+    dropdownAction.setAttribute('class', 'dropdown-menu');
+    dropdownAction.setAttribute('aria-labelledby', 'menuAction');
+    listAction.forEach(function (item) {
+      dropdownAction.appendChild(item);
+    });
+    groupAction.appendChild(menuAction);
+    groupAction.appendChild(dropdownAction);
+  } else {
+    return null;
+  }
+
+  return groupAction;
 };
 
 var _setDisableEditAction2 = function _setDisableEditAction2(isDisable) {
@@ -6097,19 +6525,22 @@ var _setDisableDeleteAction2 = function _setDisableDeleteAction2(isDisable) {
 };
 
 var _renderButtonAction2 = function _renderButtonAction2(id) {
-  var _this4 = this;
+  var _this5 = this;
 
   var td = document.createElement('td');
-  var editIcon = '<i class="fa fa-pencil-square-o"></i>';
-  var deleteIcon = '<i class="fa fa-trash-o"></i>';
+
+  var editIcon = _classPrivateFieldGet(this, _icons).edit;
+
+  var deleteIcon = _classPrivateFieldGet(this, _icons)["delete"];
 
   if (_classPrivateFieldGet(this, _onEdit) != undefined) {
     var aEdit = document.createElement('a');
     aEdit.setAttribute('class', 'mr-2');
     aEdit.setAttribute('href', 'javascript:void(0)');
+    aEdit.setAttribute('style', 'color: #28A745');
     aEdit.innerHTML = editIcon;
     aEdit.addEventListener('click', function () {
-      _classPrivateFieldGet(_this4, _onEdit).call(_this4, id);
+      _classPrivateFieldGet(_this5, _onEdit).call(_this5, id);
     });
     td.appendChild(aEdit);
   }
@@ -6117,12 +6548,13 @@ var _renderButtonAction2 = function _renderButtonAction2(id) {
   if (_classPrivateFieldGet(this, _onDelete) != undefined) {
     var aDelete = document.createElement('a');
     aDelete.setAttribute('class', 'mr-2');
-    aDelete.setAttribute('style', 'javascript:void(0)');
+    aDelete.setAttribute('href', 'javascript:void(0)');
+    aDelete.setAttribute('style', 'color: red');
     aDelete.innerHTML = deleteIcon;
     aDelete.addEventListener('click', function () {
-      _classPrivateFieldGet(_this4, _onDelete).call(_this4, id).then(function (res) {
+      _classPrivateFieldGet(_this5, _onDelete).call(_this5, id).then(function (res) {
         if (res) {
-          _this4.reload();
+          _this5.reload();
         }
       });
     });
@@ -6133,13 +6565,14 @@ var _renderButtonAction2 = function _renderButtonAction2(id) {
 };
 
 var _renderShowMore2 = function _renderShowMore2() {
-  var _this5 = this;
+  var _this6 = this;
 
   var showMoreId = "".concat(_classPrivateFieldGet(this, _element).id, "-dataTable-show-more");
 
   _classPrivateFieldSet(this, _showMoreId, showMoreId);
 
-  var icon = '<i class="fa fa-angle-double-down"></i>';
+  var icon = _classPrivateFieldGet(this, _icons).showMore;
+
   var span = document.createElement('span');
   span.setAttribute('class', 'd-flex justify-content-center');
   span.setAttribute('style', 'display:none;');
@@ -6148,12 +6581,12 @@ var _renderShowMore2 = function _renderShowMore2() {
   _classPrivateFieldGet(this, _element).parentElement.appendChild(span);
 
   document.querySelector("#".concat(showMoreId)).addEventListener('click', function (e) {
-    _this5.nextPage();
+    _this6.nextPage();
   });
 };
 
 var _removeSelectedRow2 = function _removeSelectedRow2() {
-  var row = document.querySelectorAll("#".concat(_classPrivateFieldGet(this, _element).id, " tr"));
+  var row = _classPrivateFieldGet(this, _tableType) == DataTable.TableType.List ? document.querySelectorAll("#".concat(_classPrivateFieldGet(this, _element).id, " tr")) : document.querySelectorAll("#".concat(_classPrivateFieldGet(this, _element).id, " .card"));
   var rowLength = row.length;
 
   for (var i = 0; i < rowLength; i++) {
@@ -6165,14 +6598,14 @@ var _handlingNextPage2 = function _handlingNextPage2() {
   var nextPage;
 
   switch (_classPrivateFieldGet(this, _paginationType)) {
-    case DataTable.PAGINATION_DEFAULT:
+    case DataTable.PaginationType.Default:
       break;
 
-    case DataTable.PAGINATION_SHOW_MORE:
+    case DataTable.PaginationType.ShowMore:
       nextPage = document.querySelector("#".concat(_classPrivateFieldGet(this, _showMoreId)));
       break;
 
-    case DataTable.PAGINATION_INFINITE:
+    case DataTable.PaginationType.Infinite:
       break;
 
     default:

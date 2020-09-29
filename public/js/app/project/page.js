@@ -17010,8 +17010,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var bootstrap_slider__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! bootstrap-slider */ "./node_modules/bootstrap-slider/dist/bootstrap-slider.js");
 /* harmony import */ var bootstrap_slider__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(bootstrap_slider__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _libraries_lookup_lookup__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../libraries/lookup/lookup */ "./resources/js/libraries/lookup/lookup.js");
-/* harmony import */ var _project__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./project */ "./resources/js/app/project/project.js");
+/* harmony import */ var _libraries_httpClient_httpClient__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../libraries/httpClient/httpClient */ "./resources/js/libraries/httpClient/httpClient.js");
+/* harmony import */ var _libraries_lookup_lookup__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../libraries/lookup/lookup */ "./resources/js/libraries/lookup/lookup.js");
+/* harmony import */ var _project__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./project */ "./resources/js/app/project/project.js");
 
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
@@ -17021,13 +17022,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
 
 
+
 Shimmer(true);
 var projectId = document.querySelector('#project-page-id') ? document.querySelector('#project-page-id').value : null;
 var pageMode = document.querySelector('#page-mode') ? document.querySelector('#page-mode').value : ADD_MODE;
-var progressProject = new bootstrap_slider__WEBPACK_IMPORTED_MODULE_1___default.a('#project-page-progress');
+var projectData = _project__WEBPACK_IMPORTED_MODULE_4__["Project"].getAllProperty(_project__WEBPACK_IMPORTED_MODULE_4__["Project"].attribute.page);
 /** Lookup */
 
-var projectStatusLookup = new _libraries_lookup_lookup__WEBPACK_IMPORTED_MODULE_2__["Lookup"]({
+var projectStatusLookup = new _libraries_lookup_lookup__WEBPACK_IMPORTED_MODULE_3__["Lookup"]({
   element: '#project-page-project_status',
   placeholder: 'Pilih Status',
   isAutoInit: false
@@ -17038,57 +17040,151 @@ var projectStatusLookup = new _libraries_lookup_lookup__WEBPACK_IMPORTED_MODULE_
 
 /** End DataTable */
 
+var projectSubTotal = new Cleave('#project-page-sub_total', {
+  numeral: true,
+  prefix: 'Rp ',
+  numeralDecimalMark: ',',
+  delimiter: '.'
+});
+var projectCCO = new Cleave('#project-page-cco', {
+  numeral: true,
+  prefix: 'Rp ',
+  numeralDecimalMark: ',',
+  delimiter: '.'
+});
+var projectTotal = new Cleave('#project-page-total', {
+  numeral: true,
+  prefix: 'Rp ',
+  numeralDecimalMark: ',',
+  delimiter: '.'
+});
+var projectDP = new Cleave('#project-page-dp', {
+  numeral: true,
+  prefix: 'Rp ',
+  numeralDecimalMark: ',',
+  delimiter: '.'
+});
+var projectSisa = new Cleave('#project-page-sisa', {
+  numeral: true,
+  prefix: 'Rp ',
+  numeralDecimalMark: ',',
+  delimiter: '.'
+});
+var progressProject = new bootstrap_slider__WEBPACK_IMPORTED_MODULE_1___default.a('#project-page-progress');
+var projectDate = new Datepicker(projectData.date, {
+  autohide: true,
+  clearBtn: true,
+  buttonClass: 'btn',
+  format: 'dd/mm/yyyy'
+});
 document.addEventListener('DOMContentLoaded', /*#__PURE__*/function () {
-  var _ref = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(e) {
+  var _ref = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2(e) {
     var isError;
-    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee2$(_context2) {
       while (1) {
-        switch (_context.prev = _context.next) {
+        switch (_context2.prev = _context2.next) {
           case 0:
             isError = false;
-            _context.prev = 1;
-            _context.next = 4;
+            _context2.prev = 1;
+            _context2.next = 4;
             return init();
 
           case 4:
-            _context.next = 10;
+            _context2.next = 10;
             break;
 
           case 6:
-            _context.prev = 6;
-            _context.t0 = _context["catch"](1);
+            _context2.prev = 6;
+            _context2.t0 = _context2["catch"](1);
             Alert({
-              title: 'Something wrong happen',
-              message: _context.t0,
+              title: 'Terjadi kesalahan',
+              message: _context2.t0,
               type: AlertHelper.Error
             });
             isError = true;
 
           case 10:
-            _context.prev = 10;
+            _context2.prev = 10;
             Shimmer(false);
 
             if (!isError) {
-              _context.next = 14;
+              _context2.next = 14;
               break;
             }
 
-            return _context.abrupt("return");
+            return _context2.abrupt("return");
 
           case 14:
-            return _context.finish(10);
+            return _context2.finish(10);
 
           case 15:
             progressProject.on("slide", function (sliderValue) {
               document.querySelector("#project-page-progress-value").textContent = "".concat(sliderValue, "%");
             });
+            progressProject.on("change", function (sliderValue) {
+              document.querySelector("#project-page-progress-value").textContent = "".concat(sliderValue.newValue, "%");
+            });
+            document.querySelector('#project-page-save').addEventListener('click', /*#__PURE__*/function () {
+              var _ref2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(e) {
+                var res;
+                return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
+                  while (1) {
+                    switch (_context.prev = _context.next) {
+                      case 0:
+                        _context.prev = 0;
+                        _context.next = 3;
+                        return save();
 
-          case 16:
+                      case 3:
+                        res = _context.sent;
+
+                        if (res) {
+                          if (res.status && res.id && pageMode == ADD_MODE) {
+                            Alert({
+                              title: 'Project berhasil disimpan'
+                            }).then(function (res) {
+                              return window.location.href = "".concat(APP_URL, "/projects");
+                            });
+                          } else {
+                            Toastr({
+                              message: 'Project berhasil disimpan'
+                            });
+                            reloadPage();
+                          }
+                        }
+
+                        _context.next = 11;
+                        break;
+
+                      case 7:
+                        _context.prev = 7;
+                        _context.t0 = _context["catch"](0);
+                        console.error(_context.t0);
+                        Alert({
+                          title: 'Terjadi kesalahan',
+                          message: _context.t0,
+                          type: AlertHelper.Error
+                        });
+
+                      case 11:
+                      case "end":
+                        return _context.stop();
+                    }
+                  }
+                }, _callee, null, [[0, 7]]);
+              }));
+
+              return function (_x2) {
+                return _ref2.apply(this, arguments);
+              };
+            }());
+
+          case 18:
           case "end":
-            return _context.stop();
+            return _context2.stop();
         }
       }
-    }, _callee, null, [[1, 6, 10, 15]]);
+    }, _callee2, null, [[1, 6, 10, 15]]);
   }));
 
   return function (_x) {
@@ -17101,22 +17197,22 @@ function init() {
 }
 
 function _init() {
-  _init = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2() {
+  _init = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee3() {
     var data;
-    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee2$(_context2) {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee3$(_context3) {
       while (1) {
-        switch (_context2.prev = _context2.next) {
+        switch (_context3.prev = _context3.next) {
           case 0:
-            _context2.prev = 0;
-            _context2.next = 3;
+            _context3.prev = 0;
+            _context3.next = 3;
             return renderLookup();
 
           case 3:
-            _context2.next = 5;
+            _context3.next = 5;
             return renderModal();
 
           case 5:
-            _context2.next = 7;
+            _context3.next = 7;
             return renderDetail();
 
           case 7:
@@ -17124,52 +17220,79 @@ function _init() {
             handlingAfterSaveModals();
 
             if (!(pageMode == EDIT_MODE && projectId != undefined)) {
-              _context2.next = 14;
+              _context3.next = 14;
               break;
             }
 
-            _context2.next = 12;
-            return _project__WEBPACK_IMPORTED_MODULE_3__["Project"].show({
+            _context3.next = 12;
+            return _project__WEBPACK_IMPORTED_MODULE_4__["Project"].show({
               id: projectId
             });
 
           case 12:
-            data = _context2.sent;
+            data = _context3.sent;
             renderPage(data);
 
           case 14:
-            _context2.next = 20;
+            _context3.next = 20;
             break;
 
           case 16:
-            _context2.prev = 16;
-            _context2.t0 = _context2["catch"](0);
-            console.error(_context2.t0);
-            throw _context2.t0;
+            _context3.prev = 16;
+            _context3.t0 = _context3["catch"](0);
+            console.error(_context3.t0);
+            throw _context3.t0;
 
           case 20:
           case "end":
-            return _context2.stop();
+            return _context3.stop();
         }
       }
-    }, _callee2, null, [[0, 16]]);
+    }, _callee3, null, [[0, 16]]);
   }));
   return _init.apply(this, arguments);
 }
 
-function renderPage(data) {}
+function renderPage(data) {
+  projectData.name.value = data.name ? data.name : '';
+  projectData.code.value = data.code ? data.code : '';
+  projectData.owner.value = data.owner ? data.owner : ''; // projectData.date.value = data.date ? data.date : '';
+
+  projectDate.setDate(data.date ? new Date(data.date) : null);
+  projectData.city.value = data.city ? data.city : '';
+  projectData.address.value = data.address ? data.address : '';
+  projectData.luas_area.value = data.luas_area ? parseFloat(data.luas_area) : 0;
+  projectData.estimasi.value = data.estimasi ? data.estimasi : 0; // projectData.sub_total.value = data.sub_total ? parseFloat(data.sub_total) : 0;
+  // projectData.cco.value = data.cco ? parseFloat(data.cco) : 0;
+  // projectData.total.value = data.total ? parseFloat(data.total) : 0;
+  // projectData.dp.value = data.dp ? parseFloat(data.dp) : 0;
+  // projectData.sisa.value = data.sisa ? parseFloat(data.sisa) : 0;
+
+  projectSubTotal.setRawValue(data.sub_total ? data.sub_total : '0');
+  projectCCO.setRawValue(data.cco ? data.cco : '0');
+  projectTotal.setRawValue(data.total ? data.total : '0');
+  projectDP.setRawValue(data.dp ? data.dp : '0');
+  projectSisa.setRawValue(data.sisa ? data.sisa : '0');
+  progressProject.setValue(data.progress ? data.progress : 0, false, true);
+  document.querySelector("#project-page-progress-value").textContent = "".concat(data.progress ? data.progress : 0, "%");
+  var projectStatusValue = data.project_status ? {
+    id: data.project_status.id,
+    name: data.project_status.name
+  } : null;
+  projectStatusLookup.setValue(projectStatusValue);
+}
 
 function renderLookup() {
   return _renderLookup.apply(this, arguments);
 }
 
 function _renderLookup() {
-  _renderLookup = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee3() {
-    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee3$(_context3) {
+  _renderLookup = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee4() {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee4$(_context4) {
       while (1) {
-        switch (_context3.prev = _context3.next) {
+        switch (_context4.prev = _context4.next) {
           case 0:
-            _context3.prev = 0;
+            _context4.prev = 0;
             // const projectStatusData = HTTPClient.Request({
             //     uri: `${APP_URL}/lookups/project-status`,
             //     method: HTTPClient.GET
@@ -17186,21 +17309,21 @@ function _renderLookup() {
             //     })
             // };
             projectStatusLookup.init();
-            _context3.next = 8;
+            _context4.next = 8;
             break;
 
           case 4:
-            _context3.prev = 4;
-            _context3.t0 = _context3["catch"](0);
-            console.error(_context3.t0);
-            throw _context3.t0;
+            _context4.prev = 4;
+            _context4.t0 = _context4["catch"](0);
+            console.error(_context4.t0);
+            throw _context4.t0;
 
           case 8:
           case "end":
-            return _context3.stop();
+            return _context4.stop();
         }
       }
-    }, _callee3, null, [[0, 4]]);
+    }, _callee4, null, [[0, 4]]);
   }));
   return _renderLookup.apply(this, arguments);
 }
@@ -17210,31 +17333,31 @@ function renderModal() {
 }
 
 function _renderModal() {
-  _renderModal = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee4() {
-    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee4$(_context4) {
+  _renderModal = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee5() {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee5$(_context5) {
       while (1) {
-        switch (_context4.prev = _context4.next) {
+        switch (_context5.prev = _context5.next) {
           case 0:
-            _context4.prev = 0;
-            _context4.next = 3;
+            _context5.prev = 0;
+            _context5.next = 3;
             return Promise.all([]);
 
           case 3:
-            _context4.next = 9;
+            _context5.next = 9;
             break;
 
           case 5:
-            _context4.prev = 5;
-            _context4.t0 = _context4["catch"](0);
-            console.error(_context4.t0);
-            throw _context4.t0;
+            _context5.prev = 5;
+            _context5.t0 = _context5["catch"](0);
+            console.error(_context5.t0);
+            throw _context5.t0;
 
           case 9:
           case "end":
-            return _context4.stop();
+            return _context5.stop();
         }
       }
-    }, _callee4, null, [[0, 5]]);
+    }, _callee5, null, [[0, 5]]);
   }));
   return _renderModal.apply(this, arguments);
 }
@@ -17246,72 +17369,72 @@ function renderDetail() {
 }
 
 function _renderDetail() {
-  _renderDetail = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee5() {
-    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee5$(_context5) {
+  _renderDetail = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee6() {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee6$(_context6) {
       while (1) {
-        switch (_context5.prev = _context5.next) {
+        switch (_context6.prev = _context6.next) {
           case 0:
           case "end":
-            return _context5.stop();
+            return _context6.stop();
         }
       }
-    }, _callee5);
+    }, _callee6);
   }));
   return _renderDetail.apply(this, arguments);
 }
 
 function handlingNewButtonDetails() {}
 
-function reloadDetail(_x2) {
+function reloadDetail(_x3) {
   return _reloadDetail.apply(this, arguments);
 }
 
 function _reloadDetail() {
-  _reloadDetail = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee6(_ref2) {
-    var _ref2$name, name, _ref2$reloadAll, reloadAll, listDetail, promiseList, key;
+  _reloadDetail = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee7(_ref3) {
+    var _ref3$name, name, _ref3$reloadAll, reloadAll, listDetail, promiseList, key;
 
-    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee6$(_context6) {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee7$(_context7) {
       while (1) {
-        switch (_context6.prev = _context6.next) {
+        switch (_context7.prev = _context7.next) {
           case 0:
-            _ref2$name = _ref2.name, name = _ref2$name === void 0 ? null : _ref2$name, _ref2$reloadAll = _ref2.reloadAll, reloadAll = _ref2$reloadAll === void 0 ? false : _ref2$reloadAll;
+            _ref3$name = _ref3.name, name = _ref3$name === void 0 ? null : _ref3$name, _ref3$reloadAll = _ref3.reloadAll, reloadAll = _ref3$reloadAll === void 0 ? false : _ref3$reloadAll;
             listDetail = {};
-            _context6.prev = 2;
+            _context7.prev = 2;
 
             if (!reloadAll) {
-              _context6.next = 17;
+              _context7.next = 17;
               break;
             }
 
             promiseList = [];
-            _context6.t0 = _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.keys(listDetail);
+            _context7.t0 = _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.keys(listDetail);
 
           case 6:
-            if ((_context6.t1 = _context6.t0()).done) {
-              _context6.next = 13;
+            if ((_context7.t1 = _context7.t0()).done) {
+              _context7.next = 13;
               break;
             }
 
-            key = _context6.t1.value;
+            key = _context7.t1.value;
 
             if (listDetail.hasOwnProperty(key)) {
-              _context6.next = 10;
+              _context7.next = 10;
               break;
             }
 
-            return _context6.abrupt("continue", 6);
+            return _context7.abrupt("continue", 6);
 
           case 10:
             promiseList.push(listDetail[key].reload());
-            _context6.next = 6;
+            _context7.next = 6;
             break;
 
           case 13:
-            _context6.next = 15;
+            _context7.next = 15;
             return Promise.all(promiseList);
 
           case 15:
-            _context6.next = 18;
+            _context7.next = 18;
             break;
 
           case 17:
@@ -17320,21 +17443,21 @@ function _reloadDetail() {
             }
 
           case 18:
-            _context6.next = 24;
+            _context7.next = 24;
             break;
 
           case 20:
-            _context6.prev = 20;
-            _context6.t2 = _context6["catch"](2);
-            console.error(_context6.t2);
-            throw _context6.t2;
+            _context7.prev = 20;
+            _context7.t2 = _context7["catch"](2);
+            console.error(_context7.t2);
+            throw _context7.t2;
 
           case 24:
           case "end":
-            return _context6.stop();
+            return _context7.stop();
         }
       }
-    }, _callee6, null, [[2, 20]]);
+    }, _callee7, null, [[2, 20]]);
   }));
   return _reloadDetail.apply(this, arguments);
 }
@@ -17344,59 +17467,139 @@ function reloadPage() {
 }
 
 function _reloadPage() {
-  _reloadPage = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee7() {
+  _reloadPage = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee8() {
     var isError, data;
-    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee7$(_context7) {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee8$(_context8) {
       while (1) {
-        switch (_context7.prev = _context7.next) {
+        switch (_context8.prev = _context8.next) {
           case 0:
             isError = false;
             Shimmer(true);
-            _context7.prev = 2;
-            _context7.next = 5;
-            return _project__WEBPACK_IMPORTED_MODULE_3__["Project"].show({
+            _context8.prev = 2;
+            _context8.next = 5;
+            return _project__WEBPACK_IMPORTED_MODULE_4__["Project"].show({
               id: projectId
             });
 
           case 5:
-            data = _context7.sent;
+            data = _context8.sent;
             renderPage(data);
-            _context7.next = 9;
+            _context8.next = 9;
             return reloadDetail({
               reloadAll: true
             });
 
           case 9:
-            _context7.next = 14;
+            _context8.next = 14;
             break;
 
           case 11:
-            _context7.prev = 11;
-            _context7.t0 = _context7["catch"](2);
-            console.error(_context7.t0);
+            _context8.prev = 11;
+            _context8.t0 = _context8["catch"](2);
+            console.error(_context8.t0);
 
           case 14:
-            _context7.prev = 14;
+            _context8.prev = 14;
             Shimmer(false);
 
             if (!isError) {
-              _context7.next = 18;
+              _context8.next = 18;
               break;
             }
 
             throw error;
 
           case 18:
-            return _context7.finish(14);
+            return _context8.finish(14);
 
           case 19:
           case "end":
-            return _context7.stop();
+            return _context8.stop();
         }
       }
-    }, _callee7, null, [[2, 11, 14, 19]]);
+    }, _callee8, null, [[2, 11, 14, 19]]);
   }));
   return _reloadPage.apply(this, arguments);
+}
+
+function save() {
+  return _save.apply(this, arguments);
+}
+
+function _save() {
+  _save = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee9() {
+    var conf, project;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee9$(_context9) {
+      while (1) {
+        switch (_context9.prev = _context9.next) {
+          case 0:
+            _context9.prev = 0;
+            _context9.next = 3;
+            return Confirm();
+
+          case 3:
+            conf = _context9.sent;
+
+            if (conf) {
+              _context9.next = 6;
+              break;
+            }
+
+            return _context9.abrupt("return");
+
+          case 6:
+            project = new _project__WEBPACK_IMPORTED_MODULE_4__["Project"]();
+            project.setAllProperty(_project__WEBPACK_IMPORTED_MODULE_4__["Project"].attribute.page);
+            project.date = projectData.date.value ? projectDate.getDate('yyyy-mm-dd') : null;
+            project.sub_total = projectSubTotal.getRawValue().split('Rp ')[1];
+            project.cco = projectCCO.getRawValue().split('Rp ')[1];
+            project.total = projectTotal.getRawValue().split('Rp ')[1];
+            project.dp = projectDP.getRawValue().split('Rp ')[1];
+            project.sisa = projectSisa.getRawValue().split('Rp ')[1];
+
+            if (!(pageMode == ADD_MODE)) {
+              _context9.next = 20;
+              break;
+            }
+
+            _context9.next = 17;
+            return project.save();
+
+          case 17:
+            return _context9.abrupt("return", _context9.sent);
+
+          case 20:
+            if (!(pageMode == EDIT_MODE)) {
+              _context9.next = 24;
+              break;
+            }
+
+            _context9.next = 23;
+            return project.update({
+              id: projectId
+            });
+
+          case 23:
+            return _context9.abrupt("return", _context9.sent);
+
+          case 24:
+            _context9.next = 30;
+            break;
+
+          case 26:
+            _context9.prev = 26;
+            _context9.t0 = _context9["catch"](0);
+            console.error(_context9.t0);
+            throw _context9.t0;
+
+          case 30:
+          case "end":
+            return _context9.stop();
+        }
+      }
+    }, _callee9, null, [[0, 26]]);
+  }));
+  return _save.apply(this, arguments);
 }
 
 /***/ }),
@@ -17469,9 +17672,7 @@ var Project = /*#__PURE__*/function (_Controller) {
         dp = _ref.dp,
         sisa = _ref.sisa,
         progress = _ref.progress,
-        project_status = _ref.project_status,
-        _ref$autoInit = _ref.autoInit,
-        autoInit = _ref$autoInit === void 0 ? false : _ref$autoInit;
+        project_status = _ref.project_status;
 
     _classCallCheck(this, Project);
 
@@ -17523,46 +17724,10 @@ var Project = /*#__PURE__*/function (_Controller) {
       _this.sisa = sisa;
       _this.progress = progress;
       _this.project_status = project_status;
-    } // if(autoInit) {
-    //     this.autoCollect();
-    // }
-
+    }
 
     return _this;
-  } // get attribute() {
-  //     return {
-  //         page: {
-  //             name: 'project-page-name',
-  //             code: 'project-page-code',
-  //             owner: 'project-page-owner',
-  //             date: 'project-page-date',
-  //             city: 'project-page-city',
-  //             address: 'project-page-address',
-  //             luas_area: 'project-page-luas_area',
-  //             estimasi: 'project-page-estimasi',
-  //             sub_total: 'project-page-sub_total',
-  //             cco: 'project-page-cco',
-  //             total: 'project-page-total',
-  //             dp: 'project-page-dp',
-  //             sisa: 'project-page-sisa',
-  //             progress: 'project-page-progress',
-  //             project_status: 'project-page-project_status'
-  //         },
-  //     };
-  // }
-  // autoCollect() {
-  //     const attributeList = this.attribute.page;
-  //     for(const attribute in attributeList) {
-  //         if (!attributeList.hasOwnProperty(attribute)) {
-  //             continue;
-  //         }
-  //         const element = document.querySelector(`#${attributeList[attribute]}`);
-  //         if(element != undefined) {
-  //             Project[attribute] = element.value;
-  //         }
-  //     }
-  // }
-
+  }
 
   _createClass(Project, [{
     key: "name",
@@ -17636,7 +17801,7 @@ var Project = /*#__PURE__*/function (_Controller) {
       return this._luas_area;
     },
     set: function set(value) {
-      var _value = value != undefined ? parseFloat(value.trim()) : 0;
+      var _value = value != undefined && value.trim() != '' && !isNaN(value) ? parseFloat(value.trim()) : 0;
 
       this.addProperty('luas_area', _value);
       this._luas_area = _value;
@@ -17647,7 +17812,7 @@ var Project = /*#__PURE__*/function (_Controller) {
       return this._estimasi;
     },
     set: function set(value) {
-      var _value = value != undefined ? parseInt(value.trim()) : 0;
+      var _value = value != undefined && value.trim() != '' && !isNaN(value) ? parseInt(value.trim()) : 0;
 
       this.addProperty('estimasi', _value);
       this._estimasi = _value;
@@ -17658,7 +17823,7 @@ var Project = /*#__PURE__*/function (_Controller) {
       return this._sub_total;
     },
     set: function set(value) {
-      var _value = value != undefined ? parseFloat(value.trim()) : 0;
+      var _value = value != undefined && value.trim() != '' && !isNaN(value) ? parseFloat(value.trim()) : 0;
 
       this.addProperty('sub_total', _value);
       this._sub_total = _value;
@@ -17669,7 +17834,7 @@ var Project = /*#__PURE__*/function (_Controller) {
       return this._cco;
     },
     set: function set(value) {
-      var _value = value != undefined ? parseFloat(value.trim()) : 0;
+      var _value = value != undefined && value.trim() != '' && !isNaN(value) ? parseFloat(value.trim()) : 0;
 
       this.addProperty('cco', _value);
       this._cco = _value;
@@ -17680,7 +17845,7 @@ var Project = /*#__PURE__*/function (_Controller) {
       return this._total;
     },
     set: function set(value) {
-      var _value = value != undefined ? parseFloat(value.trim()) : 0;
+      var _value = value != undefined && value.trim() != '' && !isNaN(value) ? parseFloat(value.trim()) : 0;
 
       this.addProperty('total', _value);
       this._total = _value;
@@ -17691,7 +17856,7 @@ var Project = /*#__PURE__*/function (_Controller) {
       return this._dp;
     },
     set: function set(value) {
-      var _value = value != undefined ? parseFloat(value.trim()) : 0;
+      var _value = value != undefined && value.trim() != '' && !isNaN(value) ? parseFloat(value.trim()) : 0;
 
       this.addProperty('dp', _value);
       this._dp = _value;
@@ -17702,7 +17867,7 @@ var Project = /*#__PURE__*/function (_Controller) {
       return this._sisa;
     },
     set: function set(value) {
-      var _value = value != undefined ? parseFloat(value.trim()) : 0;
+      var _value = value != undefined && value.trim() != '' && !isNaN(value) ? parseFloat(value.trim()) : 0;
 
       this.addProperty('sisa', _value);
       this._sisa = _value;
@@ -17713,7 +17878,7 @@ var Project = /*#__PURE__*/function (_Controller) {
       return this._progress;
     },
     set: function set(value) {
-      var _value = value != undefined ? parseInt(value.trim()) : 0;
+      var _value = value != undefined && value.trim() != '' && !isNaN(value) ? parseInt(value.trim()) : 0;
 
       this.addProperty('progress', _value);
       this._progress = _value;
@@ -17727,401 +17892,38 @@ var Project = /*#__PURE__*/function (_Controller) {
       var _value = value != undefined && _typeof(value) == 'object' ? {
         id: value.id.trim(),
         name: value.name.trim()
-      } : null;
+      } : value != undefined && typeof value == 'string' ? value.trim() : null;
 
       this.addProperty('project_status_id', _value);
       this._project_status = _value;
+    }
+  }], [{
+    key: "attribute",
+    get: function get() {
+      return {
+        page: {
+          name: '#project-page-name',
+          code: '#project-page-code',
+          owner: '#project-page-owner',
+          date: '#project-page-date',
+          city: '#project-page-city',
+          address: '#project-page-address',
+          luas_area: '#project-page-luas_area',
+          estimasi: '#project-page-estimasi',
+          sub_total: '#project-page-sub_total',
+          cco: '#project-page-cco',
+          total: '#project-page-total',
+          dp: '#project-page-dp',
+          sisa: '#project-page-sisa',
+          progress: '#project-page-progress',
+          project_status: '#project-page-project_status'
+        }
+      };
     }
   }]);
 
   return Project;
 }(_libraries_controller_controller__WEBPACK_IMPORTED_MODULE_0__["Controller"]);
-
-/***/ }),
-
-/***/ "./resources/js/libraries/HttpClient/httpClient.js":
-/*!*********************************************************!*\
-  !*** ./resources/js/libraries/HttpClient/httpClient.js ***!
-  \*********************************************************/
-/*! exports provided: HTTPClient */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "HTTPClient", function() { return HTTPClient; });
-/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
-/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
-
-
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var HTTPClient = /*#__PURE__*/function () {
-  function HTTPClient() {
-    _classCallCheck(this, HTTPClient);
-  }
-
-  _createClass(HTTPClient, null, [{
-    key: "isContentTypeJSON",
-
-    /** End Available Content Type */
-    value: function isContentTypeJSON(headers) {
-      return headers.has('Content-Type') && headers.get('Content-Type') == HTTPClient.CONTENT_TYPE_JSON;
-    }
-  }, {
-    key: "isContentTypeForm",
-    value: function isContentTypeForm(headers) {
-      return headers.has('Content-Type') && headers.get('Content-Type') == HTTPClient.CONTENT_TYPE_FORM;
-    }
-  }, {
-    key: "isContentTypeFormData",
-    value: function isContentTypeFormData(body) {
-      return _typeof(body) == 'object' && body instanceof FormData;
-    }
-  }, {
-    key: "Request",
-    value: function () {
-      var _Request = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(_ref) {
-        var _ref$uri, uri, method, _ref$headers, headers, _ref$body, body, _ref$isSelfHandling, isSelfHandling, req, options;
-
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                _ref$uri = _ref.uri, uri = _ref$uri === void 0 ? null : _ref$uri, method = _ref.method, _ref$headers = _ref.headers, headers = _ref$headers === void 0 ? null : _ref$headers, _ref$body = _ref.body, body = _ref$body === void 0 ? null : _ref$body, _ref$isSelfHandling = _ref.isSelfHandling, isSelfHandling = _ref$isSelfHandling === void 0 ? false : _ref$isSelfHandling;
-                _context.prev = 1;
-                _context.t0 = method;
-                _context.next = _context.t0 === HTTPClient.GET ? 5 : _context.t0 === HTTPClient.POST ? 7 : _context.t0 === HTTPClient.PUT ? 9 : _context.t0 === HTTPClient.PATCH ? 11 : _context.t0 === HTTPClient.DELETE ? 13 : 15;
-                break;
-
-              case 5:
-                options = HTTPClient.buildOptions({
-                  method: HTTPClient.GET,
-                  headers: headers
-                });
-                return _context.abrupt("break", 17);
-
-              case 7:
-                options = HTTPClient.buildOptions({
-                  method: HTTPClient.POST,
-                  headers: headers,
-                  body: body
-                });
-                return _context.abrupt("break", 17);
-
-              case 9:
-                options = HTTPClient.buildOptions({
-                  method: HTTPClient.PUT,
-                  headers: headers,
-                  body: body
-                });
-                return _context.abrupt("break", 17);
-
-              case 11:
-                options = HTTPClient.buildOptions({
-                  method: HTTPClient.PATCH,
-                  headers: headers,
-                  body: body
-                });
-                return _context.abrupt("break", 17);
-
-              case 13:
-                options = HTTPClient.buildOptions({
-                  method: HTTPClient.DELETE,
-                  headers: headers
-                });
-                return _context.abrupt("break", 17);
-
-              case 15:
-                options = HTTPClient.buildOptions({
-                  method: HTTPClient.GET,
-                  headers: headers
-                });
-                return _context.abrupt("break", 17);
-
-              case 17:
-                _context.next = 19;
-                return fetch(uri, options);
-
-              case 19:
-                req = _context.sent;
-
-                if (!isSelfHandling) {
-                  _context.next = 24;
-                  break;
-                }
-
-                return _context.abrupt("return", req);
-
-              case 24:
-                _context.next = 26;
-                return HTTPClient.handlingResponse(req);
-
-              case 26:
-                return _context.abrupt("return", _context.sent);
-
-              case 27:
-                _context.next = 32;
-                break;
-
-              case 29:
-                _context.prev = 29;
-                _context.t1 = _context["catch"](1);
-                throw new Error(_context.t1);
-
-              case 32:
-              case "end":
-                return _context.stop();
-            }
-          }
-        }, _callee, null, [[1, 29]]);
-      }));
-
-      function Request(_x) {
-        return _Request.apply(this, arguments);
-      }
-
-      return Request;
-    }()
-  }, {
-    key: "handlingResponse",
-    value: function () {
-      var _handlingResponse = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2(response) {
-        var contentType;
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee2$(_context2) {
-          while (1) {
-            switch (_context2.prev = _context2.next) {
-              case 0:
-                _context2.prev = 0;
-
-                if (response.ok) {
-                  _context2.next = 3;
-                  break;
-                }
-
-                throw "HTTP Request Error: ".concat(response.status);
-
-              case 3:
-                contentType = response.headers.get("content-type");
-
-                if (!(contentType && contentType.indexOf("application/json") !== -1)) {
-                  _context2.next = 10;
-                  break;
-                }
-
-                _context2.next = 7;
-                return response.json();
-
-              case 7:
-                return _context2.abrupt("return", _context2.sent);
-
-              case 10:
-                if (!(contentType && (contentType.indexOf("text/html") !== -1 || contentType.indexOf("text/plain") !== -1))) {
-                  _context2.next = 14;
-                  break;
-                }
-
-                _context2.next = 13;
-                return response.text();
-
-              case 13:
-                return _context2.abrupt("return", _context2.sent);
-
-              case 14:
-                _context2.next = 19;
-                break;
-
-              case 16:
-                _context2.prev = 16;
-                _context2.t0 = _context2["catch"](0);
-                throw _context2.t0;
-
-              case 19:
-              case "end":
-                return _context2.stop();
-            }
-          }
-        }, _callee2, null, [[0, 16]]);
-      }));
-
-      function handlingResponse(_x2) {
-        return _handlingResponse.apply(this, arguments);
-      }
-
-      return handlingResponse;
-    }()
-  }, {
-    key: "handlingDownload",
-    value: function () {
-      var _handlingDownload = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee3(response, filename) {
-        var blob, url, a;
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee3$(_context3) {
-          while (1) {
-            switch (_context3.prev = _context3.next) {
-              case 0:
-                _context3.prev = 0;
-                _context3.next = 3;
-                return response.blob();
-
-              case 3:
-                blob = _context3.sent;
-                url = window.URL.createObjectURL(blob);
-                a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                _context3.next = 17;
-                break;
-
-              case 14:
-                _context3.prev = 14;
-                _context3.t0 = _context3["catch"](0);
-                throw _context3.t0;
-
-              case 17:
-              case "end":
-                return _context3.stop();
-            }
-          }
-        }, _callee3, null, [[0, 14]]);
-      }));
-
-      function handlingDownload(_x3, _x4) {
-        return _handlingDownload.apply(this, arguments);
-      }
-
-      return handlingDownload;
-    }()
-  }, {
-    key: "buildOptions",
-    value: function buildOptions(_ref2) {
-      var method = _ref2.method,
-          _ref2$headers = _ref2.headers,
-          headers = _ref2$headers === void 0 ? null : _ref2$headers,
-          _ref2$body = _ref2.body,
-          body = _ref2$body === void 0 ? null : _ref2$body;
-      var options = {};
-
-      try {
-        switch (method) {
-          case HTTPClient.GET:
-            options.method = HTTPClient.GET;
-            break;
-
-          case HTTPClient.POST:
-            options.method = HTTPClient.POST;
-            break;
-
-          case HTTPClient.PUT:
-            options.method = HTTPClient.PUT;
-            break;
-
-          case HTTPClient.PATCH:
-            options.method = HTTPClient.PATCH;
-            break;
-
-          case HTTPClient.DELETE:
-            options.method = HTTPClient.DELETE;
-            break;
-
-          default:
-            options.method = HTTPClient.GET;
-            break;
-        }
-
-        options.headers = new Headers();
-
-        if (headers != undefined && _typeof(headers) == 'object') {
-          Object.keys(headers).forEach(function (key) {
-            if (!options.headers.has(key)) {
-              options.headers.append(key, headers[key]);
-            }
-          });
-        }
-
-        if (method == HTTPClient.POST || method == HTTPClient.PUT || method == HTTPClient.PATCH) {
-          if (body != undefined && _typeof(body) == 'object') {
-            if (HTTPClient.isContentTypeJSON(options.headers)) {
-              options.body = JSON.stringify(body);
-            } else if (HTTPClient.isContentTypeForm(options.headers)) {
-              var urlencoded = new URLSearchParams();
-              Object.keys(body).forEach(function (key) {
-                urlencoded.append(key, body[key]);
-              });
-              options.body = urlencoded;
-            } else if (HTTPClient.isContentTypeFormData(body)) {
-              var formdata = new FormData();
-              Object.keys(body).forEach(function (key) {
-                formdata.append(key, body[key]);
-              });
-              options.body = formdata;
-              delete options.headers;
-            }
-          }
-        }
-      } catch (error) {
-        throw error;
-      }
-
-      return options;
-    }
-  }, {
-    key: "GET",
-
-    /** Available Method */
-    get: function get() {
-      return 'GET';
-    }
-  }, {
-    key: "POST",
-    get: function get() {
-      return 'POST';
-    }
-  }, {
-    key: "PUT",
-    get: function get() {
-      return 'PUT';
-    }
-  }, {
-    key: "PATCH",
-    get: function get() {
-      return 'PATCH';
-    }
-  }, {
-    key: "DELETE",
-    get: function get() {
-      return 'DELETE';
-    }
-    /** End Available Method */
-
-    /** Available Content Type */
-
-  }, {
-    key: "CONTENT_TYPE_JSON",
-    get: function get() {
-      return "application/json";
-    }
-  }, {
-    key: "CONTENT_TYPE_FORM",
-    get: function get() {
-      return "application/x-www-form-urlencoded";
-    }
-  }]);
-
-  return HTTPClient;
-}();
 
 /***/ }),
 
@@ -18189,7 +17991,7 @@ var AlertHelper = /*#__PURE__*/function () {
         message_ = message;
       }
 
-      sweetalert2__WEBPACK_IMPORTED_MODULE_1___default.a.fire({
+      return sweetalert2__WEBPACK_IMPORTED_MODULE_1___default.a.fire({
         icon: type,
         title: title != undefined ? title : 'Information',
         text: message_
@@ -18232,7 +18034,7 @@ var AlertHelper = /*#__PURE__*/function () {
           toast.addEventListener('mouseleave', sweetalert2__WEBPACK_IMPORTED_MODULE_1___default.a.resumeTimer);
         }
       });
-      Toast.fire({
+      return Toast.fire({
         icon: type,
         title: message_
       });
@@ -18396,6 +18198,8 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
+function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(receiver)) { throw new TypeError("attempted to get private field on non-instance"); } return fn; }
+
 function _classPrivateFieldGet(receiver, privateMap) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to get private field on non-instance"); } if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
 
 function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to set private field on non-instance"); } if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } return value; }
@@ -18407,9 +18211,25 @@ var _data = new WeakMap();
 
 var _routeName = new WeakMap();
 
+var _getValueFromElement = new WeakSet();
+
+var _getValueInputElement = new WeakSet();
+
+var _getValueSelectElement = new WeakSet();
+
+var _getValuTextAreaElement = new WeakSet();
+
 var Controller = /*#__PURE__*/function () {
   function Controller(routeName) {
     _classCallCheck(this, Controller);
+
+    _getValuTextAreaElement.add(this);
+
+    _getValueSelectElement.add(this);
+
+    _getValueInputElement.add(this);
+
+    _getValueFromElement.add(this);
 
     _data.set(this, {
       writable: true,
@@ -18430,9 +18250,6 @@ var Controller = /*#__PURE__*/function () {
 
   _createClass(Controller, [{
     key: "addProperty",
-    // autoCollect() {
-    //     throw new Error("Method 'autoCollect()' must be implemented.");
-    // }
     value: function addProperty(name, value) {
       if (_classPrivateFieldGet(this, _data) == undefined || _classPrivateFieldGet(this, _data) == null) {
         _classPrivateFieldSet(this, _data, {});
@@ -18441,9 +18258,24 @@ var Controller = /*#__PURE__*/function () {
       _classPrivateFieldGet(this, _data)[name] = _typeof(value) == 'object' && value != undefined ? value.id : value;
     }
   }, {
-    key: "getAllProperty",
-    value: function getAllProperty() {
-      return _classPrivateFieldGet(this, _data);
+    key: "setAllProperty",
+    value: function setAllProperty(attributes) {
+      try {
+        for (var key in attributes) {
+          if (!attributes.hasOwnProperty(key)) {
+            continue;
+          }
+
+          var element = document.querySelector(attributes[key]);
+
+          if (element != undefined) {
+            this[key] = _classPrivateMethodGet(this, _getValueFromElement, _getValueFromElement2).call(this, element);
+          }
+        }
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
     }
   }, {
     key: "save",
@@ -18586,6 +18418,25 @@ var Controller = /*#__PURE__*/function () {
       return _classPrivateFieldGet(this, _routeName);
     }
   }], [{
+    key: "getAllProperty",
+    value: function getAllProperty(attributes) {
+      var data = {};
+
+      for (var key in attributes) {
+        if (!attributes.hasOwnProperty(key)) {
+          continue;
+        }
+
+        var element = document.querySelector(attributes[key]);
+
+        if (element != undefined) {
+          data[key] = element;
+        }
+      }
+
+      return data;
+    }
+  }, {
     key: "getCSRF",
     value: function getCSRF() {
       return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -18802,6 +18653,62 @@ var Controller = /*#__PURE__*/function () {
 
   return Controller;
 }();
+
+var _getValueFromElement2 = function _getValueFromElement2(element) {
+  var value;
+  var elementType = element.nodeName;
+
+  switch (elementType) {
+    case 'SELECT':
+      value = _classPrivateMethodGet(this, _getValueSelectElement, _getValueSelectElement2).call(this, element);
+      break;
+
+    case 'TEXTAREA':
+      value = _classPrivateMethodGet(this, _getValuTextAreaElement, _getValuTextAreaElement2).call(this, element);
+      break;
+
+    case 'INPUT':
+    default:
+      value = _classPrivateMethodGet(this, _getValueInputElement, _getValueInputElement2).call(this, element);
+      break;
+  }
+
+  return value;
+};
+
+var _getValueInputElement2 = function _getValueInputElement2(element) {
+  var value;
+  var inputType = element.type;
+
+  switch (inputType) {
+    case 'radio':
+      break;
+
+    case 'checkbox':
+      break;
+
+    case 'text':
+    case 'number':
+    default:
+      value = element.value;
+      break;
+  }
+
+  return value;
+};
+
+var _getValueSelectElement2 = function _getValueSelectElement2(element) {
+  var value;
+  value = element.value == null || element.value.trim() == '' ? null : {
+    id: value.value,
+    name: value.selectedOptions[0].text
+  };
+  return value;
+};
+
+var _getValuTextAreaElement2 = function _getValuTextAreaElement2(element) {
+  return element.value;
+};
 
 /***/ }),
 
@@ -19201,7 +19108,6 @@ var HTTPClient = /*#__PURE__*/function () {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Lookup", function() { return Lookup; });
-/* harmony import */ var _HttpClient_httpClient__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../HttpClient/httpClient */ "./resources/js/libraries/HttpClient/httpClient.js");
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -19215,8 +19121,6 @@ function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = p
 function _classPrivateFieldGet(receiver, privateMap) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to get private field on non-instance"); } if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
 
 function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(receiver)) { throw new TypeError("attempted to get private field on non-instance"); } return fn; }
-
-
 
 var _element = new WeakMap();
 
@@ -19319,8 +19223,17 @@ var Lookup = /*#__PURE__*/function () {
         $(_classPrivateFieldGet(this, _element)).val(null).trigger('change');
       }
     }
+    /**
+     * @param {string} value
+     */
+
   }, {
     key: "setValue",
+
+    /**
+     * setValue
+     * @param {string | object} value 
+     */
     value: function setValue(value) {
       try {
         if (value == null) {
@@ -19373,6 +19286,10 @@ var Lookup = /*#__PURE__*/function () {
 
       _classPrivateFieldSet(this, _element, value);
     }
+    /**
+     * @param {string} value
+     */
+
   }, {
     key: "dropdownParent",
     set: function set(value) {
@@ -19384,6 +19301,10 @@ var Lookup = /*#__PURE__*/function () {
         _classPrivateFieldSet(this, _dropdownParent, value);
       }
     }
+    /**
+     * @param {string} value
+     */
+
   }, {
     key: "placeholder",
     set: function set(value) {
@@ -19395,6 +19316,10 @@ var Lookup = /*#__PURE__*/function () {
         _classPrivateFieldSet(this, _placeholder, value);
       }
     }
+    /**
+     * @param {{ serverSide: { uri: string; isPagination: boolean; renderData: void; }; static: [object]; }} value
+     */
+
   }, {
     key: "sourceData",
     set: function set(value) {
@@ -19488,7 +19413,8 @@ var _buildOptions2 = function _buildOptions2() {
     };
   }
 
-  options.allowClear = true;
+  options.allowClear = true; // options.theme = 'bootstrap4';
+
   return options;
 };
 
