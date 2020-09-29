@@ -40,12 +40,20 @@
 
             {{-- button group --}}
             <div class="row">
-                <div class="col">
+                <div class="col-8">
                     <div class="mb-3">
                         <button class="btn btn-success" id="@yield('save-button-id')">Save</button>
                         <a href="{{ url()->previous() }}" class="btn btn-primary">Close</a>
                         @yield('custom-button')
                     </div>
+                </div>
+                <div class="col-4">
+                    @if (isset($pageMode) && $pageMode == 'Edit')
+                        <div class="float-right">
+                            <button class="btn btn-outline-primary" type="button" id="view-button">View</button>
+                            <button class="btn btn-outline-primary" type="button" id="refresh-button"><i class="fas fa-sync-alt"></i></button>
+                        </div>
+                    @endif
                 </div>
             </div>
 
@@ -60,8 +68,8 @@
                                     <div class="card">
                                         <div class="card-body">
                                             @if ($isProfileImageExists)
-                                                {{-- @include('layouts.skeleton.image') --}}
-                                                <div class="">
+                                                @include('layouts.shimmers.profil_image')
+                                                <div class="d-none">
                                                     <div class="mb-3 text-center">
                                                         <img class="profile-user-img img-fluid img-circle" src="" alt="profile image" id="profile-image">
                                                         <div class="d-flex align-items-end justify-content-center mt-2">
@@ -72,8 +80,8 @@
                                                 </div>
                                             @endif
                                     
-                                            {{-- @include('layouts.skeleton.page.mainProfile') --}}
-                                            <div class="">
+                                            @include('layouts.shimmers.page.main_profile')
+                                            <div class="d-none">
                                                 @yield('main-profile')
                                             </div>
                                         </div>
@@ -88,8 +96,8 @@
                                 <div class="col-12">
                                     <div class="card">
                                         <div class="card-body">
-                                            {{-- @include('layouts.skeleton.page.subProfile') --}}
-                                            <div class="">
+                                            @include('layouts.shimmers.page.sub_profile')
+                                            <div class="d-none">
                                                 @yield('sub-profile')
                                             </div>
                                         </div>
@@ -110,8 +118,8 @@
                                 <div class="col-12">
                                     <div class="card">
                                         <div class="card-body">
-                                            {{-- @include('layouts.skeleton.page.mainContent') --}}
-                                            <div class="">
+                                            @include('layouts.shimmers.page.main_content')
+                                            <div class="d-none">
                                                 @yield('main-content')
                                             </div>
                                         </div>
@@ -126,8 +134,8 @@
                                 <div class="col-12">
                                     <div class="card">
                                         <div class="card-body">
-                                            {{-- @include('layouts.skeleton.page.detailContent') --}}
-                                            <div class="">
+                                            @include('layouts.shimmers.page.detail_content')
+                                            <div class="d-none">
                                                 @yield('detail-content')
                                             </div>
                                         </div>
@@ -144,4 +152,5 @@
     <!-- /.content -->
 
     @yield('modal-content')
+    
 @endsection

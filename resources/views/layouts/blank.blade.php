@@ -4,6 +4,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>SimakPro</title>
 
         {{-- css --}}
@@ -36,6 +37,9 @@
         <!-- ./wrapper -->
 
         {{-- js --}}
+            <script>
+                const APP_URL = @json(env('APP_URL'), JSON_PRETTY_PRINT);
+            </script>
             <script src="{{ asset('js/app.js') }}"></script>
             @yield('custom-js')
         {{-- end js --}}

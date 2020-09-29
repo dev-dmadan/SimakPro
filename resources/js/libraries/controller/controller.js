@@ -15,7 +15,7 @@ export class Controller {
     get routeName() {
         return this.#routeName;
     }
-    
+
     addProperty(name, value) {
         if(this.#data == undefined || this.#data == null) {
             this.#data = {};
@@ -25,8 +25,92 @@ export class Controller {
             value.id : value;
     }
 
-    getAllProperty() {
-        return this.#data;
+    static getAllProperty(attributes) {
+        const data = {};
+        for (const key in attributes) {
+            if (!attributes.hasOwnProperty(key)) {
+                continue;
+            }
+
+            const element = document.querySelector(attributes[key]);
+            if(element != undefined) {
+                data[key] = element;
+            }
+        }
+
+        return data;
+    }
+
+    setAllProperty(attributes) {
+        try {
+            for (const key in attributes) {
+                if (!attributes.hasOwnProperty(key)) {
+                    continue;
+                }
+
+                const element = document.querySelector(attributes[key]);
+                if(element != undefined) {
+                    this[key] = this.#getValueFromElement(element);
+                }
+            }
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
+    }
+
+    #getValueFromElement(element) {
+        let value;
+        const elementType = element.nodeName;
+        switch (elementType) {
+            case 'SELECT':
+                value = this.#getValueSelectElement(element);
+                break;
+            case 'TEXTAREA':
+                value = this.#getValuTextAreaElement(element);
+                break;
+            case 'INPUT':
+            default:
+                value = this.#getValueInputElement(element);
+                break;
+        }
+
+        return value;
+    }
+
+    #getValueInputElement(element) {
+        let value;
+        const inputType = element.type;
+        switch (inputType) {
+            case 'radio':
+
+                break;
+            case 'checkbox':
+                
+                break;
+            case 'text':
+            case 'number':
+            default:
+                value = element.value;
+                break;
+        }
+
+        return value;
+    }
+
+    #getValueSelectElement(element) {
+        let value;
+        value = element.value == null || element.value.trim() == '' ? 
+            null : {
+                id: value.value,
+                name: value.selectedOptions[0].text
+            };
+
+        return value;
+    }
+
+    #getValuTextAreaElement(element) {
+        return element.value;
     }
 
     static getCSRF() {

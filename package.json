@@ -10,6 +10,8 @@
         "production": "cross-env NODE_ENV=production node_modules/webpack/bin/webpack.js --no-progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js"
     },
     "devDependencies": {
+        "@babel/plugin-proposal-class-properties": "^7.10.4",
+        "@babel/plugin-proposal-private-methods": "^7.10.4",
         "axios": "^0.19",
         "bootstrap": "^4.0.0",
         "browser-sync": "^2.26.12",
@@ -22,9 +24,19 @@
         "resolve-url-loader": "^3.1.0",
         "sass": "^1.15.2",
         "sass-loader": "^8.0.0",
+        "vanillajs-datepicker": "^1.0.3",
         "vue-template-compiler": "^2.6.12"
     },
     "dependencies": {
-        "admin-lte": "^3.0.5"
+        "admin-lte": "^3.0.5",
+        "cleave.js": "^1.6.0",
+        "laravel-echo": "^1.8.1",
+        "pusher-js": "^7.0.0"
+    },
+    "babel": {
+        "plugins": [
+            "@babel/plugin-proposal-class-properties",
+            "@babel/plugin-proposal-private-methods"
+        ]
     }
 }
