@@ -1,3 +1,7 @@
+@php
+    use Illuminate\Support\Str;
+@endphp
+
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
     <a href="/" class="brand-link">
@@ -20,9 +24,30 @@
         <!-- Sidebar Menu -->
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                @foreach(App\Models\Access::orderBy('position','asc')->get() as $menuItem)
+
+                    @php
+                        $isActive = '';
+                        if($menuItem->route != '/') {
+                            $isActive = Str::contains(strtolower(url()->current()), strtolower($menuItem->route)) ? 'active' : '';
+                        } else if(url()->current() == env('APP_URL')) {
+                            $isActive = 'active';
+                        }
+                    @endphp
+
+                    <li class="nav-item">
+                        <a href="{{ $menuItem->route }}" class="nav-link {{ $isActive }}">
+                            {!! $menuItem->icon !!}
+                            <p>{{ $menuItem->title }}</p>
+                        </a>
+                    </li>
+
+                @endforeach
+
+
                 <!-- Add icons to the links using the .nav-icon class
                 with font-awesome or any other icon font library -->
-                <li class="nav-item has-treeview menu-open">
+                {{-- <li class="nav-item has-treeview menu-open">
                     <a href="javascript:void(0)" class="nav-link active">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
                         <p>Starter Pages <i class="right fas fa-angle-left"></i></p>
@@ -47,7 +72,7 @@
                         <i class="nav-icon fas fa-th"></i>
                         <p>Simple Link <span class="right badge badge-danger">New</span></p>
                     </a>
-                </li>
+                </li> --}}
             </ul>
         </nav>
         <!-- /.sidebar-menu -->
