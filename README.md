@@ -6,7 +6,7 @@ Simakpro (Sistem Informasi Managemen Proyek)
 1. Minimum PHP v7.2.5 / check https://github.com/GastonHeim/Laravel-Requirement-Checker
 2. Composer
 3. Minimum Node JS v12
-4. Minumum Npm v6
+4. Minimum Npm v6
 5. DBMS MariaDB / MySQL
 
 ## Instalasi
