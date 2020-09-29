@@ -1,4 +1,3 @@
-import {HTTPClient} from '../HttpClient/httpClient';
 export class Lookup {
     #_element;
     #_dropdownParent;
@@ -36,6 +35,9 @@ export class Lookup {
         }
     }
 
+    /**
+     * @param {string} value
+     */
     set element(value) {
         if(typeof value != 'string') {
             throw new Error('Element must be string');
@@ -44,6 +46,9 @@ export class Lookup {
         this.#_element = value;
     }
 
+    /**
+     * @param {string} value
+     */
     set dropdownParent(value) {
         if(value != undefined) {
             if(typeof value != 'string') {
@@ -54,6 +59,9 @@ export class Lookup {
         }
     }
 
+    /**
+     * @param {string} value
+     */
     set placeholder(value) {
         if(value != undefined) {
             if(typeof value != 'string') {
@@ -64,6 +72,9 @@ export class Lookup {
         }
     }
 
+    /**
+     * @param {{ serverSide: { uri: string; isPagination: boolean; renderData: void; }; static: [object]; }} value
+     */
     set sourceData(value) {
         if(value != undefined && typeof value == 'object') {
             if(value.serverSide != undefined && typeof value.serverSide == 'object' && value.serverSide.hasOwnProperty('uri')) {
@@ -84,6 +95,10 @@ export class Lookup {
         }
     }
 
+    /**
+     * setValue
+     * @param {string | object} value 
+     */
     setValue(value) {
         try {
             if(value == null) {
@@ -193,6 +208,7 @@ export class Lookup {
         }
 
         options.allowClear = true;
+        // options.theme = 'bootstrap4';
 
         return options;
     }
