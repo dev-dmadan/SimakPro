@@ -13,19 +13,20 @@ class Project extends Model
     protected $primaryKey = 'id';
     public $incrementing = false;
     protected $keyType = 'string';
+    const nullColumns = ['date', 'project_status_id', 'created_by_id', 'updated_by_id'];
 
     public function projectStatus()
     {
-        return $this->belongsTo('App\ProjectStatus', 'project_status_id');
+        return $this->belongsTo('App\Models\ProjectStatus', 'project_status_id');
     }
 
     public function createdBy()
     {
-        return $this->belongsTo('App\Contact', 'created_by_id');
+        return $this->belongsTo('App\Models\Contact', 'created_by_id');
     }
 
     public function updatedBy()
     {
-        return $this->belongsTo('App\Contact', 'updated_by_id');
+        return $this->belongsTo('App\Models\Contact', 'updated_by_id');
     }
 }

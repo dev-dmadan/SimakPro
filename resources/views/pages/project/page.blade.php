@@ -3,6 +3,8 @@
 {{-- page title --}}
 @section('page-title', 'Form Proyek')
 
+@section('save-button-id', 'project-page-save')
+
 {{-- input hidden page id --}}
 @section('page-id', 'project-page-id')
 
@@ -63,7 +65,7 @@
         <div class="col">
             <div class="form-group">
                 <label for="project-page-address">Alamat</label>
-                <textarea class="form-control" id="project-page-alamat" placeholder="Masukkan Alamat" rows="3"></textarea>
+                <textarea class="form-control" id="project-page-address" placeholder="Masukkan Alamat" rows="3"></textarea>
             </div>
         </div>
     </div>
@@ -90,14 +92,14 @@
         <div class="col-6">
             <div class="form-group">
                 <label for="project-page-sub_total">Sub Total</label>
-                <input type="number" class="form-control" id="project-page-sub_total" placeholder="Masukkan Sub Total">
+                <input type="text" class="form-control" id="project-page-sub_total" placeholder="Masukkan Sub Total">
             </div>
         </div>
 
         <div class="col-6">
             <div class="form-group">
                 <label for="project-page-cco">CCO</label>
-                <input type="number" class="form-control" id="project-page-cco" placeholder="Masukkan CCO">
+                <input type="text" class="form-control" id="project-page-cco" placeholder="Masukkan CCO">
             </div>
         </div>
     </div>
@@ -106,7 +108,7 @@
         <div class="col-6 offset-6">
             <div class="form-group">
                 <label for="project-page-total">Total</label>
-                <input type="number" class="form-control" id="project-page-total" placeholder="Masukkan Total">
+                <input type="text" class="form-control" id="project-page-total" placeholder="Masukkan Total">
             </div>
         </div>
     </div>
@@ -115,14 +117,14 @@
         <div class="col-6">
             <div class="form-group">
                 <label for="project-page-dp">DP</label>
-                <input type="number" class="form-control" id="project-page-dp" placeholder="Masukkan DP">
+                <input type="text" class="form-control" id="project-page-dp" placeholder="Masukkan DP">
             </div>
         </div>
 
         <div class="col-6">
             <div class="form-group">
                 <label for="project-page-sisa">Sisa</label>
-                <input type="number" class="form-control" id="project-page-sisa" value="0" readonly>
+                <input type="text" class="form-control" id="project-page-sisa" value="0" readonly>
             </div>
         </div>
     </div>

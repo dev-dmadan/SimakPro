@@ -38,7 +38,6 @@ export class Project extends Controller {
         sisa,
         progress,
         project_status,
-        autoInit = false
     } = {}) {
         super('projects');
 
@@ -59,47 +58,29 @@ export class Project extends Controller {
             this.progress = progress;
             this.project_status = project_status;
         }
-
-        // if(autoInit) {
-        //     this.autoCollect();
-        // }
     }
 
-    // get attribute() {
-    //     return {
-    //         page: {
-    //             name: 'project-page-name',
-    //             code: 'project-page-code',
-    //             owner: 'project-page-owner',
-    //             date: 'project-page-date',
-    //             city: 'project-page-city',
-    //             address: 'project-page-address',
-    //             luas_area: 'project-page-luas_area',
-    //             estimasi: 'project-page-estimasi',
-    //             sub_total: 'project-page-sub_total',
-    //             cco: 'project-page-cco',
-    //             total: 'project-page-total',
-    //             dp: 'project-page-dp',
-    //             sisa: 'project-page-sisa',
-    //             progress: 'project-page-progress',
-    //             project_status: 'project-page-project_status'
-    //         },
-    //     };
-    // }
-
-    // autoCollect() {
-    //     const attributeList = this.attribute.page;
-    //     for(const attribute in attributeList) {
-    //         if (!attributeList.hasOwnProperty(attribute)) {
-    //             continue;
-    //         }
-
-    //         const element = document.querySelector(`#${attributeList[attribute]}`);
-    //         if(element != undefined) {
-    //             Project[attribute] = element.value;
-    //         }
-    //     }
-    // }
+    static get attribute() {
+        return {
+            page: {
+                name: '#project-page-name',
+                code: '#project-page-code',
+                owner: '#project-page-owner',
+                date: '#project-page-date',
+                city: '#project-page-city',
+                address: '#project-page-address',
+                luas_area: '#project-page-luas_area',
+                estimasi: '#project-page-estimasi',
+                sub_total: '#project-page-sub_total',
+                cco: '#project-page-cco',
+                total: '#project-page-total',
+                dp: '#project-page-dp',
+                sisa: '#project-page-sisa',
+                progress: '#project-page-progress',
+                project_status: '#project-page-project_status'
+            },
+        };
+    }
 
     get name() {
         return this._name;
@@ -159,7 +140,7 @@ export class Project extends Controller {
         return this._luas_area;
     }
     set luas_area(value) {
-        const _value = value != undefined ? parseFloat(value.trim()) : 0;
+        const _value = value != undefined && value.trim() != '' && !isNaN(value) ? parseFloat(value.trim()) : 0;
         this.addProperty('luas_area', _value);
         this._luas_area = _value;
     }
@@ -168,7 +149,7 @@ export class Project extends Controller {
         return this._estimasi;
     }
     set estimasi(value) {
-        const _value = value != undefined ? parseInt(value.trim()) : 0;
+        const _value = value != undefined && value.trim() != '' && !isNaN(value) ? parseInt(value.trim()) : 0;
         this.addProperty('estimasi', _value);
         this._estimasi = _value;
     }
@@ -177,7 +158,7 @@ export class Project extends Controller {
         return this._sub_total;
     }
     set sub_total(value) {
-        const _value = value != undefined ? parseFloat(value.trim()) : 0;
+        const _value = value != undefined && value.trim() != '' && !isNaN(value) ? parseFloat(value.trim()) : 0;
         this.addProperty('sub_total', _value);
         this._sub_total = _value;
     }
@@ -186,7 +167,7 @@ export class Project extends Controller {
         return this._cco;
     }
     set cco(value) {
-        const _value = value != undefined ? parseFloat(value.trim()) : 0;
+        const _value = value != undefined && value.trim() != '' && !isNaN(value) ? parseFloat(value.trim()) : 0;
         this.addProperty('cco', _value);
         this._cco = _value;
     }
@@ -195,7 +176,7 @@ export class Project extends Controller {
         return this._total;
     }
     set total(value) {
-        const _value = value != undefined ? parseFloat(value.trim()) : 0;
+        const _value = value != undefined && value.trim() != '' && !isNaN(value) ? parseFloat(value.trim()) : 0;
         this.addProperty('total', _value);
         this._total = _value;
     }
@@ -204,7 +185,7 @@ export class Project extends Controller {
         return this._dp;
     }
     set dp(value) {
-        const _value = value != undefined ? parseFloat(value.trim()) : 0;
+        const _value = value != undefined && value.trim() != '' && !isNaN(value) ? parseFloat(value.trim()) : 0;
         this.addProperty('dp', _value);
         this._dp = _value;
     }
@@ -213,7 +194,7 @@ export class Project extends Controller {
         return this._sisa;
     }
     set sisa(value) {
-        const _value = value != undefined ? parseFloat(value.trim()) : 0;
+        const _value = value != undefined && value.trim() != '' && !isNaN(value) ? parseFloat(value.trim()) : 0;
         this.addProperty('sisa', _value);
         this._sisa = _value;
     }
@@ -222,7 +203,7 @@ export class Project extends Controller {
         return this._progress;
     }
     set progress(value) {
-        const _value = value != undefined ? parseInt(value.trim()) : 0;
+        const _value = value != undefined && value.trim() != '' && !isNaN(value) ? parseInt(value.trim()) : 0;
         this.addProperty('progress', _value);
         this._progress = _value;
     }
@@ -234,7 +215,7 @@ export class Project extends Controller {
         const _value = value != undefined && typeof value == 'object' ? {
             id: value.id.trim(),
             name: value.name.trim()
-        } : null;
+        } : (value != undefined && typeof value == 'string' ? value.trim() : null);
         this.addProperty('project_status_id', _value);
         this._project_status = _value;
     }

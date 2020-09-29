@@ -46,12 +46,15 @@ class ProjectController extends Controller
     {
         $project = new Project();
         foreach($request->all() as $key => $item) {
-            if($item != null) {
+            if($item != null || is_numeric($item)) {
                 $project->$key = $item;
             }
         }
 
-        return response()->json($project->save());
+        return response()->json([
+            'status' => $project->save(),
+            'id' => $project->id
+        ]);
     }
 
     /**
@@ -121,7 +124,9 @@ class ProjectController extends Controller
     {
         $project = Project::find($id);
         foreach($request->all() as $key => $item) {
-            if($item != null) {
+            if($item == null && in_array($key, Project::nullColumns)) {
+                $project->$key = $item;
+            } else if($item != null || is_numeric($item)) {
                 $project->$key = $item;
             }
         }

@@ -16,6 +16,6 @@ class ProjectStatus extends Model
 
     public function project()
     {
-        return $this->hasMany('App\Project', 'project_status_id');
+        return $this->hasMany('App\Models\Project', 'project_status_id');
     }
 }
