@@ -1,5 +1,5 @@
-import {HTTPClient} from '../httpClient/httpClient';
-import { AlertHelper } from "../alert/alert";
+import { HTTPClient } from '../httpClient/httpClient';
+import { AlertHelper } from '../alert/alert';
 
 export class DataTable {
     #_element;
@@ -13,25 +13,46 @@ export class DataTable {
     #_actionType;
     #_onEdit;
     #_onDelete;
+    #_renderRow;
+    #_renderTile;
     #_pagination;
     #_showMoreId;
     #_selected;
+    #_filter;
+    #_icons = {
+        menu: '<i class="fa fa-ellipsis-v"></i>',
+        showMore: '<i class="fas fa-angle-double-down"></i>',
+        edit: '<i class="far fa-edit"></i>',
+        delete: '<i class="far fa-trash-alt"></i>',
+        view: '',
+        asc: '',
+        desc: ''
+    };
 
     constructor({
         element,
-        tableType = DataTable.TABLE_DEFAULT,
-        paginationType = DataTable.PAGINATION_SHOW_MORE, 
+        tableType = DataTable.TableType.List,
+        paginationType = DataTable.PaginationType.ShowMore, 
         mappingData,
         url,
         event = null,
         action = null,
+        renderRow = null,
+        renderTile = null,
         isAutoInit = true,
     }) {
         try {
-            this.element = element;
             this.tableType = tableType;
+            this.element = element;
+
+            if(tableType == DataTable.TableType.List) {
+                this.mappingData = mappingData;
+                this.renderRow = renderRow;
+            } else {
+                this.renderTile = renderTile;
+            }
+
             this.paginationType = paginationType;
-            this.mappingData = mappingData;
             this.url = url;
             this.event = event;
             this.action = action;
@@ -45,50 +66,38 @@ export class DataTable {
         }
     }
 
-    static get TABLE_DEFAULT() {
-        return 'LIST';
+    static get TableType() {
+        return {
+            List: 'List',
+            Tile: 'Tile'
+        };
     }
 
-    static get TABLE_TILE() {
-        return 'TILE';
+    static get PaginationType() {
+        return {
+            Default: 'Default',
+            ShowMore: 'Show More',
+            Infinite: 'Infinite Scroll'
+        };
     }
 
-    static get PAGINATION_DEFAULT() {
-        return 'DEFAULT';
+    static get ActionType() {
+        return {
+            Default: 'Default',
+            Menu: 'Menu',
+            Custom: 'Custom'
+        };
     }
 
-    static get PAGINATION_SHOW_MORE() {
-        return 'SHOW_MORE';
-    }
-
-    static get PAGINATION_INFINITE() {
-        return 'INFINITE_SCROLL';
-    }
-
-    static get DEFAULT_ACTION_TYPE() {
-        return 'DEFAULT';
-    }
-
-    static get MENU_ACTION_TYPE() {
-        return 'MENU'
-    }
-
-    set element(value) {
-        if(typeof value == 'string') {
-            this.#_element = document.querySelector(value);
-        } else if(value.nodeName && value.nodeName == 'TABLE') {
-            this.#_element = value;
-        } else {
-            throw new Error('Element must be Id of table element or table element');
-        }
-    }
-
+    /**
+     * @param {string} value
+     */
     set tableType(value) {
         if(typeof value != 'string' || (value != undefined && value.trim() == '')) {
             throw new Error('Table Type must be string');
         }
 
-        const isCorrectTableType = [DataTable.TABLE_DEFAULT, DataTable.TABLE_TILE].filter(item => item == value).length > 0 ? true : false;
+        const isCorrectTableType = [DataTable.TableType.List, DataTable.TableType.Tile].filter(item => item == value).length > 0 ? true : false;
         if(!isCorrectTableType) {
             throw new Error('Table Type is not registered');
         }
@@ -96,15 +105,41 @@ export class DataTable {
         this.#_tableType = value;
     }
 
+    /**
+     * @param {string} value
+     */
+    set element(value) {
+        if(typeof value == 'string') {
+            this.#_element = document.querySelector(value);
+        } else if(this.#_tableType == DataTable.TableType.Default) {
+            if(value.nodeName && value.nodeName == 'TABLE') {
+                this.#_element = value;
+            } else {
+                throw new Error('Element must be Id of table element or table element');
+            }
+        } else if(this.#_tableType == DataTable.TableType.Tile) {
+            if(value.nodeName && value.nodeName != 'TABLE') {
+                this.#_element = value;
+            } else {
+                throw new Error('Element must be Id of tile element or tile element (not table)');
+            }
+        } else {
+            throw new Error("Element can't be empty");
+        }
+    }
+
+    /**
+     * @param {string} value
+     */
     set paginationType(value) {
         if(typeof value != 'string' || (value != undefined && value.trim() == '')) {
             throw new Error('Pagination Type must be string');
         }
 
         const isCorrectPaginationType = [
-            DataTable.PAGINATION_DEFAULT, 
-            DataTable.PAGINATION_SHOW_MORE, 
-            DataTable.PAGINATION_INFINITE
+            DataTable.PaginationType.Default, 
+            DataTable.PaginationType.ShowMore, 
+            DataTable.PaginationType.Infinite
         ].filter(item => item == value).length > 0 ? true : false;
         if(!isCorrectPaginationType) {
             throw new Error('Pagination Type is not registered');
@@ -113,6 +148,9 @@ export class DataTable {
         this.#_paginationType = value;
     }
 
+    /**
+     * @param {[string]} value
+     */
     set mappingData(value) {
         if(value == undefined || typeof value != 'object' || value.length < 1) {
             throw new Error('Mapping Data must be array');
@@ -121,14 +159,20 @@ export class DataTable {
         this.#_mappingData = value;
     }
 
+    /**
+     * @param {string} value
+     */
     set url(value) {
         if(typeof value != 'string') {
             throw new Error('Url must be string');
         }
-
-        this.#_url = `${APP_URL}/${value.trim()}?page=`;
+        
+        this.#_url = value.includes(APP_URL) ? value : `${APP_URL}/${value.trim()}?page=`;
     }
 
+    /**
+     * @param {{ onClick: void; onDoubleClick: void; }} value
+     */
     set event(value) {
         if(value != undefined && typeof value != 'object') {
             throw new Error('Event must be object');
@@ -153,6 +197,9 @@ export class DataTable {
         }
     }
 
+    /**
+     * @param {{ type: string; onEdit: void; onDelete: promise; }} value
+     */
     set action(value) {
         if(value != undefined && typeof value != 'object') {
             throw new Error('Action must be object');
@@ -160,13 +207,17 @@ export class DataTable {
 
         if(value != undefined && typeof value == 'object') {
             if(value.hasOwnProperty('type') && value.type != undefined && typeof value.type == 'string') {
-                if(value.type != DataTable.DEFAULT_ACTION_TYPE && value.type != DataTable.MENU_ACTION_TYPE) {
-                    throw new Error('Action Type must be object DEFAULT or MENU');
+                const actionList = [
+                    DataTable.ActionType.Default, DataTable.ActionType.Menu, DataTable.ActionType.Menu
+                ];
+                const isExist = actionList.filter(item => item = value.type).length > 0 ? true : false;
+                if(!isExist) {
+                    throw new Error('Action Type must be object Default or Menu or Custom');
                 }
 
                 this.#_actionType = value.type;
             } else {
-                this.#_actionType = DataTable.DEFAULT_ACTION_TYPE;
+                this.#_actionType = DataTable.ActionType.Default;
             }
 
             if(value.hasOwnProperty('onEdit') && value.onEdit != undefined) {
@@ -179,6 +230,9 @@ export class DataTable {
         }
     }
 
+    /**
+     * @param {void} value
+     */
     set onClick(value) {
         if(typeof value != 'function') {
             throw new Error('Event onClick must be function');
@@ -187,6 +241,9 @@ export class DataTable {
         this.#_onClick = value;
     }
 
+    /**
+     * @param {void} value
+     */
     set onDoubleClick(value) {
         if(typeof value != 'function') {
             throw new Error('Event onDoubleClick must be function');
@@ -199,6 +256,9 @@ export class DataTable {
 
     // }
 
+    /**
+     * @param {void} value
+     */
     set onEdit(value) {
         if(typeof value != 'function') {
             throw new Error('Action onEdit must be function');
@@ -207,6 +267,9 @@ export class DataTable {
         this.#_onEdit = value;
     }
 
+    /**
+     * @param {promise} value
+     */
     set onDelete(value) {
         if(typeof value != 'function') {
             throw new Error('Action onDelete must be function');
@@ -215,55 +278,84 @@ export class DataTable {
         this.#_onDelete = value;
     }
 
+    /**
+     * @param {void} value
+     */
+    set renderRow(value) {
+        if(value != undefined && typeof value != 'object') {
+            if(typeof value != 'function') {
+                throw new Error('Render Row must be function');
+            }
+        }
+
+        this.#_renderRow = value;
+    }
+
+    /**
+     * @param {void} value
+     */
+    set renderTile(value) {
+        if(typeof value != 'function') {
+            throw new Error('Render Tile must be function');
+        }
+
+        this.#_renderTile = value;
+    }
+
     get selected() {
         return this.#_selected;
     }
 
     async init() {
-        const totalHeading = this.#_element.tHead.children[0].childElementCount;
-        const totalMappingData = this.#_mappingData.length;
-
         try {
-            if(totalHeading != totalMappingData) {
-                throw "The number of column don't match the number of headings";
-            }
-
             switch (this.#_paginationType) {
-                case DataTable.PAGINATION_DEFAULT:
+                case DataTable.PaginationType.Default:
                     
                     break;
 
-                case DataTable.PAGINATION_SHOW_MORE:
+                case DataTable.PaginationType.ShowMore:
                     this.#renderShowMore();   
                     break;
 
-                case DataTable.PAGINATION_INFINITE:
+                case DataTable.PaginationType.Infinite:
                 
                     break;
             
                 default:
                     break;
             }
-            
-            if(this.#_actionType == DataTable.DEFAULT_ACTION_TYPE) {
-                this.#renderTheadAction();
-            } else {
-                this.#renderMenuAction();
-            }
-            
+
             const data = await this.getData(1);
+            if(this.#_tableType == DataTable.TableType.List) {
+                const totalHeading = this.#_element.tHead.children[0].childElementCount;
+                const totalMappingData = this.#_mappingData.length;
+                if(totalHeading != totalMappingData) {
+                    throw "The number of column don't match the number of headings";
+                }
+
+                if(this.#_actionType == DataTable.ActionType.Default) {
+                    this.#renderTheadAction();
+                } else {
+                    this.#renderMenuAction();
+                }
+            } 
+
             this.addRows(data);
         } catch (error) {
             throw new Error(error);
         }
     }
 
+    /**
+     * addRow
+     * @param {object} data 
+     */
     addRow(data) {
         const tbody = this.#_element.tBodies[0];
         const tr = document.createElement('tr');
-        const tr_data_id = document.createAttribute("data-id");
-        tr_data_id.value = data.Id || data.id;
-        tr.setAttributeNode(tr_data_id);
+        // const tr_data_id = document.createAttribute("data-id");
+        // tr_data_id.value = data.Id || data.id;
+        // tr.setAttributeNode(tr_data_id);
         
         this.#_mappingData.forEach(item => {
             const td = document.createElement('td');
@@ -276,11 +368,11 @@ export class DataTable {
                 tr.classList.toggle('selected-row');
                 this.#_selected = data.Id || data.id;
 
-                if(this.#_onEdit != undefined && this.#_actionType == DataTable.MENU_ACTION_TYPE) {
+                if(this.#_onEdit != undefined && this.#_actionType == DataTable.ActionType.Menu) {
                     this.#setDisableEditAction(false);
                 }
 
-                if(this.#_onDelete != undefined && this.#_actionType == DataTable.MENU_ACTION_TYPE) {
+                if(this.#_onDelete != undefined && this.#_actionType == DataTable.ActionType.Menu) {
                     this.#setDisableDeleteAction(false);
                 }
             });
@@ -289,13 +381,16 @@ export class DataTable {
         });
         
         if(this.#_onEdit != undefined || this.#_onDelete != undefined) {
-            if(this.#_actionType == DataTable.DEFAULT_ACTION_TYPE) {
+            if(this.#_actionType == DataTable.ActionType.Default) {
                 tr.appendChild(this.#renderButtonAction(data.Id || data.id));
             }
         }
 
         tbody.appendChild(tr);
-
+        if(this.#_renderRow != undefined) {
+            this.#_renderRow(tr, tr.cells, data);
+        }
+        
         if(this.#_onClick != undefined) {
             tr.classList.toggle('clickable-row', true);
             tr.addEventListener('click', (event) => {
@@ -311,14 +406,112 @@ export class DataTable {
         }
     }
 
-    addRows(data) {
-        data.forEach(item => {
-            this.addRow(item);
+    /**
+     * addTile
+     * @param {object} data 
+     */
+    addTile(data) {
+        const card = document.createElement('div');
+        card.setAttribute('class', 'card card-custom-shadow-tile');
+        
+        const cardBody = document.createElement('div');
+        cardBody.setAttribute('class', 'card-body');
+
+        const renderTile = this.#_renderTile(data, {edit: this.#_onEdit, delete: this.#_onDelete});
+        if(this.#_onEdit != undefined || this.#_onDelete != undefined) {
+            if(this.#_actionType == DataTable.ActionType.Custom) {
+                if(typeof renderTile == 'string') {
+                    cardBody.innerHTML += renderTile;
+                } else {
+                    cardBody.appendChild(renderTile);
+                }
+            } else {
+                const contentCardBody = document.createElement('div');
+                contentCardBody.setAttribute('class', 'row align-items-md-center');
+                contentCardBody.appendChild(this.#renderTileAction());
+                
+                if(typeof renderTile == 'string') {
+                    contentCardBody.innerHTML += '<div class="col">' + renderTile + '</div>';
+                } else {
+                    const _div = document.createElement('div');
+                    _div.setAttribute('class', 'col');
+                    _div.appendChild(renderTile);
+                    contentCardBody.appendChild(_div);
+                }
+
+                if(this.#_onEdit != undefined) {
+                    contentCardBody.querySelector('.action-edit').addEventListener('click', () => {
+                        if(!data.id) {
+                            return; 
+                        }
+    
+                        this.#_onEdit(data.id);
+                    });
+                }
+
+                if(this.#_onDelete != undefined) {
+                    contentCardBody.querySelector('.action-delete').addEventListener('click', () => {
+                        if(!data.id) {
+                            return; 
+                        }
+    
+                        this.#_onDelete(data.id).then(res => {
+                            if(res) {
+                                this.reload();
+                            }
+                        });
+                    });
+                }
+
+                cardBody.appendChild(contentCardBody);
+            }
+        } else {
+            if(typeof renderTile == 'string') {
+                cardBody.innerHTML += renderTile;
+            } else {
+                cardBody.appendChild(renderTile);
+            }
+        }
+
+        card.appendChild(cardBody);
+        card.addEventListener('click', () => {
+            this.#removeSelectedRow();
+            card.classList.toggle('selected-row');
+            this.#_selected = data.Id || data.id;
         });
+        this.#_element.appendChild(card);
+
+        if(this.#_onClick != undefined) {            
+            card.classList.toggle('clickable-row', true);
+            card.addEventListener('click', (event) => {
+                this.#_onClick(event, data.Id || data.id);
+            });
+        }
+
+        if(this.#_onDoubleClick != undefined) {
+            card.classList.toggle('clickable-row', true);
+            card.addEventListener('dblclick', (event) => {
+                this.#_onDoubleClick(event, data.Id || data.id);
+            });
+        }
     }
 
+    /**
+     * addRows
+     * @param {[object]} data 
+     */
+    addRows(data) {
+        data.forEach(item => {
+            if(this.#_tableType == DataTable.TableType.List) {
+                this.addRow(item);
+            } else {
+                this.addTile(item);
+            }
+        });
+    }
+    
     #renderTheadAction() {
-        if((this.#_onEdit != undefined || this.#_onDelete != undefined) && this.#_actionType == DataTable.DEFAULT_ACTION_TYPE) {
+        if((this.#_onEdit != undefined || this.#_onDelete != undefined) && this.#_actionType == DataTable.ActionType.Default) {
             const tHead = this.#_element.tHead.children[0];
             const th = document.createElement('th');
             th.textContent = 'Action';
@@ -327,10 +520,10 @@ export class DataTable {
     }
 
     #renderMenuAction() {
-        if((this.#_onEdit != undefined || this.#_onDelete != undefined) && this.#_actionType == DataTable.MENU_ACTION_TYPE) {
+        if((this.#_onEdit != undefined || this.#_onDelete != undefined) && this.#_actionType == DataTable.ActionType.Menu) {
             const btnGroup = this.#_element.parentElement.parentElement.previousElementSibling;
             
-            const icon = '<i class="fa fa-ellipsis-v"></i>';
+            const icon = this.#_icons.menu;
             const listAction = [];
             if(this.#_onEdit != undefined) {
                 const aEdit = document.createElement('a');
@@ -391,6 +584,59 @@ export class DataTable {
         }
     }
 
+    #renderTileAction() {
+        const groupAction = document.createElement('div');
+        if((this.#_onEdit != undefined || this.#_onDelete != undefined) && this.#_tableType == DataTable.TableType.Tile) {
+            groupAction.setAttribute('class', 'col-3 col-md-auto order-md-last text-right');
+            
+            const listAction = [];
+            if(this.#_onEdit != undefined) {
+                const aEdit = document.createElement('a');
+                const aEditClass = 'dropdown-item action-edit';
+                aEdit.setAttribute('class', aEditClass);
+                aEdit.href = 'javascript:void(0)';
+                aEdit.textContent = 'Edit';
+
+                listAction.push(aEdit);
+            }
+
+            if(this.#_onDelete != undefined) {
+                const aDelete = document.createElement('a');
+                const aDeleteClass = 'dropdown-item action-delete';
+                aDelete.setAttribute('class', aDeleteClass);
+                aDelete.href = 'javascript:void(0)';
+                aDelete.textContent = 'Delete';
+
+                listAction.push(aDelete);
+            }
+
+            const menuAction = document.createElement('button');
+            menuAction.setAttribute('class', 'btn btn-icons btn-rounded btn-light');
+            menuAction.setAttribute('data-toggle', 'dropdown');
+            menuAction.setAttribute('aria-haspopup', 'true');
+            menuAction.setAttribute('aria-expanded', "false");
+            menuAction.innerHTML = '<i class="fa fa-ellipsis-v pt-1"></i>';
+
+            const dropdownAction = document.createElement('div');
+            dropdownAction.setAttribute('class', 'dropdown-menu');
+            dropdownAction.setAttribute('aria-labelledby', 'menuAction');
+            listAction.forEach(item => {
+                dropdownAction.appendChild(item);
+            });
+
+            groupAction.appendChild(menuAction);
+            groupAction.appendChild(dropdownAction);
+        } else {
+            return null;
+        }
+
+        return groupAction;
+    }
+
+    /**
+     * setDisableEditAction
+     * @param {boolean} isDisable 
+     */
     #setDisableEditAction(isDisable) {
         const actionMenu = this.#_element.parentElement.parentElement.previousElementSibling.lastElementChild;
         const actionEdit = actionMenu.querySelector('.action-edit');
@@ -402,6 +648,10 @@ export class DataTable {
         }
     }
 
+    /**
+     * setDisableDeleteAction
+     * @param {boolean} isDisable 
+     */
     #setDisableDeleteAction(isDisable) {
         const actionMenu = this.#_element.parentElement.parentElement.previousElementSibling.lastElementChild;
         const actionDelete = actionMenu.querySelector('.action-delete');
@@ -413,15 +663,20 @@ export class DataTable {
         }
     }
 
+    /**
+     * renderButtonAction
+     * @param {string} id 
+     */
     #renderButtonAction(id) {
         const td = document.createElement('td');
-        const editIcon = '<i class="fa fa-pencil-square-o"></i>';
-        const deleteIcon = '<i class="fa fa-trash-o"></i>';
+        const editIcon = this.#_icons.edit;
+        const deleteIcon = this.#_icons.delete;
 
         if(this.#_onEdit != undefined) {
             const aEdit = document.createElement('a');
             aEdit.setAttribute('class', 'mr-2');
             aEdit.setAttribute('href', 'javascript:void(0)');
+            aEdit.setAttribute('style', 'color: #28A745');
             aEdit.innerHTML = editIcon;
             aEdit.addEventListener('click', () => {
                 this.#_onEdit(id);
@@ -433,7 +688,8 @@ export class DataTable {
         if(this.#_onDelete != undefined) {
             const aDelete = document.createElement('a');
             aDelete.setAttribute('class', 'mr-2');
-            aDelete.setAttribute('style', 'javascript:void(0)');
+            aDelete.setAttribute('href', 'javascript:void(0)');
+            aDelete.setAttribute('style', 'color: red');
             aDelete.innerHTML = deleteIcon;
             aDelete.addEventListener('click', () => {
                 this.#_onDelete(id).then(res => {
@@ -453,7 +709,7 @@ export class DataTable {
         const showMoreId = `${this.#_element.id}-dataTable-show-more`;
         this.#_showMoreId = showMoreId;
         
-        const icon = '<i class="fa fa-angle-double-down"></i>';
+        const icon = this.#_icons.showMore;
 
         const span = document.createElement('span');
         span.setAttribute('class', 'd-flex justify-content-center');
@@ -471,8 +727,10 @@ export class DataTable {
     // }
 
     #removeSelectedRow() {
-        const row = document.querySelectorAll(`#${this.#_element.id} tr`);
+        const row = this.#_tableType == DataTable.TableType.List ? 
+            document.querySelectorAll(`#${this.#_element.id} tr`) : document.querySelectorAll(`#${this.#_element.id} .card`);
         const rowLength = row.length;
+
         for(let i = 0; i < rowLength; i++) {
             row[i].classList.remove('selected-row');
         }
@@ -481,15 +739,15 @@ export class DataTable {
     #handlingNextPage() {
         let nextPage;
         switch (this.#_paginationType) {
-            case DataTable.PAGINATION_DEFAULT:
+            case DataTable.PaginationType.Default:
                 
                 break;
 
-            case DataTable.PAGINATION_SHOW_MORE:
+            case DataTable.PaginationType.ShowMore:
                 nextPage = document.querySelector(`#${this.#_showMoreId}`);   
                 break;
 
-            case DataTable.PAGINATION_INFINITE:
+            case DataTable.PaginationType.Infinite:
             
                 break;
         
@@ -506,10 +764,25 @@ export class DataTable {
 
     async getData(page = 1) {
         try {
-            const res = await HTTPClient.Request({
-                uri: this.#_url + page,
-                method: HTTPClient.GET
-            });
+            let res;
+            const filter = this.#_filter != undefined ? this.#_filter : null;
+            if(filter) {
+                res = await HTTPClient.Request({
+                    uri: this.#_url + page,
+                    method: HTTPClient.POST,
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: {
+                        filters: filter
+                    }
+                });
+            } else {
+                res = await HTTPClient.Request({
+                    uri: this.#_url + page,
+                    method: HTTPClient.GET
+                });
+            }
 
             this.#setPagination({
                 total: res.total,
@@ -528,7 +801,13 @@ export class DataTable {
     }
 
     clearData() {
-        this.#_element.replaceChild(document.createElement('tbody'), this.#_element.tBodies[0]);
+        if(this.#_tableType == DataTable.TableType.List) {
+            this.#_element.replaceChild(document.createElement('tbody'), this.#_element.tBodies[0]);
+        } else {
+            while (this.#_element.firstChild) {
+                this.#_element.removeChild(this.#_element.firstChild);
+            }
+        }
     }
 
     #setPagination({
@@ -572,13 +851,11 @@ export class DataTable {
     async nextPage() {
         try {
             let page = this.currentPage;
-            if(this.#_paginationType == DataTable.PAGINATION_DEFAULT) {
-                page = 1;
+            if(this.#_paginationType == DataTable.PaginationType.Default) {
                 this.clearData();
-            } else {
-                page += 1;
             }
 
+            page += 1;
             if(this.currentPage < this.lastPage) {
                 const data = await this.getData(page);
                 this.addRows(data);
@@ -606,7 +883,7 @@ export class DataTable {
             const data = await this.getData(page);
             this.addRows(data);
 
-            if(this.#_actionType == DataTable.MENU_ACTION_TYPE) {
+            if(this.#_actionType == DataTable.ActionType.Menu) {
                 this.#setDisableEditAction(true);
                 this.#setDisableDeleteAction(true);
             }
