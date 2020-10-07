@@ -1,62 +1,11 @@
-import Slider from 'bootstrap-slider';
 import { HTTPClient } from '../../libraries/httpClient/httpClient';
-import { Lookup } from '../../libraries/lookup/lookup';
 import { Project } from './project';
 
 Shimmer(true);
 const projectId = document.querySelector('#project-page-id') ? document.querySelector('#project-page-id').value : null;
 const pageMode = document.querySelector('#page-mode') ? document.querySelector('#page-mode').value : ADD_MODE;
-const projectData = Project.getAllProperty(Project.attribute.page);
 
-/** Lookup */
-    const projectStatusLookup = new Lookup({
-        element: '#project-page-project_status',
-        placeholder: 'Pilih Status',
-        isAutoInit: false
-    });
-/** End Lookup */
-
-/** DataTable */
-/** End DataTable */
-
-const projectSubTotal = new Cleave('#project-page-sub_total', {
-    numeral: true,
-    prefix: 'Rp ',
-    numeralDecimalMark: ',',
-    delimiter: '.'
-});
-const projectCCO = new Cleave('#project-page-cco', {
-    numeral: true,
-    prefix: 'Rp ',
-    numeralDecimalMark: ',',
-    delimiter: '.'
-});
-const projectTotal = new Cleave('#project-page-total', {
-    numeral: true,
-    prefix: 'Rp ',
-    numeralDecimalMark: ',',
-    delimiter: '.'
-});
-const projectDP = new Cleave('#project-page-dp', {
-    numeral: true,
-    prefix: 'Rp ',
-    numeralDecimalMark: ',',
-    delimiter: '.'
-});
-const projectSisa = new Cleave('#project-page-sisa', {
-    numeral: true,
-    prefix: 'Rp ',
-    numeralDecimalMark: ',',
-    delimiter: '.'
-});
-const progressProject = new Slider('#project-page-progress');
-const projectDate = new Datepicker(projectData.date, {
-    autohide: true,
-    clearBtn: true,
-    buttonClass: 'btn',
-    format: 'dd/mm/yyyy'
-});
-
+const project = new Project();
 document.addEventListener('DOMContentLoaded', async (e) => {
     let isError = false;
     try {
@@ -65,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async (e) => {
         Alert({
             title: 'Terjadi kesalahan',
             message: error,
-            type: AlertHelper.Error
+            type: AlertHelper.AlertType.Error
         });
         isError = true;
     } finally {
@@ -75,10 +24,10 @@ document.addEventListener('DOMContentLoaded', async (e) => {
         }
     }
 
-    progressProject.on("slide", function(sliderValue) {
+    project.getProperty('progress').on("slide", function(sliderValue) {
         document.querySelector("#project-page-progress-value").textContent = `${sliderValue}%`;
     });
-    progressProject.on("change", function(sliderValue) {
+    project.getProperty('progress').on("change", function(sliderValue) {
         document.querySelector("#project-page-progress-value").textContent = `${sliderValue.newValue}%`;
     });
 
@@ -98,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async (e) => {
             Alert({
                 title: 'Terjadi kesalahan',
                 message: error,
-                type: AlertHelper.Error
+                type: AlertHelper.AlertType.Error
             });
         }
     });
@@ -106,6 +55,7 @@ document.addEventListener('DOMContentLoaded', async (e) => {
 
 async function init() {
     try {
+        project.renderProperty(Project.attribute.page);
         await renderLookup();
         await renderModal();
         await renderDetail();
@@ -123,35 +73,28 @@ async function init() {
 }
 
 function renderPage(data) {
-    projectData.name.value = data.name ? data.name : '';
-    projectData.code.value = data.code ? data.code : '';
-    projectData.owner.value = data.owner ? data.owner : '';
-    // projectData.date.value = data.date ? data.date : '';
-    projectDate.setDate(data.date ? new Date(data.date) : null);
-    projectData.city.value = data.city ? data.city : '';
-    projectData.address.value = data.address ? data.address : '';
-    projectData.luas_area.value = data.luas_area ? parseFloat(data.luas_area) : 0;
-    projectData.estimasi.value = data.estimasi ? data.estimasi : 0;
-    // projectData.sub_total.value = data.sub_total ? parseFloat(data.sub_total) : 0;
-    // projectData.cco.value = data.cco ? parseFloat(data.cco) : 0;
-    // projectData.total.value = data.total ? parseFloat(data.total) : 0;
-    // projectData.dp.value = data.dp ? parseFloat(data.dp) : 0;
-    // projectData.sisa.value = data.sisa ? parseFloat(data.sisa) : 0;
-    
-    projectSubTotal.setRawValue(data.sub_total ? data.sub_total : '0');
-    projectCCO.setRawValue(data.cco ? data.cco : '0');
-    projectTotal.setRawValue(data.total ? data.total : '0');
-    projectDP.setRawValue(data.dp ? data.dp : '0');
-    projectSisa.setRawValue(data.sisa ? data.sisa : '0');
+    project.getProperty('name').value = data.name ? data.name : '';
+    project.getProperty('code').value = data.code ? data.code : '';
+    project.getProperty('owner').value = data.owner ? data.owner : '';
+    project.getProperty('date').setDate(data.date ? new Date(data.date) : null);
+    project.getProperty('city').value = data.city ? data.city : '';
+    project.getProperty('address').value = data.address ? data.address : '';
+    project.getProperty('luas_area').setRawValue(data.luas_area ? data.luas_area : '0');
+    project.getProperty('estimasi').setRawValue(data.estimasi ? data.estimasi : '0');
+    project.getProperty('sub_total').setRawValue(data.sub_total ? data.sub_total : '0');
+    project.getProperty('cco').setRawValue(data.cco ? data.cco : '0');
+    project.getProperty('total').setRawValue(data.total ? data.total : '0');
+    project.getProperty('dp').setRawValue(data.dp ? data.dp : '0');
+    project.getProperty('sisa').setRawValue(data.sisa ? data.sisa : '0');
 
-    progressProject.setValue(data.progress ? data.progress : 0, false, true);
+    project.getProperty('progress').setValue(data.progress ? data.progress : 0, false, true);
     document.querySelector("#project-page-progress-value").textContent = `${data.progress ? data.progress : 0}%`;
 
     const projectStatusValue = data.project_status ? {
         id: data.project_status.id,
         name: data.project_status.name
     } : null;
-    projectStatusLookup.setValue(projectStatusValue);
+    project.getProperty('project_status').setValue(projectStatusValue);
 }
 
 async function renderLookup() {
@@ -165,7 +108,7 @@ async function renderLookup() {
         //     projectStatusData,
         // ]);
 
-        // projectStatusLookup.sourceData = {
+        // projectData.project_status.sourceData = {
         //     static: lookupData[0].map(item => {
         //         return {
         //             id: item.id,
@@ -174,7 +117,7 @@ async function renderLookup() {
         //     })
         // };
 
-        projectStatusLookup.init();
+        project.getProperty('project_status').init();
     } catch (error) {
         console.error(error);
         throw error;
@@ -256,9 +199,8 @@ async function save() {
             return;
         }
 
-        const project = new Project();
         project.setAllProperty(Project.attribute.page);
-        project.date = projectData.date.value ? projectDate.getDate('yyyy-mm-dd') : null;
+        // project.date = projectData.date.value ? projectDate.getDate('yyyy-mm-dd') : null;
         project.sub_total = projectSubTotal.getRawValue().split('Rp ')[1];
         project.cco = projectCCO.getRawValue().split('Rp ')[1];
         project.total = projectTotal.getRawValue().split('Rp ')[1];

@@ -66,19 +66,73 @@ export class Project extends Controller {
                 name: '#project-page-name',
                 code: '#project-page-code',
                 owner: '#project-page-owner',
-                date: '#project-page-date',
+                date: {
+                    element: '#project-page-date',
+                    plugin: {
+                        type: Controller.PluginType.Date
+                    }
+                },
                 city: '#project-page-city',
                 address: '#project-page-address',
-                luas_area: '#project-page-luas_area',
-                estimasi: '#project-page-estimasi',
-                sub_total: '#project-page-sub_total',
-                cco: '#project-page-cco',
-                total: '#project-page-total',
-                dp: '#project-page-dp',
-                sisa: '#project-page-sisa',
-                progress: '#project-page-progress',
-                project_status: '#project-page-project_status'
-            },
+                luas_area: {
+                    element: '#project-page-luas_area',
+                    plugin: {
+                        type: Controller.PluginType.Number
+                    }
+                },
+                estimasi: {
+                    element: '#project-page-estimasi',
+                    plugin: {
+                        type: Controller.PluginType.Number
+                    }
+                },
+                sub_total: {
+                    element: '#project-page-sub_total',
+                    plugin: {
+                        type: Controller.PluginType.Currency
+                    }
+                },
+                cco: {
+                    element: '#project-page-cco',
+                    plugin: {
+                        type: Controller.PluginType.Currency
+                    }
+                },
+                total: {
+                    element: '#project-page-total',
+                    plugin: {
+                        type: Controller.PluginType.Currency
+                    }
+                },
+                dp: {
+                    element: '#project-page-dp',
+                    plugin: {
+                        type: Controller.PluginType.Currency
+                    }
+                },
+                sisa: {
+                    element: '#project-page-sisa',
+                    plugin: {
+                        type: Controller.PluginType.Currency
+                    }
+                },
+                progress: {
+                    element: '#project-page-progress',
+                    plugin: {
+                        type: Controller.PluginType.Slider
+                    }
+                },
+                project_status: {
+                    element: '#project-page-project_status',
+                    plugin: {
+                        type: Controller.PluginType.Lookup,
+                        options: {
+                            placeholder: 'Pilih Status',
+                            isAutoInit: false
+                        }
+                    }
+                }
+            }
         };
     }
 
