@@ -1,4 +1,4 @@
-import {HTTPClient} from '../httpClient/httpClient';
+import { HTTPClient } from '../httpClient/httpClient';
 import { AlertHelper } from '../../libraries/alert/alert';
 
 export class Controller {

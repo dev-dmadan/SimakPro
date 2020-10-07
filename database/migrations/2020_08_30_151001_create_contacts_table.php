@@ -33,8 +33,6 @@ class CreateContactsTable extends Migration
             $table->foreign('gender_id')->references('id')->on('genders');
             $table->foreign('contact_type_id')->references('id')->on('contact_types');
             $table->foreign('active_status_id')->references('id')->on('active_status');
-            // $table->foreign('created_by_id')->references('id')->on('contacts');
-            // $table->foreign('updated_by_id')->references('id')->on('contacts');
             $table->engine = 'InnoDB';
         });
     }

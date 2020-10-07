@@ -43,7 +43,7 @@
                 <div class="col-8">
                     <div class="mb-3">
                         <button class="btn btn-success" id="@yield('save-button-id')">Save</button>
-                        <a href="{{ url()->previous() }}" class="btn btn-primary">Close</a>
+                        <button class="btn btn-primary" onclick="history.go(-1)">Close</button>
                         @yield('custom-button')
                     </div>
                 </div>
