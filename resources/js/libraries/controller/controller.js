@@ -1,46 +1,250 @@
 import { HTTPClient } from '../httpClient/httpClient';
-import { AlertHelper } from '../../libraries/alert/alert';
+import { AlertHelper } from '../alert/alert';
+import { Lookup } from '../lookup/lookup';
+import Slider from 'bootstrap-slider';
 
 export class Controller {
-    #data = null;
-    #routeName;
+    _data = null;
+    _property = null;
+    _routeName;
+
+    /**
+     * constructor
+     * @param {string} routeName 
+     */
     constructor(routeName) {
         if (this.constructor === Controller) {
             throw new Error("Can't instantiate this class");
         }
 
-        this.#routeName = routeName;
+        this._routeName = routeName;
     }
 
+    /**
+     * routeName
+     * @returns {string}
+     */
     get routeName() {
-        return this.#routeName;
+        return this._routeName;
     }
 
+    /**
+     * addProperty
+     * @param {string} name 
+     * @param {any} value 
+     */
     addProperty(name, value) {
-        if(this.#data == undefined || this.#data == null) {
-            this.#data = {};
+        if(this._data == undefined || this._data == null) {
+            this._data = {};
         }
         
-        this.#data[name] = (typeof value == 'object' && value != undefined) ? 
+        this._data[name] = (typeof value == 'object' && value != undefined) ? 
             value.id : value;
     }
 
-    static getAllProperty(attributes) {
+    static get PluginType() {
+        return {
+            Lookup: 'lookup',
+            Currency: 'currency',
+            Number: 'number',
+            Slider: 'slider',
+            Date: 'date',
+            DateTime: 'datetime',
+            RangeDate: 'range-date'
+        };
+    }
+
+    getProperty(name) {
+        return this._property != undefined ? this._property[name] : null;
+    }
+
+    getAllProperty() {
+        return this._property;
+    }
+
+    /**
+     * renderProperty
+     * @param {object} attributes 
+     * @returns {object} data
+     */
+    renderProperty(attributes) {
         const data = {};
         for (const key in attributes) {
             if (!attributes.hasOwnProperty(key)) {
                 continue;
             }
 
-            const element = document.querySelector(attributes[key]);
-            if(element != undefined) {
-                data[key] = element;
+            let element;
+            if(typeof attributes[key] == 'string') {
+                element = document.querySelector(attributes[key]);
+                if(element != undefined) {
+                    data[key] = element;
+                }
+            } else if(typeof attributes[key] == 'object' && 
+                (attributes[key].hasOwnProperty('element') && attributes[key].hasOwnProperty('plugin'))) {
+                data[key] = this._pluginProperty(attributes[key].element, attributes[key].plugin);
+            } else {
+                throw "Element is not defined";
             }
+        }
+
+        this._property = data;
+    }
+
+    /**
+     * _pluginProperty
+     * @param {string | HTMLElement} element 
+     * @param {{
+     *  type: string;
+     *  options: object | any;
+     * }} plugin 
+     * @return {object} data
+     */
+    _pluginProperty(element, plugin) {
+        let data;
+        const options = plugin.options || {};
+        switch (plugin.type) {
+            case Controller.PluginType.Lookup:
+                data = this._lookupPlugin(element, options);
+                break;
+
+            case Controller.PluginType.Currency:
+                data = this._currencyPlugin(element, options);
+                break;
+
+            case Controller.PluginType.Number:
+                data = this._numberPlugin(element, options);
+                break;
+
+            case Controller.PluginType.Slider:
+                data = this._sliderPlugin(element, options);
+                break;
+
+            case Controller.PluginType.Date:
+                data = this._datePlugin(element, options);
+                break;
+
+            // case Controller.PluginType.DateTime:
+            //     data = this._lookupPlugin(element, options);
+            //     break;
+
+            // case Controller.PluginType.RangeDate:
+            //     data = this._lookupPlugin(element, options);
+            //     break;
+        
+            default:
+                throw 'Plugin is not registred';
         }
 
         return data;
     }
 
+    /**
+     * _lookupPlugin
+     * @param {string | HTMLElement} element 
+     * @param {object} options 
+     * @return {Lookup} data
+     */
+    _lookupPlugin(element, options) {
+        if(options == undefined || Object.keys(options).length < 1) {
+            throw "Options can't be empty";
+        }
+
+        if(!options.element) {
+            options.element = element;
+        }
+        
+        const _elem = new Lookup(options);
+        return _elem;
+    }
+
+    /**
+     * _datePlugin
+     * @param {string | HTMLElement} element 
+     * @param {object} options 
+     * @return {Datepicker} data
+     */
+    _datePlugin(element, options = {}) {
+        const _element = typeof element == 'string' ? 
+            document.querySelector(element) : 
+            (typeof element == 'object' && element && element.nodeType ? element : null);
+        if(!_element) {
+            throw "Element can't be empty";
+        }
+        
+        const _options = options == undefined || Object.keys(options).length < 1 ? {
+            autohide: true,
+            clearBtn: true,
+            buttonClass: 'btn',
+            format: 'dd/mm/yyyy'
+        } : options;
+        const _elem = new Datepicker(_element, _options);
+
+        return _elem;
+    }
+
+    /**
+     * _numberPlugin
+     * @param {string} element 
+     * @param {object} options 
+     * @return {Cleave} data
+     */
+    _numberPlugin(element, options = {}) {
+        if(typeof element != 'string') {
+            throw "Element must be string";
+        }
+        
+        const _options = options == undefined || Object.keys(options).length < 1 ? {
+            numeral: true,
+            numeralDecimalMark: ',',
+            delimiter: '.'
+        } : options
+        const _elem = new Cleave(element, _options);
+
+        return _elem;
+    }
+
+    /**
+     * _currencyPlugin
+     * @param {string} element 
+     * @param {object} options 
+     * @return {Cleave} data
+     */
+    _currencyPlugin(element, options = {}) {
+        if(typeof element != 'string') {
+            throw "Element must be string";
+        }
+
+        const _options = options == undefined || Object.keys(options).length < 1 ? {
+            numeral: true,
+            prefix: 'Rp ',
+            numeralDecimalMark: ',',
+            delimiter: '.'
+        } : options
+        const _elem = new Cleave(element, _options);
+
+        return _elem;
+    }
+
+    /**
+     * _sliderPlugin
+     * @param {HTMLElement} element 
+     * @param {object} options 
+     * @return {Slider} data
+     */
+    _sliderPlugin(element, options = {}) {
+        if(typeof element != 'string') {
+            throw "Element must be string";
+        }
+
+        const _elem = new Slider(element, options);
+        return _elem;
+    }
+
+    /**
+     * setAllProperty
+     * @param {object} attributes 
+     */
     setAllProperty(attributes) {
         try {
             for (const key in attributes) {
@@ -48,9 +252,17 @@ export class Controller {
                     continue;
                 }
 
-                const element = document.querySelector(attributes[key]);
-                if(element != undefined) {
-                    this[key] = this.#getValueFromElement(element);
+                let element;
+                if(typeof attributes[key] == 'string') {
+                    element = document.querySelector(attributes[key]);
+                    if(element != undefined) {
+                        this[key] = this._getValueFromElement(element);
+                    }
+                } else if(typeof attributes[key] == 'object' && 
+                    (attributes[key].hasOwnProperty('id') && attributes[key].hasOwnProperty('plugin'))) {
+                    this[key] = this._getValueFromPlugin(attributes[key].element, attributes[key].plugin);
+                } else {
+                    throw 'Attribute value is invalid';
                 }
             }
         } catch (error) {
@@ -59,26 +271,60 @@ export class Controller {
         }
     }
 
-    #getValueFromElement(element) {
+    _getValueFromPlugin() {
+
+    }
+
+    _lookupValuePlugin() {
+
+    }
+
+    _dateValuePlugin() {
+
+    }
+
+    _numberValuePlugin() {
+
+    }
+
+    _currencyValuePlugin() {
+
+    }
+
+    _sliderValuePlugin() {
+        
+    }
+
+    /**
+     * _getValueFromElement
+     * @param {HTMLElement} element 
+     * @return {string | number | object} value
+     */
+    _getValueFromElement(element) {
         let value;
         const elementType = element.nodeName;
         switch (elementType) {
             case 'SELECT':
-                value = this.#getValueSelectElement(element);
+                value = this._getValueSelectElement(element);
                 break;
             case 'TEXTAREA':
-                value = this.#getValuTextAreaElement(element);
+                value = this._getValuTextAreaElement(element);
                 break;
             case 'INPUT':
             default:
-                value = this.#getValueInputElement(element);
+                value = this._getValueInputElement(element);
                 break;
         }
 
         return value;
     }
 
-    #getValueInputElement(element) {
+    /**
+     * _getValueInputElement
+     * @param {HTMLElement} element
+     * @return {string | number | object} value
+     */
+    _getValueInputElement(element) {
         let value;
         const inputType = element.type;
         switch (inputType) {
@@ -98,7 +344,12 @@ export class Controller {
         return value;
     }
 
-    #getValueSelectElement(element) {
+    /**
+     * _getValueSelectElement
+     * @param {HTMLElement} element 
+     * @return {object} value
+     */
+    _getValueSelectElement(element) {
         let value;
         value = element.value == null || element.value.trim() == '' ? 
             null : {
@@ -109,14 +360,33 @@ export class Controller {
         return value;
     }
 
-    #getValuTextAreaElement(element) {
+    /**
+     * _getValuTextAreaElement
+     * @param {HTMLElement} element 
+     * @return {string} value
+     */
+    _getValuTextAreaElement(element) {
         return element.value;
     }
 
+    /**
+     * getCSRF
+     * @return {string} CSRF
+     */
     static getCSRF() {
         return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     }
 
+    /**
+     * save
+     * @param {{
+     *  uri: string;
+     *  method: string;
+     *  headers: object;
+     *  body: object;
+     * }} options 
+     * @return {promise} result
+     */
     async save({
         uri = null, 
         method = null, 
@@ -129,7 +399,7 @@ export class Controller {
             "Content-Type": "application/json",
             "X-CSRF-TOKEN": Controller.getCSRF()
         };
-        const _body = this.#data;;
+        const _body = this._data;
         try {
             if(body != undefined && typeof body == 'object') {
                 Object.keys(body).forEach(key => {
@@ -147,6 +417,17 @@ export class Controller {
         }
     }
 
+    /**
+     * update
+     * @param {{
+     *  id: string;
+     *  uri: string;
+     *  method: string;
+     *  headers: object;
+     *  body: object;
+     * }} options 
+     * @return {promise} result
+     */
     async update({
         id,
         uri = null, 
@@ -159,7 +440,7 @@ export class Controller {
             "Content-Type": "application/json",
             "X-CSRF-TOKEN": Controller.getCSRF()
         };
-        const _body = this.#data;
+        const _body = this._data;
         try {
             if(id == undefined || id.trim() == '') {
                 throw `Id must required and can't be empty`;
@@ -182,6 +463,20 @@ export class Controller {
         }
     }
 
+    /**
+     * delete
+     * @param {{
+     *  id: string;
+     *  method: string;
+     *  headers: object;
+     *  body: object;
+     *  withConfirm: {
+     *      confirmMessage: string;
+     *      afterMessage: string;  
+     *  } | boolean
+     * }} options 
+     * @return {promise} result
+     */
     static async delete({
         id,
         uri = null,
@@ -248,7 +543,7 @@ export class Controller {
                 AlertHelper.Alert({
                     title: 'Something wrong happen',
                     message: error,
-                    type: AlertHelper.Error
+                    type: AlertHelper.AlertType.Error
                 }); 
             }
 
@@ -260,6 +555,17 @@ export class Controller {
         }
     }
 
+    /**
+     * show
+     * @param {{
+     *  id: string;
+     *  uri: string;
+     *  method: string;
+     *  headers: object;
+     *  body: object;
+     * }} options 
+     * @return {promise} result
+     */
     static async show({
         id,
         uri = null,
