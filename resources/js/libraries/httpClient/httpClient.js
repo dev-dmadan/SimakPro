@@ -1,49 +1,60 @@
 export class HTTPClient {
 
-    /** Available Method */
-        static get GET() {
-            return 'GET';
-        }
-
-        static get POST() {
-            return 'POST';
-        }
-
-        static get PUT() {
-            return 'PUT';
-        }
-
-        static get PATCH() {
-            return 'PATCH';
-        }
-
-        static get DELETE() {
-            return 'DELETE';
-        }
-    /** End Available Method */
+    static get Method() {
+        return {
+            Get: 'GET',
+            Post: 'POST',
+            Put: 'PUT',
+            Patch: 'PATCH',
+            Delete: 'DELETE'
+        };
+    }
     
-    /** Available Content Type */
-        static get CONTENT_TYPE_JSON() {
-            return "application/json";
-        }
+    static get ContentType() {
+        return {
+            Json: 'application/json',
+            Form: 'application/x-www-form-urlencoded'
+        };
+    }
 
-        static get CONTENT_TYPE_FORM() {
-            return "application/x-www-form-urlencoded";
-        }
-    /** End Available Content Type */
-
+    /**
+     * isContentTypeJSON
+     * @param {Headers} headers 
+     * @return {boolean}
+     */
     static isContentTypeJSON(headers) {
-        return headers.has('Content-Type') && headers.get('Content-Type') == HTTPClient.CONTENT_TYPE_JSON;
+        return headers.has('Content-Type') && headers.get('Content-Type') == HTTPClient.ContentType.Json;
     }
 
+    /**
+     * isContentTypeForm
+     * @param {Headers} headers 
+     * @return {boolean}
+     */
     static isContentTypeForm(headers) {
-        return headers.has('Content-Type') && headers.get('Content-Type') == HTTPClient.CONTENT_TYPE_FORM;
+        return headers.has('Content-Type') && headers.get('Content-Type') == HTTPClient.ContentType.Form;
     }
 
+    /**
+     * isContentTypeFormData
+     * @param {object} body 
+     * @return {boolean}
+     */
     static isContentTypeFormData(body) {
         return typeof body == 'object' && body instanceof FormData;
     }
 
+    /**
+     * Request
+     * @param {{
+     *  uri: string;
+     *  method: string;
+     *  headers: object;
+     *  body: object;
+     *  isSelfHandling: boolean;
+     * }} options 
+     * @returns {Promise} result
+     */
     static async Request({
         uri = null, 
         method, 
@@ -55,63 +66,64 @@ export class HTTPClient {
             let req;
             let options;
             switch (method) {
-                case HTTPClient.GET:
+                case HTTPClient.Method.Get:
                     options = HTTPClient.buildOptions({
-                        method: HTTPClient.GET,
+                        method: HTTPClient.Method.Get,
                         headers: headers
                     });
                     break;
 
-                case HTTPClient.POST:
+                case HTTPClient.Method.Post:
                     options = HTTPClient.buildOptions({
-                        method: HTTPClient.POST,
+                        method: HTTPClient.Method.Post,
                         headers: headers,
                         body: body
                     });
                     break;
 
-                case HTTPClient.PUT:
+                case HTTPClient.Method.Put:
                     options = HTTPClient.buildOptions({
-                        method: HTTPClient.PUT,
+                        method: HTTPClient.Method.Put,
                         headers: headers,
                         body: body
                     });
                     break;
 
-                case HTTPClient.PATCH:
+                case HTTPClient.Method.Patch:
                     options = HTTPClient.buildOptions({
-                        method: HTTPClient.PATCH,
+                        method: HTTPClient.Method.Patch,
                         headers: headers,
                         body: body
                     });
                     break;
 
-                case HTTPClient.DELETE:
+                case HTTPClient.Method.Delete:
                     options = HTTPClient.buildOptions({
-                        method: HTTPClient.DELETE,
+                        method: HTTPClient.Method.Delete,
                         headers: headers
                     });
                     break;
             
                 default:
                     options = HTTPClient.buildOptions({
-                        method: HTTPClient.GET,
+                        method: HTTPClient.Method.Get,
                         headers: headers
                     });
                     break;
             }
 
             req = await fetch(uri, options);
-            if(isSelfHandling) {
-                return req;
-            } else {
-                return await HTTPClient.handlingResponse(req);
-            }
+            return isSelfHandling ? req : await HTTPClient.handlingResponse(req);
         } catch (error) {
             throw new Error(error);
         }
     }
 
+    /**
+     * handlingResponse
+     * @param {promise} response 
+     * @return {Promise<string | object>} result
+     */
     static async handlingResponse(response) {
         try {
             if(!response.ok) {
@@ -129,6 +141,11 @@ export class HTTPClient {
         }
     }
 
+    /**
+     * handlingDownload
+     * @param {promise} response 
+     * @param {string} filename 
+     */
     static async handlingDownload(response, filename) {
         try {
             const blob = await response.blob();
@@ -146,33 +163,41 @@ export class HTTPClient {
         }
     }
 
+    /**
+     * buildOptions
+     * @param {{
+     *  method: string;
+     *  headers: object;
+     *  body: object;
+     * }} options 
+     */
     static buildOptions({method, headers = null, body = null}) {
         const options = {};
 
         try {
             switch (method) {
-                case HTTPClient.GET:
-                    options.method = HTTPClient.GET;
+                case HTTPClient.Method.Get:
+                    options.method = HTTPClient.Method.Get;
                     break;
     
-                case HTTPClient.POST:
-                    options.method = HTTPClient.POST;
+                case HTTPClient.Method.Post:
+                    options.method = HTTPClient.Method.Post;
                     break;
     
-                case HTTPClient.PUT:
-                    options.method = HTTPClient.PUT;
+                case HTTPClient.Method.Put:
+                    options.method = HTTPClient.Method.Put;
                     break;
     
-                case HTTPClient.PATCH:
-                    options.method = HTTPClient.PATCH;
+                case HTTPClient.Method.Patch:
+                    options.method = HTTPClient.Method.Patch;
                     break;
     
-                case HTTPClient.DELETE:
-                    options.method = HTTPClient.DELETE;
+                case HTTPClient.Method.Delete:
+                    options.method = HTTPClient.Method.Delete;
                     break;
             
                 default:
-                    options.method = HTTPClient.GET;
+                    options.method = HTTPClient.Method.Get;
                     break;
             }
     
@@ -185,7 +210,7 @@ export class HTTPClient {
                 });
             }
     
-            if(method == HTTPClient.POST || method == HTTPClient.PUT || method == HTTPClient.PATCH) {
+            if(method == HTTPClient.Method.Post || method == HTTPClient.Method.Put || method == HTTPClient.Method.Patch) {
                 if(body != undefined && typeof body == 'object') {
                     if(HTTPClient.isContentTypeJSON(options.headers)) {
                         options.body = JSON.stringify(body);
