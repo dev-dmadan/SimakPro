@@ -17,6 +17,7 @@ try {
 /** Default Plugins */
     require('overlayscrollbars');
     require("select2");
+    require('bootstrap-datepicker/dist/js/bootstrap-datepicker');
 /** End Default Plugins */
 
 require('../../node_modules/admin-lte/dist/js/adminlte');
