@@ -63,6 +63,11 @@ use Illuminate\Support\Facades\Route;
     });
 /** End Example */
 
+/** Lookup */
+    Route::get('/lookups/{name}', 'LookupController@showList');
+    Route::get('/lookups/{name}/{id}', 'LookupController@show');
+/** End Lookup */
+
 /** Project */
     Route::get('/projects', 'ProjectController@index');
     Route::get('/projects/create', 'ProjectController@create');
