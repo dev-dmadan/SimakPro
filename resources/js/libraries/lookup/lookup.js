@@ -17,7 +17,7 @@ export class Lookup {
      *  dropdownParent: string | null;
      *  placeholder: string | null;
      *  sourceData: {
-     *      serverSide: {\
+     *      serverSide: {
      *          uri: string;
      *          isPagination: boolean;
      *          renderData: (response: object) => [{id: string; text: string}]
@@ -119,7 +119,7 @@ export class Lookup {
                 this._renderData = value.serverSide.renderData || null;
 
                 this._isServerSide = true;
-            } else if(value.static != undefined && typeof value.static == 'object' && value.static.length > 0) {
+            } else if(value.static != undefined && typeof value.static == 'object') {
                 this._data = value.static;
             } else {
                 throw new Error('Source Data must have property Server Side or Static');
@@ -187,6 +187,14 @@ export class Lookup {
             console.error(error);
             throw error;
         }
+    }
+
+    getValue() {
+        const value = $(this._element).select2('data');
+        return value.length > 0 ? {
+            id: value[0].id,
+            name: value[0].text
+        } : null;
     }
 
     _buildOptions() {
