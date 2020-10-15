@@ -53,6 +53,11 @@ mix.js('resources/js/app.js', 'public/js')
     .js('resources/js/app/contact/page.js', 'public/js/app/contact')
     .js('resources/js/app/contact/view.js', 'public/js/app/contact')
 
+    // operational
+    .js('resources/js/app/operational/list.js', 'public/js/app/operational')
+    .js('resources/js/app/operational/page.js', 'public/js/app/operational')
+    .js('resources/js/app/operational/view.js', 'public/js/app/operational')
+
     // user
     .js('resources/js/app/user/list.js', 'public/js/app/user')
     .js('resources/js/app/user/page.js', 'public/js/app/user')
