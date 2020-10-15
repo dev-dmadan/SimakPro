@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Constants\PaginationConstant;
+use Illuminate\Support\Facades\Validator;
 use App\Models\Project;
 
 class ProjectController extends Controller
@@ -44,16 +45,32 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
-        $project = new Project();
-        foreach($request->all() as $key => $item) {
-            if($item != null || is_numeric($item)) {
-                $project->$key = $item;
+        $isSuccess = false;
+        $message = null;
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|max:255',
+            'date' => 'required',
+            'progress' => 'required|integer|min:10',
+            'project_status_id' => 'required'
+        ]);
+        
+        if(!$validator->fails()) {
+            $project = new Project();
+            foreach($request->all() as $key => $item) {
+                if($item != null || is_numeric($item)) {
+                    $project->$key = $item;
+                }
             }
+            $isSuccess = $project->save();
+        } else {
+            $message = $validator->messages();
         }
 
         return response()->json([
-            'status' => $project->save(),
-            'id' => $project->id
+            'success' => $isSuccess,
+            'errors' => $message,
+            'id' => $isSuccess ? $project->id : null
         ]);
     }
 

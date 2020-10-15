@@ -1,17 +1,18 @@
 import { HTTPClient } from '../../libraries/httpClient/httpClient';
+import { AlertHelper } from '../../libraries/alert/alert';
 import { Project } from './project';
 
 Shimmer(true);
 const projectId = document.querySelector('#project-page-id') ? document.querySelector('#project-page-id').value : null;
 const pageMode = document.querySelector('#page-mode') ? document.querySelector('#page-mode').value : ADD_MODE;
+const project = new Project(Project.attribute.page);
 
-const project = new Project();
 document.addEventListener('DOMContentLoaded', async (e) => {
     let isError = false;
     try {
         await init();
     } catch (error) {
-        Alert({
+        AlertHelper.Alert({
             title: 'Terjadi kesalahan',
             message: error,
             type: AlertHelper.AlertType.Error
@@ -24,27 +25,52 @@ document.addEventListener('DOMContentLoaded', async (e) => {
         }
     }
 
-    project.getProperty('progress').on("slide", function(sliderValue) {
+    console.log(project.getAllProperty());
+
+    project.progress.plugin.on("slide", function(sliderValue) {
         document.querySelector("#project-page-progress-value").textContent = `${sliderValue}%`;
     });
-    project.getProperty('progress').on("change", function(sliderValue) {
+    project.progress.plugin.on("change", function(sliderValue) {
         document.querySelector("#project-page-progress-value").textContent = `${sliderValue.newValue}%`;
+    });
+
+    // on change sub total, cco
+    [project.sub_total.element, project.cco.element].forEach(elem => {
+        elem.addEventListener('change', function() {
+            const total = project.sub_total.get() + project.cco.get();
+            project.total.set(total);
+        });
+    });
+
+    // on change dp
+    project.dp.element.addEventListener('change', function() {
+        const sisa = project.total.get() - project.dp.get();
+        project.sisa.set(sisa);
+    });
+    
+    $(project.date.element).datepicker().on('changeDate', (e) => {
+        console.log('on change...');
     });
 
     document.querySelector('#project-page-save').addEventListener('click', async (e) => {
         try {
             const res = await save();
-            if(res) {
-                if(res.status && res.id && pageMode == ADD_MODE) {
-                    Alert({title: 'Project berhasil disimpan'}).then(res => window.location.href = `${APP_URL}/projects`);
+            if(res.success) {
+                if(res.id && pageMode == ADD_MODE) {
+                    AlertHelper.Alert({title: 'Project berhasil disimpan'}).then(res => window.location.href = `${APP_URL}/projects`);
                 } else {
-                    Toastr({message: 'Project berhasil disimpan'});
+                    AlertHelper.Toastr({message: 'Project berhasil disimpan'});
                     reloadPage();
                 }
+            } else {
+                AlertHelper.Toastr({
+                    message: 'Terdapat kesalahan, silahkan check kembali form',
+                    type: AlertHelper.AlertType.Warning
+                });
             }
         } catch (error) {
             console.error(error);
-            Alert({
+            AlertHelper.Alert({
                 title: 'Terjadi kesalahan',
                 message: error,
                 type: AlertHelper.AlertType.Error
@@ -55,9 +81,9 @@ document.addEventListener('DOMContentLoaded', async (e) => {
 
 async function init() {
     try {
-        project.renderProperty(Project.attribute.page);
+        project.renderAllProperty();
+
         await renderLookup();
-        await renderModal();
         await renderDetail();
         handlingNewButtonDetails();
         handlingAfterSaveModals();
@@ -73,62 +99,51 @@ async function init() {
 }
 
 function renderPage(data) {
-    project.getProperty('name').value = data.name ? data.name : '';
-    project.getProperty('code').value = data.code ? data.code : '';
-    project.getProperty('owner').value = data.owner ? data.owner : '';
-    project.getProperty('date').setDate(data.date ? new Date(data.date) : null);
-    project.getProperty('city').value = data.city ? data.city : '';
-    project.getProperty('address').value = data.address ? data.address : '';
-    project.getProperty('luas_area').setRawValue(data.luas_area ? data.luas_area : '0');
-    project.getProperty('estimasi').setRawValue(data.estimasi ? data.estimasi : '0');
-    project.getProperty('sub_total').setRawValue(data.sub_total ? data.sub_total : '0');
-    project.getProperty('cco').setRawValue(data.cco ? data.cco : '0');
-    project.getProperty('total').setRawValue(data.total ? data.total : '0');
-    project.getProperty('dp').setRawValue(data.dp ? data.dp : '0');
-    project.getProperty('sisa').setRawValue(data.sisa ? data.sisa : '0');
+    project.name.set(data.name ? data.name : '');
+    project.code.set(data.code ? data.code : '');
+    project.owner.set(data.owner ? data.owner : '');
+    project.date.set(data.date);
+    project.city.set(data.city ? data.city : '');
+    project.address.set(data.address ? data.address : '');
+    project.luas_area.set(data.luas_area);
+    project.estimasi.set(data.estimasi);
+    project.sub_total.set(data.sub_total);
+    project.cco.set(data.cco);
+    project.total.set(data.total);
+    project.dp.set(data.dp);
+    project.sisa.set(data.sisa);
 
-    project.getProperty('progress').setValue(data.progress ? data.progress : 0, false, true);
+    project.progress.set(data.progress);
     document.querySelector("#project-page-progress-value").textContent = `${data.progress ? data.progress : 0}%`;
 
     const projectStatusValue = data.project_status ? {
         id: data.project_status.id,
         name: data.project_status.name
     } : null;
-    project.getProperty('project_status').setValue(projectStatusValue);
+    project.project_status.set(projectStatusValue);
 }
 
 async function renderLookup() {
     try {
-        // const projectStatusData = HTTPClient.Request({
-        //     uri: `${APP_URL}/lookups/project-status`,
-        //     method: HTTPClient.GET
-        // });
+        const projectStatusData = HTTPClient.Request({
+            uri: `${APP_URL}/lookups/project-status`,
+            method: HTTPClient.GET
+        });
 
-        // const lookupData = await Promise.all([
-        //     projectStatusData,
-        // ]);
-
-        // projectData.project_status.sourceData = {
-        //     static: lookupData[0].map(item => {
-        //         return {
-        //             id: item.id,
-        //             text: item.name
-        //         }
-        //     })
-        // };
-
-        project.getProperty('project_status').init();
-    } catch (error) {
-        console.error(error);
-        throw error;
-    }
-}
-
-async function renderModal() {
-    try {
-        await Promise.all([
-
+        const lookupData = await Promise.all([
+            projectStatusData,
         ]);
+
+        project.project_status.plugin.sourceData = {
+            static: lookupData[0].map(item => {
+                return {
+                    id: item.id,
+                    text: item.name
+                }
+            })
+        };
+
+        project.project_status.plugin.init();
     } catch (error) {
         console.error(error);
         throw error;
@@ -194,19 +209,11 @@ async function reloadPage() {
 
 async function save() {
     try {
-        const conf = await Confirm();
+        const conf = await AlertHelper.Confirm();
         if(!conf) {
             return;
         }
 
-        project.setAllProperty(Project.attribute.page);
-        // project.date = projectData.date.value ? projectDate.getDate('yyyy-mm-dd') : null;
-        project.sub_total = projectSubTotal.getRawValue().split('Rp ')[1];
-        project.cco = projectCCO.getRawValue().split('Rp ')[1];
-        project.total = projectTotal.getRawValue().split('Rp ')[1];
-        project.dp = projectDP.getRawValue().split('Rp ')[1];
-        project.sisa = projectSisa.getRawValue().split('Rp ')[1];
-        
         if(pageMode == ADD_MODE) {
             return await project.save();
         } else if(pageMode == EDIT_MODE) {

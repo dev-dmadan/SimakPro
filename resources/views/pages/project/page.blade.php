@@ -20,24 +20,29 @@
     <div class="form-group">
         <label for="project-page-code">Kode Proyek</label>
         <input type="text" class="form-control" id="project-page-code" placeholder="Masukkan Kode Proyek" readonly>
+        <div class="invalid-feedback project-page-code"></div>
     </div>
     <div class="form-group">
         <label for="project-page-name">Nama Proyek</label>
         <input type="text" class="form-control" id="project-page-name" placeholder="Masukkan Nama Proyek">
+        <div class="invalid-feedback project-page-name"></div>
     </div>
     <div class="form-group">
         <label for="project-page-date">Tanggal Proyek</label>
         <input type="text" class="form-control" id="project-page-date" placeholder="Masukkan Tanggal Proyek">
+        <div class="invalid-feedback project-page-date"></div>
     </div>
     <div class="form-group">
         <label for="project-page-progress">Progres Proyek</label>
         <input id="project-page-progress" type="text" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="0"/>
         <span id="project-page-progress-value"></span>
+        <div class="invalid-feedback project-page-progress"></div>
     </div>
     <div class="form-group">
         <label for="project-page-project_status">Status Proyek</label>
         <select class="form-control" id="project-page-project_status" style="width: 100%">
         </select>
+        <div class="invalid-feedback project-page-project_status"></div>
     </div>
 
 @endsection
@@ -51,12 +56,14 @@
             <div class="form-group">
                 <label for="project-page-owner">Pemilik</label>
                 <input type="text" class="form-control" id="project-page-owner" placeholder="Masukkan Nama Pemilik">
+                <div class="invalid-feedback"></div>
             </div>
         </div>
         <div class="col-6">
             <div class="form-group">
                 <label for="project-page-city">Kota</label>
                 <input type="text" class="form-control" id="project-page-city" placeholder="Masukkan Kota">
+                <div class="invalid-feedback"></div>
             </div>
         </div>
     </div>
@@ -66,6 +73,7 @@
             <div class="form-group">
                 <label for="project-page-address">Alamat</label>
                 <textarea class="form-control" id="project-page-address" placeholder="Masukkan Alamat" rows="3"></textarea>
+                <div class="invalid-feedback"></div>
             </div>
         </div>
     </div>
@@ -74,14 +82,16 @@
         <div class="col-6">
             <div class="form-group">
                 <label for="project-page-luas_area">Luas Area</label>
-                <input type="number" class="form-control" id="project-page-luas_area" placeholder="Masukkan Luas Area">
+                <input type="text" class="form-control" id="project-page-luas_area" placeholder="Masukkan Luas Area">
+                <div class="invalid-feedback"></div>
             </div>
         </div>
 
         <div class="col-6">
             <div class="form-group">
                 <label for="project-page-estimasi">Estimasi</label>
-                <input type="number" class="form-control" id="project-page-estimasi" placeholder="Masukkan Estimasi Proyek (Dalam Bulan)">
+                <input type="text" class="form-control" id="project-page-estimasi" placeholder="Masukkan Estimasi Proyek (Dalam Bulan)">
+                <div class="invalid-feedback"></div>
             </div>
         </div>
     </div>
@@ -93,6 +103,7 @@
             <div class="form-group">
                 <label for="project-page-sub_total">Sub Total</label>
                 <input type="text" class="form-control" id="project-page-sub_total" placeholder="Masukkan Sub Total">
+                <div class="invalid-feedback"></div>
             </div>
         </div>
 
@@ -100,6 +111,7 @@
             <div class="form-group">
                 <label for="project-page-cco">CCO</label>
                 <input type="text" class="form-control" id="project-page-cco" placeholder="Masukkan CCO">
+                <div class="invalid-feedback"></div>
             </div>
         </div>
     </div>
@@ -108,7 +120,8 @@
         <div class="col-6 offset-6">
             <div class="form-group">
                 <label for="project-page-total">Total</label>
-                <input type="text" class="form-control" id="project-page-total" placeholder="Masukkan Total">
+                <input type="text" class="form-control" id="project-page-total" placeholder="Masukkan Total" readonly>
+                <div class="invalid-feedback"></div>
             </div>
         </div>
     </div>
@@ -118,6 +131,7 @@
             <div class="form-group">
                 <label for="project-page-dp">DP</label>
                 <input type="text" class="form-control" id="project-page-dp" placeholder="Masukkan DP">
+                <div class="invalid-feedback"></div>
             </div>
         </div>
 
@@ -125,6 +139,7 @@
             <div class="form-group">
                 <label for="project-page-sisa">Sisa</label>
                 <input type="text" class="form-control" id="project-page-sisa" value="0" readonly>
+                <div class="invalid-feedback"></div>
             </div>
         </div>
     </div>

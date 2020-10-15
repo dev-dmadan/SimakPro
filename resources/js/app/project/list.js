@@ -48,8 +48,10 @@ document.addEventListener('DOMContentLoaded', async (e) => {
     document.querySelector('#project-new-button').addEventListener('click', () => {
         window.location.href = `${APP_URL}/projects/create`;
     });
-    document.querySelector('#refresh-button').addEventListener('click', () => {
-        dataTable.reload();
+    document.querySelector('#refresh-button').addEventListener('click', function() {
+        const btn = this;
+        btn.disabled = true;
+        dataTable.reload().then(res => btn.disabled = false);
     });
 });
 
