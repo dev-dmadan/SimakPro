@@ -61,7 +61,7 @@ export class DataTable {
                 this.init();
             }
         } catch (error) {
-            AlertHelper.Alert({title: 'Error in DataTable', message: error, type: AlertHelper.Error});
+            AlertHelper.Alert({title: 'Error in DataTable', message: error, type: AlertHelper.AlertType.Error});
             throw error;
         }
     }
