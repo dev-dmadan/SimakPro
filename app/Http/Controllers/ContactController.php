@@ -8,6 +8,7 @@ use App\Constants\PaginationConstant;
 use App\Models\Contact;
 use Illuminate\Support\Facades\Validator;
 use App\Constants\ContactTypeConstant;
+use App\Helpers\Filter;
 
 class ContactController extends Controller
 {
@@ -132,7 +133,7 @@ class ContactController extends Controller
         return response()->json($contact);
     }
 
-    public function showList()
+    public function showList(Request $request)
     {
         $contacts = Contact::with([
             'gender' => function($query) {
@@ -144,9 +145,16 @@ class ContactController extends Controller
             'activeStatus' => function($query) {
                 $query->select('id', 'name');
             },
-        ])
-        ->orderBy('created_at', 'DESC')
-        ->paginate(PaginationConstant::Limit);
+        ]);
+
+        if($request->isMethod(('post'))) {
+            $contacts = Filter::buildFilters($contacts, $request->input('filters'))
+                ->orderBy('created_at', 'DESC')
+                ->paginate(PaginationConstant::Limit);
+        } else {
+            $contacts = $contacts->orderBy('created_at', 'DESC')
+            ->paginate(10);
+        }
 
         return response()->json($contacts);
     }

@@ -64,6 +64,26 @@ document.addEventListener('DOMContentLoaded', async (e) => {
 
 async function init() {
     try {
+        if(!_isContact) {
+            let contactType;
+            if(_isKasBesar) {
+                contactType = _contactType.KasBesar;
+            } else if(_isKasKecil) {
+                contactType = _contactType.KasKecil;
+            } else {
+                contactType = _contactType.SubKasKecil;
+            }
+            console.log('contactType: ', contactType);
+
+            dataTable.setDefaultFilter([
+                {
+                    column: 'contact_type_id',
+                    value: contactType,
+                    operator: 0
+                }
+            ]);
+        }
+
         await dataTable.init();
         await renderModal();
     } catch (error) {

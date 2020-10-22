@@ -19,6 +19,8 @@ export class DataTable {
     _showMoreId;
     _selected;
     _filter;
+    _defaultFilter;
+
     _icons = {
         menu: '<i class="fa fa-ellipsis-v"></i>',
         showMore: '<i class="fas fa-angle-double-down"></i>',
@@ -762,6 +764,26 @@ export class DataTable {
         return this._selected != null && this._selected.trim() != '' ? true : false;
     }
 
+    setDefaultFilter(filters) {
+        this._defaultFilter = filters;
+        if(this._filter != undefined || (typeof this._filter == 'object' && this._filter.length > 0)) {
+            this._filter.concat(this._defaultFilter);   
+        } else {
+            this._filter = this._defaultFilter;
+        }
+    } 
+
+    setFilter(filter, reload = true) {
+        this._filter = filter;
+        if(this._defaultFilter != undefined || (typeof this._defaultFilter == 'object' && this._defaultFilter.length > 0)) {
+            this._filter.concat(this._defaultFilter);   
+        }
+
+        if(reload) {
+            this.reload();
+        }
+    }
+
     async getData(page = 1) {
         try {
             let res;
@@ -769,7 +791,7 @@ export class DataTable {
             if(filter) {
                 res = await HTTPClient.Request({
                     uri: this._url + page,
-                    method: HTTPClient.POST,
+                    method: HTTPClient.Method.Post,
                     headers: {
                         "Content-Type": "application/json",
                     },
