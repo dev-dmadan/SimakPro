@@ -24,6 +24,10 @@ export class Validation {
         }
     }
 
+    static isBoolean(value) {
+        return value != undefined && typeof value == 'boolean';
+    }
+
     static isLookup(value) {
         const isObject = value && typeof value == 'object';
         const hasIdAndName = isObject && (value.hasOwnProperty('id') && value.hasOwnProperty('name'));
