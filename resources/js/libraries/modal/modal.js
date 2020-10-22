@@ -99,6 +99,20 @@ export class Modal {
 
         $(`#${this._element.id}`).on('hidden.bs.modal', (e) => {
             document.querySelector(`#${this._element.id} form`).reset();
+            
+            const isInvalidClass = document.querySelectorAll(`#${this._element.id} form .form-control`);
+            const invalidFeedback = document.querySelectorAll(`#${this._element.id} form .invalid-feedback`);
+
+            const isInvalidClassLength = isInvalidClass.length;
+            for(let i = 0; i < isInvalidClassLength; i++) {
+                isInvalidClass[i].classList.remove('is-invalid');
+            }
+
+            const invalidFeedbackLength = invalidFeedback.length;
+            for(let i = 0; i < invalidFeedbackLength; i++) {
+                invalidFeedback[i].innerHTML = '';
+            }
+            
             value();
         });
     }
