@@ -293,7 +293,7 @@ export class Controller {
                 case Controller.PluginType.Number:
                     value = Validation.isNumber(value) ? value.toString() : (
                         Validation.isString(value) && !Validation.isStringNullOrEmpty(value) ? 
-                            (value == '0.00' ? '0' : value ) : '0'
+                            (value == '0.00' || value == '.00' ? '0' : value) : '0'
                     );
                     this[`_${propertyName}`].plugin.setRawValue(value);
                     this[`_${propertyName}`].element.dispatchEvent(new Event('change'));
@@ -356,7 +356,10 @@ export class Controller {
      * @param {boolean} value 
      */
     _setupSetChoiceProperty(propertyName, index, value) {
-        this[`_${propertyName}`].element[index].checked = Validation.isBoolean(value) ? value : false;
+        const _value = Validation.isBoolean(value) ? value : (
+            Validation.isNumber(value, true) ? Boolean(Number(value)) : false
+        );
+        this[`_${propertyName}`].element[index].checked = _value;
         this[`_${propertyName}`].element[index].dispatchEvent(new Event('change'));
     }
 
@@ -421,11 +424,58 @@ export class Controller {
     }
 
     _setupShowProperty(element, isShow) {
+        let elem, parent;
+        // const formGroup = '';
 
+        // element using name
+        if(element.length && element.length > 0 && element[0] != undefined && element[0].type != undefined) {
+            if(element[0].type.toLowerCase() == 'checkbox' || element[0].type.toLowerCase() == 'radio') {
+                elem = element[0];
+            } 
+        } else {
+            elem = element;
+        }
+
+        let found = false;
+        let i = 0;
+        while(!found) {
+            const _parent = elem.parentNode;
+            if(_parent.nodeName == 'DIV' && _parent.classList.contains('form-group')) {
+                found = true;
+                parent = _parent;
+            } else {
+                elem = _parent;
+                i++;
+            }
+
+            if(i == 5) {
+                parent = null;
+                break;
+            }
+        }
+
+        if(parent == null) {
+            return;
+        }
+
+        if(isShow) {
+            parent.classList.remove('d-none');
+        } else {
+            parent.classList.toggle('d-none', true);
+        }
     }
 
     _setupEnableProperty(element, isEnable) {
-
+        if(element.length && element.length > 0 && element[0] != undefined && element[0].type != undefined) {
+            if(element[0].type.toLowerCase() == 'checkbox' || element[0].type.toLowerCase() == 'radio') {
+                const _length = element.length;
+                for(let i=0; i<_length; i++) {
+                    element[i].disabled = isEnable;
+                }
+            } 
+        } else {
+            element.disabled = isEnable;
+        }
     }
 
     _resetIsSend() {
@@ -1018,7 +1068,7 @@ export class Controller {
         this._resetIsSend();
 
         try {
-            if(id == undefined || id.trim() == '') {
+            if(!Validation.isString(id) || Validation.isStringNullOrEmpty(id)) {
                 throw `Id must required and can't be empty`;
             }
 
@@ -1081,7 +1131,7 @@ export class Controller {
         const isWithConfirmValid = isWithConfirmBoolean || isWithConfirmObject ? true : false;
 
         try {
-            if(id == undefined || id.trim() == '') {
+            if(!Validation.isString(id) || Validation.isStringNullOrEmpty(id)) {
                 throw `Id must required and can't be empty`;
             }
 
@@ -1173,7 +1223,7 @@ export class Controller {
         const _headers = headers || {"Content-Type": "application/json"};
         const _body = body || {};
         try {
-            if(id == undefined || id.trim() == '') {
+            if(!Validation.isString(id) || Validation.isStringNullOrEmpty(id)) {
                 throw `Id must required and can't be empty`;
             }
 
