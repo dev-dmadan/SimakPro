@@ -47,12 +47,24 @@ class ProjectController extends Controller
     {
         $isSuccess = false;
         $message = null;
+        $errors = null;
 
         $validator = Validator::make($request->all(), [
-            'name' => 'required|max:255',
-            'date' => 'required',
-            'progress' => 'required|integer|min:10',
-            'project_status_id' => 'required'
+            'name' => 'required|string|max:500',
+            // 'code'=> 'required|string|max:500|unique:App\Models\Project,code',
+            'owner' => 'required|string|max:500',
+            'date' => 'required|date',
+            'city' => 'required|string|max:100',
+            'address' => 'required|string',
+            'luas_area' => 'numeric|max:999999',
+            'estimasi' => 'numeric|max:999999',
+            'sub_total' => 'required|numeric|min:1|max:99999999999999999',
+            'cco' => 'numeric|max:99999999999999999',
+            'total' => 'required|numeric|min:1|max:99999999999999999',
+            'dp' => 'required|numeric|min:1|max:99999999999999999',
+            'sisa' => 'required|numeric|max:99999999999999999',
+            'progress' => 'required|integer|min:0|max:100',
+            'project_status_id' => 'required|uuid'
         ]);
         
         if(!$validator->fails()) {
@@ -63,13 +75,13 @@ class ProjectController extends Controller
                 }
             }
             $isSuccess = $project->save();
-        } else {
-            $message = $validator->messages();
         }
+        $errors = $validator->fails() ? $validator->messages() : null;
 
         return response()->json([
             'success' => $isSuccess,
-            'errors' => $message,
+            'message' => $message,
+            'errors' => $errors,
             'id' => $isSuccess ? $project->id : null
         ]);
     }
@@ -139,16 +151,46 @@ class ProjectController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $project = Project::find($id);
-        foreach($request->all() as $key => $item) {
-            if($item == null && in_array($key, Project::nullColumns)) {
-                $project->$key = $item;
-            } else if($item != null || is_numeric($item)) {
-                $project->$key = $item;
-            }
-        }
+        $isSuccess = false;
+        $message = null;
+        $errors = null;
 
-        return response()->json($project->save());
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:500',
+            // 'code'=> 'required|string|max:500|unique:App\Models\Project,code',
+            'owner' => 'required|string|max:500',
+            'date' => 'required|date',
+            'city' => 'required|string|max:100',
+            'address' => 'required|string',
+            'luas_area' => 'numeric|max:999999',
+            'estimasi' => 'numeric|max:999999',
+            'sub_total' => 'required|numeric|min:1|max:99999999999999999',
+            'cco' => 'numeric|max:99999999999999999',
+            'total' => 'required|numeric|min:1|max:99999999999999999',
+            'dp' => 'required|numeric|min:1|max:99999999999999999',
+            'sisa' => 'required|numeric|max:99999999999999999',
+            'progress' => 'required|integer|min:0|max:100',
+            'project_status_id' => 'required|uuid'
+        ]);
+
+        if(!$validator->fails()) {
+            $project = Project::find($id);
+            foreach($request->all() as $key => $item) {
+                if($item == null && in_array($key, Project::nullColumns)) {
+                    $project->$key = $item;
+                } else if($item != null || is_numeric($item)) {
+                    $project->$key = $item;
+                }
+            }
+            $isSuccess = $project->save();
+        }
+        $errors = $validator->fails() ? $validator->messages() : null;
+
+        return response()->json([
+            'success' => $isSuccess,
+            'message' => $message,
+            'errors' => $errors
+        ]);
     }
 
     /**

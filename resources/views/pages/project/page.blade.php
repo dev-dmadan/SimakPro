@@ -56,14 +56,14 @@
             <div class="form-group">
                 <label for="project-page-owner">Pemilik</label>
                 <input type="text" class="form-control" id="project-page-owner" placeholder="Masukkan Nama Pemilik">
-                <div class="invalid-feedback"></div>
+                <div class="invalid-feedback project-page-owner"></div>
             </div>
         </div>
         <div class="col-6">
             <div class="form-group">
                 <label for="project-page-city">Kota</label>
                 <input type="text" class="form-control" id="project-page-city" placeholder="Masukkan Kota">
-                <div class="invalid-feedback"></div>
+                <div class="invalid-feedback project-page-city"></div>
             </div>
         </div>
     </div>
@@ -73,7 +73,7 @@
             <div class="form-group">
                 <label for="project-page-address">Alamat</label>
                 <textarea class="form-control" id="project-page-address" placeholder="Masukkan Alamat" rows="3"></textarea>
-                <div class="invalid-feedback"></div>
+                <div class="invalid-feedback project-page-address"></div>
             </div>
         </div>
     </div>
@@ -83,7 +83,7 @@
             <div class="form-group">
                 <label for="project-page-luas_area">Luas Area</label>
                 <input type="text" class="form-control" id="project-page-luas_area" placeholder="Masukkan Luas Area">
-                <div class="invalid-feedback"></div>
+                <div class="invalid-feedback project-page-luas_area"></div>
             </div>
         </div>
 
@@ -91,7 +91,7 @@
             <div class="form-group">
                 <label for="project-page-estimasi">Estimasi</label>
                 <input type="text" class="form-control" id="project-page-estimasi" placeholder="Masukkan Estimasi Proyek (Dalam Bulan)">
-                <div class="invalid-feedback"></div>
+                <div class="invalid-feedback project-page-estimasi"></div>
             </div>
         </div>
     </div>
@@ -103,7 +103,7 @@
             <div class="form-group">
                 <label for="project-page-sub_total">Sub Total</label>
                 <input type="text" class="form-control" id="project-page-sub_total" placeholder="Masukkan Sub Total">
-                <div class="invalid-feedback"></div>
+                <div class="invalid-feedback project-page-sub_total"></div>
             </div>
         </div>
 
@@ -111,7 +111,7 @@
             <div class="form-group">
                 <label for="project-page-cco">CCO</label>
                 <input type="text" class="form-control" id="project-page-cco" placeholder="Masukkan CCO">
-                <div class="invalid-feedback"></div>
+                <div class="invalid-feedback project-page-cco"></div>
             </div>
         </div>
     </div>
@@ -121,7 +121,7 @@
             <div class="form-group">
                 <label for="project-page-total">Total</label>
                 <input type="text" class="form-control" id="project-page-total" placeholder="Masukkan Total" readonly>
-                <div class="invalid-feedback"></div>
+                <div class="invalid-feedback project-page-total"></div>
             </div>
         </div>
     </div>
@@ -131,7 +131,7 @@
             <div class="form-group">
                 <label for="project-page-dp">DP</label>
                 <input type="text" class="form-control" id="project-page-dp" placeholder="Masukkan DP">
-                <div class="invalid-feedback"></div>
+                <div class="invalid-feedback project-page-dp"></div>
             </div>
         </div>
 
@@ -139,7 +139,7 @@
             <div class="form-group">
                 <label for="project-page-sisa">Sisa</label>
                 <input type="text" class="form-control" id="project-page-sisa" value="0" readonly>
-                <div class="invalid-feedback"></div>
+                <div class="invalid-feedback project-page-sisa"></div>
             </div>
         </div>
     </div>

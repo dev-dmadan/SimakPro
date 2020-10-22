@@ -25,8 +25,6 @@ document.addEventListener('DOMContentLoaded', async (e) => {
         }
     }
 
-    console.log(project.getAllProperty());
-
     project.progress.plugin.on("slide", function(sliderValue) {
         document.querySelector("#project-page-progress-value").textContent = `${sliderValue}%`;
     });
@@ -46,10 +44,6 @@ document.addEventListener('DOMContentLoaded', async (e) => {
     project.dp.element.addEventListener('change', function() {
         const sisa = project.total.get() - project.dp.get();
         project.sisa.set(sisa);
-    });
-    
-    $(project.date.element).datepicker().on('changeDate', (e) => {
-        console.log('on change...');
     });
 
     document.querySelector('#project-page-save').addEventListener('click', async (e) => {
@@ -127,7 +121,7 @@ async function renderLookup() {
     try {
         const projectStatusData = HTTPClient.Request({
             uri: `${APP_URL}/lookups/project-status`,
-            method: HTTPClient.GET
+            method: HTTPClient.Method.Get
         });
 
         const lookupData = await Promise.all([

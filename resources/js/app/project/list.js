@@ -1,5 +1,6 @@
 import { Project } from "./project";
 import { DataTable } from "../../libraries/dataTable/dataTable";
+import { AlertHelper } from "../../libraries/alert/alert";
 
 Shimmer(true);
 const dataTable = new DataTable({
@@ -35,7 +36,7 @@ document.addEventListener('DOMContentLoaded', async (e) => {
         Alert({
             title: 'Something wrong happen',
             message: error,
-            type: AlertHelper.Error
+            type: AlertHelper.AlertType.Error
         });
         isError = true;
     } finally {

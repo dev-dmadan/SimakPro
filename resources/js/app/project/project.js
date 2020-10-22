@@ -109,6 +109,10 @@ export class Project extends Controller {
      *  element: HTMLElement;
      *  get(): string;
      *  set(value: string): void;
+     *  error(error: string | null): void;
+     *  show(isShow: boolean): void;
+     *  enable(isEnable: boolean): void;
+     *  isSend: boolean;
      * }} value
      */
     get name() {
@@ -120,6 +124,10 @@ export class Project extends Controller {
      *  element: HTMLElement;
      *  get(): string;
      *  set(value): void;
+     *  error(error: string | null): void;
+     *  show(isShow: boolean): void;
+     *  enable(isEnable: boolean): void;
+     *  isSend: boolean;
      * }} value
      */
     get code() {
@@ -131,6 +139,10 @@ export class Project extends Controller {
      *  element: HTMLElement;
      *  get(): string;
      *  set(value): void;
+     *  error(error: string | null): void;
+     *  show(isShow: boolean): void;
+     *  enable(isEnable: boolean): void;
+     *  isSend: boolean;
      * }} value
      */
     get owner() {
@@ -143,6 +155,10 @@ export class Project extends Controller {
      *  plugin: Datepicker;
      *  get(): string;
      *  set(value): void;
+     *  error(error: string | null): void;
+     *  show(isShow: boolean): void;
+     *  enable(isEnable: boolean): void;
+     *  isSend: boolean;
      * }} value
      */
     get date() {
@@ -154,6 +170,10 @@ export class Project extends Controller {
      *  element: HTMLElement;
      *  get(): string;
      *  set(value): void;
+     *  error(error: string | null): void;
+     *  show(isShow: boolean): void;
+     *  enable(isEnable: boolean): void;
+     *  isSend: boolean;
      * }} value
      */
     get city() {
@@ -165,6 +185,10 @@ export class Project extends Controller {
      *  element: HTMLElement;
      *  get(): string;
      *  set(value): void;
+     *  error(error: string | null): void;
+     *  show(isShow: boolean): void;
+     *  enable(isEnable: boolean): void;
+     *  isSend: boolean;
      * }} value
      */
     get address() {
@@ -177,6 +201,10 @@ export class Project extends Controller {
      *  plugin: Cleave;
      *  get(): number;
      *  set(value): void;
+     *  error(error: string | null): void;
+     *  show(isShow: boolean): void;
+     *  enable(isEnable: boolean): void;
+     *  isSend: boolean;
      * }} value
      */
     get luas_area() {
@@ -189,6 +217,10 @@ export class Project extends Controller {
      *  plugin: Cleave;
      *  get(): number;
      *  set(value): void;
+     *  error(error: string | null): void;
+     *  show(isShow: boolean): void;
+     *  enable(isEnable: boolean): void;
+     *  isSend: boolean;
      * }} value
      */
     get estimasi() {
@@ -201,6 +233,10 @@ export class Project extends Controller {
      *  plugin: Cleave;
      *  get(): number;
      *  set(value): void;
+     *  error(error: string | null): void;
+     *  show(isShow: boolean): void;
+     *  enable(isEnable: boolean): void;
+     *  isSend: boolean;
      * }} value
      */
     get sub_total() {
@@ -213,6 +249,10 @@ export class Project extends Controller {
      *  plugin: Cleave;
      *  get(): number;
      *  set(value): void;
+     *  error(error: string | null): void;
+     *  show(isShow: boolean): void;
+     *  enable(isEnable: boolean): void;
+     *  isSend: boolean;
      * }} value
      */
     get cco() {
@@ -225,6 +265,10 @@ export class Project extends Controller {
      *  plugin: Cleave;
      *  get(): number;
      *  set(value): void;
+     *  error(error: string | null): void;
+     *  show(isShow: boolean): void;
+     *  enable(isEnable: boolean): void;
+     *  isSend: boolean;
      * }} value
      */
     get total() {
@@ -237,6 +281,10 @@ export class Project extends Controller {
      *  plugin: Cleave;
      *  get(): number;
      *  set(value): void;
+     *  error(error: string | null): void;
+     *  show(isShow: boolean): void;
+     *  enable(isEnable: boolean): void;
+     *  isSend: boolean;
      * }} value
      */
     get dp() {
@@ -249,6 +297,10 @@ export class Project extends Controller {
      *  plugin: Cleave;
      *  get(): number;
      *  set(value): void;
+     *  error(error: string | null): void;
+     *  show(isShow: boolean): void;
+     *  enable(isEnable: boolean): void;
+     *  isSend: boolean;
      * }} value
      */
     get sisa() {
@@ -261,6 +313,10 @@ export class Project extends Controller {
      *  plugin: Slider;
      *  get(): number;
      *  set(value): void;
+     *  error(error: string | null): void;
+     *  show(isShow: boolean): void;
+     *  enable(isEnable: boolean): void;
+     *  isSend: boolean;
      * }} value
      */
     get progress() {
@@ -279,6 +335,10 @@ export class Project extends Controller {
      *      id: string;
      *      name: string;
      *  } | string): void;
+     *  error(error: string | null): void;
+     *  show(isShow: boolean): void;
+     *  enable(isEnable: boolean): void;
+     *  isSend: boolean;
      * }} value
      */
     get project_status() {
