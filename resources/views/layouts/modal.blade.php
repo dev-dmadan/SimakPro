@@ -8,12 +8,16 @@
                 </button>
             </div>
             <div class="modal-body">
-                @yield('modal-body')
+                <form>
+                    
+                    @yield('modal-body')
+
+                </form>
             </div>
             <div class="modal-footer">
                 @yield('modal-custom-button')
+                <button type="button" id="@yield('modal-save-id')" class="btn btn-primary">Save</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save</button>
             </div>
         </div>
     </div>

@@ -1,7 +1,19 @@
 export class Modal {
-    #_element;
-    #_afterSave;
+    _element;
+    _afterSave;
 
+    /**
+     * 
+     * @param {{
+     *  modal: string | HTMLElement;
+     *  save: {
+     *      element: string;
+     *      onSave: () => boolean;
+     *      afterSave: () => void;
+     *  },
+     *  close: () => void;
+     * }} options 
+     */
     constructor({
         modal, 
         save = {
@@ -24,9 +36,9 @@ export class Modal {
 
     set modal(value) {
         if(typeof value == 'string' && value.trim() != '') {
-            this.#_element = document.querySelector(value);
+            this._element = document.querySelector(value);
         } else if(value.nodeName && value.nodeName == 'DIV') {
-            this.#_element = value;
+            this._element = value;
         } else {
             throw new Error('Modal must be Id of div element or modal element');
         }
@@ -63,8 +75,8 @@ export class Modal {
                 return res;
             })
             .then(res => {
-                if(this.#_afterSave != undefined && res) {
-                    this.#_afterSave();
+                if(this._afterSave != undefined && res) {
+                    this._afterSave();
                 }
             })
         });
@@ -76,7 +88,7 @@ export class Modal {
                 throw Error('Event afterSave must be function');
             }
 
-            this.#_afterSave = value;
+            this._afterSave = value;
         }
     }
 
@@ -85,8 +97,22 @@ export class Modal {
             throw Error('Close must be function');
         }
 
-        $(`#${this.#_element.id}`).on('hidden.bs.modal', (e) => {
-            document.querySelector(`#${this.#_element.id} form`).reset();
+        $(`#${this._element.id}`).on('hidden.bs.modal', (e) => {
+            document.querySelector(`#${this._element.id} form`).reset();
+            
+            const isInvalidClass = document.querySelectorAll(`#${this._element.id} form .form-control`);
+            const invalidFeedback = document.querySelectorAll(`#${this._element.id} form .invalid-feedback`);
+
+            const isInvalidClassLength = isInvalidClass.length;
+            for(let i = 0; i < isInvalidClassLength; i++) {
+                isInvalidClass[i].classList.remove('is-invalid');
+            }
+
+            const invalidFeedbackLength = invalidFeedback.length;
+            for(let i = 0; i < invalidFeedbackLength; i++) {
+                invalidFeedback[i].innerHTML = '';
+            }
+            
             value();
         });
     }
@@ -95,17 +121,17 @@ export class Modal {
         if(renderFunction != undefined && typeof renderFunction == 'function') {
             try {
                 await renderFunction();
-                $(`#${this.#_element.id}`).modal({backdrop: 'static'});   
+                $(`#${this._element.id}`).modal({backdrop: 'static'});   
             } catch (error) {
                 console.error(error);
                 throw Error(error);
             }
         } else {
-            $(`#${this.#_element.id}`).modal({backdrop: 'static'});
+            $(`#${this._element.id}`).modal({backdrop: 'static'});
         }
     }
 
     closeModal() {
-        $(`#${this.#_element.id}`).modal('hide');
+        $(`#${this._element.id}`).modal('hide');
     }
 }

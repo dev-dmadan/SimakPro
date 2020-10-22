@@ -1,5 +1,6 @@
 import { Project } from "./project";
 import { DataTable } from "../../libraries/dataTable/dataTable";
+import { AlertHelper } from "../../libraries/alert/alert";
 
 Shimmer(true);
 const dataTable = new DataTable({
@@ -35,7 +36,7 @@ document.addEventListener('DOMContentLoaded', async (e) => {
         Alert({
             title: 'Something wrong happen',
             message: error,
-            type: AlertHelper.Error
+            type: AlertHelper.AlertType.Error
         });
         isError = true;
     } finally {
@@ -48,8 +49,10 @@ document.addEventListener('DOMContentLoaded', async (e) => {
     document.querySelector('#project-new-button').addEventListener('click', () => {
         window.location.href = `${APP_URL}/projects/create`;
     });
-    document.querySelector('#refresh-button').addEventListener('click', () => {
-        dataTable.reload();
+    document.querySelector('#refresh-button').addEventListener('click', function() {
+        const btn = this;
+        btn.disabled = true;
+        dataTable.reload().then(res => btn.disabled = false);
     });
 });
 

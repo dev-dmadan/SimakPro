@@ -82,21 +82,21 @@ class AccessSeeder extends Seeder
                 "id" => AccessConstant::KasBesar,
                 "title" => "Kas Besar",
                 "icon" => '<i class="nav-icon fas fa-user-tie"></i>',
-                "route" => "/contacts/kas-besar",
+                "route" => "/kas-besar",
                 "parent_id" => null
             ],
             "KasKecil" => [
                 "id" => AccessConstant::KasKecil,
                 "title" => "Kas Kecil",
                 "icon" => '<i class="nav-icon fas fa-user-friends"></i>',
-                "route" => "/contacts/kas-kecil",
+                "route" => "/kas-kecil",
                 "parent_id" => null
             ],
             "SubKasKecil" => [
                 "id" => AccessConstant::SubKasKecil,
                 "title" => "Sub Kas Kecil",
                 "icon" => '<i class="nav-icon fas fa-users-cog"></i>',
-                "route" => "/contacts/sub-kas-kecil",
+                "route" => "/sub-kas-kecil",
                 "parent_id" => null
             ],
             "User" => [

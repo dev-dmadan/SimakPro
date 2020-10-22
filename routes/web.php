@@ -63,6 +63,11 @@ use Illuminate\Support\Facades\Route;
     });
 /** End Example */
 
+/** Lookup */
+    Route::get('/lookups/{name}', 'LookupController@showList');
+    Route::get('/lookups/{name}/{id}', 'LookupController@show');
+/** End Lookup */
+
 /** Project */
     Route::get('/projects', 'ProjectController@index');
     Route::get('/projects/create', 'ProjectController@create');
@@ -73,3 +78,30 @@ use Illuminate\Support\Facades\Route;
     Route::put('/projects/{id}', 'ProjectController@update');
     Route::delete('/projects/{id}', 'ProjectController@destroy');
 /** End Project */
+
+/** Contact */
+    Route::get('/contacts', 'ContactController@index');
+    Route::get('/contacts/create', 'ContactController@create');
+    Route::post('/contacts', 'ContactController@store');
+    Route::get('/contacts/list', 'ContactController@showList');
+    Route::post('/contacts/list', 'ContactController@showList');
+    Route::get('/contacts/{id}', 'ContactController@show');
+    Route::get('/contacts/{id}/edit', 'ContactController@edit');
+    Route::put('/contacts/{id}', 'ContactController@update');
+    Route::delete('/contacts/{id}', 'ContactController@destroy');
+
+    // kas besar
+    Route::get('/kas-besar', 'ContactController@index');
+    Route::get('/kas-besar/{id}', 'ContactController@show');
+    Route::get('/kas-besar/{id}/edit', 'ContactController@edit');
+
+    // kas kecil
+    Route::get('/kas-kecil', 'ContactController@index');
+    Route::get('/kas-kecil/{id}', 'ContactController@show');
+    Route::get('/kas-kecil/{id}/edit', 'ContactController@edit');
+
+    // sub kas kecil
+    Route::get('/sub-kas-kecil', 'ContactController@index');
+    Route::get('/sub-kas-kecil/{id}', 'ContactController@show');
+    Route::get('/sub-kas-kecil/{id}/edit', 'ContactController@edit');
+/** End Contact */
