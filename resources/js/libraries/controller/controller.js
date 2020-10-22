@@ -5,6 +5,7 @@ import { Validation } from "../validation/validation";
 import Slider from 'bootstrap-slider';
 import Cleave from 'cleave.js';
 import moment from 'moment';
+require('cleave.js/dist/addons/cleave-phone.id');
 
 export class Controller {
     _data = null;
@@ -49,23 +50,6 @@ export class Controller {
     }
 
     /**
-     * addProperty
-     * @param {string} name 
-     * @param {any} value 
-     */
-    addProperty(name, value) {
-        if(this._data == undefined || this._data == null) {
-            this._data = {};
-        }
-
-        const isLookup = this._attributes[name].plugin && this._attributes[name].plugin.type == Controller.PluginType.Lookup ? true : false;
-        const setterName = isLookup ? `${name}_id` : name;
-        const _value = isLookup ? (value && value.id ? value.id : value) : value;
-
-        this._data[setterName] = _value;
-    }
-
-    /**
      * setAttributes
      * @param {object} attributes 
      */
@@ -75,6 +59,25 @@ export class Controller {
         }
 
         this._attributes = attributes;
+    }
+
+    /**
+     * addProperty
+     * @param {string} name 
+     * @param {any} value 
+     */
+    addProperty(name, value, isForceLookup = false) {
+        if(this._data == undefined || this._data == null) {
+            this._data = {};
+        }
+
+        const isAttribute = this._attributes && this._attributes[name] ? true : false;
+        const isAttributeLookup = isAttribute && this._attributes[name].plugin && this._attributes[name].plugin.type == Controller.PluginType.Lookup;
+        const isLookup = isAttributeLookup || Validation.isLookup(value) ? true : false;
+        const setterName = isLookup || isForceLookup ? `${name}_id` : name;
+        const _value = isLookup ? (value && value.id ? value.id : value) : value;
+
+        this._data[setterName] = _value;
     }
 
     /**
@@ -94,16 +97,24 @@ export class Controller {
 
     /**
      * getAllProperty
+     * @param {boolean} isSend
      * @return {object} data
      */
-    getAllProperty() {
+    getAllProperty(isSend = true) {
         const data = {};
         for (const key in this._attributes) {
             if (!this._attributes.hasOwnProperty(key)) {
                 continue;
             }
 
-            data[key] = this.getProperty(key);
+            const temp = this.getProperty(key);
+            if(isSend) {
+                if(temp.isSend) {
+                    data[key] = temp;
+                } 
+            } else {
+                data[key] = temp;
+            }
         }
 
         return data;
@@ -111,16 +122,20 @@ export class Controller {
 
     /**
      * setAllProperty
+     * Set all property registred in attribute with isSend true
      */
     setAllProperty() {
         try {
-            this._data = null;
+            // this._data = null;
             for (const key in this._attributes) {
                 if (!this._attributes.hasOwnProperty(key)) {
                     continue;
                 }
 
-                this.addProperty(key, this.getProperty(key).get());
+                const temp = this.getProperty(key);
+                if(temp.isSend) {
+                    this.addProperty(key, temp.get(), temp.forceLookup ? true : false);
+                }
             }
         } catch (error) {
             console.error(error);
@@ -141,7 +156,9 @@ export class Controller {
             let element, setter, getter, plugin, elementClass;
             const isPlugin = typeof this._attributes[key] == 'object' && 
                 (this._attributes[key].hasOwnProperty('element') && this._attributes[key].hasOwnProperty('plugin')) ? true : false;
-
+            const isChoice = typeof this._attributes[key] == 'object' && 
+                (this._attributes[key].hasOwnProperty('element') && this._attributes[key].hasOwnProperty('choice')) ? true : false;
+                
             if(typeof this._attributes[key] == 'string') {
 
                 elementClass = this._attributes[key].substring(0, 1) == '#' ? `.${this._attributes[key].substring(1)}` : this._attributes[key];
@@ -157,6 +174,18 @@ export class Controller {
                 setter = (value) => this._setupSetProperty(key, value, this._attributes[key].plugin.type);
                 getter = () => this._setupGetProperty(plugin, this._attributes[key].element, this._attributes[key].plugin.type);
             
+            } else if(isChoice) {
+
+                elementClass = `.${this._attributes[key].element}`;
+                element = document.querySelectorAll(`input[name=${this._attributes[key].element}]`);
+                setter = (index, value) => this._setupSetChoiceProperty(key, index, value);
+
+                if(element[0].type.toLowerCase() == 'checkbox') {
+                    getter = (index = null) => this._setupGetChoiceProperty(key, index, element[0].type);
+                } else {
+                    getter = () => this._setupGetChoiceProperty(key, null, element[0].type);
+                }
+
             } else {
                 throw "Attribute is not defined";
             }
@@ -166,44 +195,66 @@ export class Controller {
                     element: element,
                     get: getter,
                     set: setter,
-                    error: (error) => this._setupErrorProperty(element, elementClass, error)
+                    error: (error) => this._setupErrorProperty(element, elementClass, error),
+                    show: (isShow = true) => this._setupShowProperty(element, isShow),
+                    enable: (isEnable = true) => this._setupEnableProperty(element, isEnable),
+                    isSend: true 
                 };
+
+                if(isChoice && this._attributes[key].hasOwnProperty('isLookup') && this._attributes[key].isLookup) {
+                    this[`_${key}`].forceLookup = true;
+                }
+
                 if(isPlugin) {
                     this[`_${key}`].plugin = plugin;
 
                     switch (this._attributes[key].plugin.type) {
                         case Controller.PluginType.Date:
                             $(this._attributes[key].element).datepicker().on('changeDate', (e) => {
-                                console.log('reset error');
                                 this._resetError(element, elementClass);
+                                this[`_${key}`].element.dispatchEvent(new Event('change'));
                             });
+
                             break;
+
                         case Controller.PluginType.Lookup:
                             this[`_${key}`].plugin.onChange = () => {
                                 this._resetError(element, elementClass);
                             };
+
                             break;
+
                         case Controller.PluginType.Number:
                         case Controller.PluginType.Currency:
                         case Controller.PluginType.Phone:
                             element.addEventListener('change', () => {
                                 this._resetError(element, elementClass);
                             });
+
                             break;
 
                         case Controller.PluginType.Slider:
                             this[`_${key}`].plugin.on("change", () => {
                                 this._resetError(element, elementClass);
                             });
+
                             break;
                     
                         default:
                             break;
                     }
                 } else {
-                    element.addEventListener('change', () => {
-                        this._resetError(element, elementClass);
-                    });   
+                    if(isChoice) {
+                        element.forEach(item => {
+                            item.addEventListener('change', () => {
+                                this._resetError(item, elementClass);
+                            }); 
+                        });
+                    } else {
+                        element.addEventListener('change', () => {
+                            this._resetError(element, elementClass);
+                        }); 
+                    }  
                 }
             }
         }
@@ -242,31 +293,44 @@ export class Controller {
                 case Controller.PluginType.Number:
                     value = Validation.isNumber(value) ? value.toString() : (
                         Validation.isString(value) && !Validation.isStringNullOrEmpty(value) ? 
-                            (value == '.00' ? '0' : value ) : '0'
+                            (value == '0.00' ? '0' : value ) : '0'
                     );
                     this[`_${propertyName}`].plugin.setRawValue(value);
+                    this[`_${propertyName}`].element.dispatchEvent(new Event('change'));
+
                     break;
     
                 case Controller.PluginType.Phone:
                     value = Validation.isNumber(value) ? value.toString() : (Validation.isString(value) ? value : '');
                     this[`_${propertyName}`].plugin.setRawValue(value);
+                    this[`_${propertyName}`].element.dispatchEvent(new Event('change'));
+
                     break;
     
                 case Controller.PluginType.Slider:
                     value = Validation.isNumber(value) ? value : 0;
                     this[`_${propertyName}`].plugin.setValue(value, false, true);
+
                     break;
     
                 case Controller.PluginType.Date:
                     try {
-                        const checkDate = new Date(value);
-                        const isDate = checkDate instanceof Date && !isNaN(checkDate);
-                        value = isDate ? checkDate : null;
+                        if(value) {
+                            const checkDate = new Date(value);
+                            const isDate = checkDate instanceof Date && !isNaN(checkDate);
+                            value = isDate ? checkDate : null;
+                        }
                     } catch(e) {
                         console.warn(e);
+                        value = null;
                     }
 
-                    $(this[`_${propertyName}`].element).datepicker('setDate', value);
+                    if(value) {
+                        $(this[`_${propertyName}`].element).datepicker('setDate', value);
+                    } else {
+                        $(this[`_${propertyName}`].element).datepicker('clearDates');
+                    }
+
                     break;
     
                 // case Controller.PluginType.DateTime:
@@ -286,6 +350,50 @@ export class Controller {
     }
 
     /**
+     * _setupSetChoiceProperty
+     * @param {string} propertyName 
+     * @param {number} index 
+     * @param {boolean} value 
+     */
+    _setupSetChoiceProperty(propertyName, index, value) {
+        this[`_${propertyName}`].element[index].checked = Validation.isBoolean(value) ? value : false;
+        this[`_${propertyName}`].element[index].dispatchEvent(new Event('change'));
+    }
+
+    /**
+     * _setupGetChoiceProperty
+     * @param {string} propertyName 
+     * @param {number} index 
+     * @return {boolean | [{
+     *  name: string;
+     *  value: boolean;
+     * }]}
+     */
+    _setupGetChoiceProperty(propertyName, index, type) {
+        if(index != null) {
+            return this[`_${propertyName}`].element[index].checked;
+        } 
+
+        const choiceLength = this[`_${propertyName}`].element.length;
+        let value = type == 'checkbox' ? [] : null;
+        for(let i=0; i<choiceLength; i++) {
+            if(type == 'checkbox') {
+                value.push({
+                    name:  this[`_${propertyName}`].element[i].value,
+                    value:  this[`_${propertyName}`].element[i].checked
+                });
+            } else {
+                if(this[`_${propertyName}`].element[i].checked) {
+                    value = this[`_${propertyName}`].element[i].value;
+                    break;
+                }
+            }
+        }
+
+        return value;
+    }
+
+    /**
      * _setupErrorProperty
      * @param {HTMLElement} element
      * @param {string} elementClassName 
@@ -294,12 +402,39 @@ export class Controller {
     _setupErrorProperty(element, elementClassName, error) {
         const errorString = Validation.isString(error) && !Validation.isStringNullOrEmpty(error) ? 
             error : (error.length > 0 ? error.join("<br>") : '');
-        
+
         if(!Validation.isStringNullOrEmpty(errorString)) {
-            element.classList.toggle('is-invalid', true);
-            document.querySelector(elementClassName).innerHTML = errorString;
+            // radio / checkbox group
+            if(element.length && element.length > 0 && element[0] != undefined && element[0].type != undefined) {
+                if(element[0].type.toLowerCase() == 'checkbox' || element[0].type.toLowerCase() == 'radio') {
+                    const invalidChoice = document.querySelector(`div.invalid-feedback${elementClassName}`);
+                    invalidChoice.innerHTML = errorString;
+                    invalidChoice.style.display = 'block';
+                } 
+            } else {
+                element.classList.toggle('is-invalid', true);
+                document.querySelector(elementClassName).innerHTML = errorString;
+            }
         } else {
             this._resetError(element, elementClassName);
+        }
+    }
+
+    _setupShowProperty(element, isShow) {
+
+    }
+
+    _setupEnableProperty(element, isEnable) {
+
+    }
+
+    _resetIsSend() {
+        for (const key in this._attributes) {
+            if (!this._attributes.hasOwnProperty(key)) {
+                continue;
+            }
+
+            this.getProperty(key).isSend = true;
         }
     }
 
@@ -309,8 +444,14 @@ export class Controller {
      * @param {string} elementClassName 
      */
     _resetError(element, elementClassName) {
-        element.classList.remove('is-invalid');
-        document.querySelector(elementClassName).innerHTML = '';
+        if(element.type.toLowerCase() == 'checkbox' || element.type.toLowerCase() == 'radio') {
+            const invalidChoice = document.querySelector(`div.invalid-feedback${elementClassName}`);
+            invalidChoice.innerHTML = '';
+            invalidChoice.style.removeProperty('display');
+        } else {
+            element.classList.remove('is-invalid');
+            document.querySelector(elementClassName).innerHTML = '';
+        }
     }
 
     /**
@@ -395,7 +536,7 @@ export class Controller {
                 break;
 
             case Controller.PluginType.Date:
-                value = this._dateValuePlugin(element);
+                value = this._dateValuePlugin(property);
                 break;
 
             // case Controller.PluginType.DateTime:
@@ -429,8 +570,7 @@ export class Controller {
             options.element = element;
         }
         
-        const _elem = new Lookup(options);
-        return _elem;
+        return new Lookup(options);
     }
 
     /**
@@ -463,11 +603,11 @@ export class Controller {
             format: "dd/mm/yyyy",
             maxViewMode: 2,
             clearBtn: true,
-            autoclose: true
+            autoclose: true,
+            todayHighlight: true
         } : options;
-        const _elem = $(element).datepicker(_options);
 
-        return _elem;
+        return $(element).datepicker(_options);
     }
 
     /**
@@ -497,10 +637,9 @@ export class Controller {
             numeral: true,
             numeralDecimalMark: ',',
             delimiter: '.'
-        } : options
-        const _elem = new Cleave(element, _options);
-
-        return _elem;
+        } : options;
+        
+        return new Cleave(element, _options);
     }
 
     /**
@@ -547,9 +686,10 @@ export class Controller {
      * @return {number} value
      */
     _currencyValuePlugin(property) {
-        const nominal = property.getRawValue().split('Rp ')[1];
+        const splitMask = property.getRawValue().split('Rp ');
+        const nominal = splitMask.length > 1 ? splitMask[1] : 0;
         const value = Validation.isNumber(nominal, true) ? nominal : 0;
-        
+
         return parseFloat(value);
     }
 
@@ -570,9 +710,8 @@ export class Controller {
             phone: true,
             phoneRegionCode: 'id'
         } : options
-        const _elem = new Cleave(element, _options);
 
-        return _elem;
+        return new Cleave(element, _options);
     }
 
     /**
@@ -623,13 +762,18 @@ export class Controller {
         switch (elementType) {
             case 'SELECT':
                 value = this._getValueSelectElement(element);
+
                 break;
+
             case 'TEXTAREA':
                 value = this._getValuTextAreaElement(element);
+
                 break;
+
             case 'INPUT':
             default:
                 value = this._getValueInputElement(element);
+
                 break;
         }
 
@@ -646,13 +790,18 @@ export class Controller {
         switch (elementType) {
             case 'SELECT':
                 this._setValueSelectElement(element, value);
+
                 break;
+
             case 'TEXTAREA':
                 this._setValuTextAreaElement(element, value);
+
                 break;
+
             case 'INPUT':
             default:
                 this._setValueInputElement(element, value);
+
                 break;
         }
     }
@@ -665,17 +814,23 @@ export class Controller {
     _getValueInputElement(element) {
         let value;
         const inputType = element.type;
-        switch (inputType) {
-            case 'radio':
+
+        switch (inputType.toLowerCase()) {
+            case 'checkbox':
+                value = element.checked;
 
                 break;
-            case 'checkbox':
-                
-                break;
+
             case 'text':
             case 'number':
-            default:
+            case 'email':
                 value = element.value;
+
+                break;
+
+            default:
+                value = null;
+                
                 break;
         }
 
@@ -690,16 +845,19 @@ export class Controller {
     _setValueInputElement(element, value) {
         const inputType = element.type;
         switch (inputType) {
-            case 'radio':
+            case 'checkbox':
+                element.checked = Validation.isBoolean(value) ? value : false;
+                element.dispatchEvent(new Event('change'));
 
                 break;
-            case 'checkbox':
-                
-                break;
+
             case 'text':
             case 'number':
+                element.value = value;
+
+                break;
+
             default:
-                value = element.value = value;
                 break;
         }
     }
@@ -764,11 +922,18 @@ export class Controller {
         return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     }
 
-    setError(errors) {
+    /**
+     * setAllError
+     * @param {object} errors 
+     */
+    setAllError(errors) {
         Object.keys(errors).forEach(key => {
             const isLookup = key.slice(-3).toLowerCase() == '_id' ? true : false;
             const propertyName = isLookup ? key.substring(0, key.length - 3) : key;
-            this[`_${propertyName}`].error(errors[key]);
+
+            if(this[`_${propertyName}`] != undefined) {
+                this[`_${propertyName}`].error(errors[key]);
+            }
         });
     }
 
@@ -794,8 +959,12 @@ export class Controller {
             "Content-Type": "application/json",
             "X-CSRF-TOKEN": Controller.getCSRF()
         };
+        
         this.setAllProperty();
         const _body = this._data;
+        this._data = null;
+        this._resetIsSend();
+
         try {
             if(body != undefined && typeof body == 'object') {
                 Object.keys(body).forEach(key => {
@@ -809,8 +978,8 @@ export class Controller {
                 body: _body
             });
 
-            if(!res.success && res.errors) {
-                this.setError(res.errors);
+            if(res && !res.success && res.errors) {
+                this.setAllError(res.errors);
             }
 
             return res;
@@ -842,8 +1011,12 @@ export class Controller {
             "Content-Type": "application/json",
             "X-CSRF-TOKEN": Controller.getCSRF()
         };
+        
         this.setAllProperty();
         const _body = this._data;
+        this._data = null;
+        this._resetIsSend();
+
         try {
             if(id == undefined || id.trim() == '') {
                 throw `Id must required and can't be empty`;
@@ -862,8 +1035,8 @@ export class Controller {
                 body: _body
             });
 
-            if(!res.success && res.errors) {
-                this.setError(res.errors);
+            if(res && !res.success && res.errors) {
+                this.setAllError(res.errors);
             }
 
             return res;
@@ -914,12 +1087,23 @@ export class Controller {
 
             const _uri = uri || `${APP_URL}/${this.routeName}/${id}`;
             if(withConfirm == null || withConfirm == false) {
-                return await HTTPClient.Request({
+                const res = await HTTPClient.Request({
                     uri: _uri,
                     method: _method,
                     headers: _headers,
                     body: _body
                 });
+
+                if(Validation.isBoolean(res)) {
+                    return res;
+                }
+                else {
+                    if(res && !res.success) {
+                        throw {message: res.message, errors: res.errors};
+                    }
+            
+                    return res.success;
+                }
             }
 
             if(!isWithConfirmValid) {
@@ -942,10 +1126,13 @@ export class Controller {
                 headers: _headers,
                 body: _body
             });
-            if(deleteRecord) {
-                AlertHelper.Alert({message: afterDeleteMessage});
-                isSuccess = true;
+
+            if(!Validation.isBoolean(deleteRecord) && deleteRecord && !deleteRecord.success) {
+                throw {message: deleteRecord.message, errors: deleteRecord.errors};
             }
+
+            AlertHelper.Alert({message: afterDeleteMessage});
+            isSuccess = true;
         } catch (error) {
             console.error(error);
             if(withConfirm != undefined) {
