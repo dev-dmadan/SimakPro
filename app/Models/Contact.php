@@ -22,7 +22,7 @@ class Contact extends Model
 
     public function contactType()
     {
-        return $this->belongsTo('App\Models\Gender', 'contact_type_id');
+        return $this->belongsTo('App\Models\ContactType', 'contact_type_id');
     }
 
     public function activeStatus()

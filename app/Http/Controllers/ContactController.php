@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Constants\PaginationConstant;
 use App\Models\Contact;
+use Illuminate\Support\Facades\Validator;
 
 class ContactController extends Controller
 {
@@ -22,7 +23,19 @@ class ContactController extends Controller
         $isKasKecil = $route == 'kas-kecil' ? true : false;
         $isSubKasKecil = $route == 'sub-kas-kecil' ? true : false;
 
+        $title = '';
+        if($isKasBesar) {
+            $title = 'Kas Besar';
+        } else if($isKasKecil) {
+            $title = 'Kas Kecil';
+        } else if($isSubKasKecil) {
+            $title = 'Sub Kas Kecil';
+        } else {
+            $title = 'Kontak';
+        }
+
         return view('pages.contact.list', [
+            'title' => $title,
             'isContact' => $isContact,
             'isKasBesar' => $isKasBesar,
             'isKasKecil' => $isKasKecil,
@@ -48,14 +61,39 @@ class ContactController extends Controller
      */
     public function store(Request $request)
     {
-        $contact = new Contact();
-        foreach($request->all() as $key => $item) {
-            if($item != null || is_numeric($item)) {
-                $contact->$key = $item;
-            }
-        }
+        $isSuccess = false;
+        $message = null;
+        $errors = null;
 
-        return response()->json($contact->save());
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:500',
+            'birthplace' => 'string|max:250', 
+            'birthdate' => 'nullable|date',
+            'gender_id' => 'required|uuid',
+            'address' => 'string',
+            'email' => 'email|max:100',
+            'phone_number' => 'string|max:50',
+            'contact_type_id' => 'required|uuid',
+            'active_status_id' => 'required|uuid',
+            'saldo' => 'numeric|max:99999999999999999'
+        ]);
+        
+        if(!$validator->fails()) {
+            $contact = new Contact();
+            foreach($request->all() as $key => $item) {
+                if($item != null || is_numeric($item)) {
+                    $contact->$key = $item;
+                }
+            }
+            $isSuccess = $contact->save();
+        }
+        $errors = $validator->fails() ? $validator->messages() : null;
+
+        return response()->json([
+            'success' => $isSuccess,
+            'message' => $message,
+            'errors' => $errors
+        ]);
     }
 
     /**
@@ -113,8 +151,9 @@ class ContactController extends Controller
      */
     public function edit($id)
     {
-        $isExist = is_null(Contact::find($id)) ? false : true;
-        $contactType = Contact::find($id)->contactType();
+        $contactData = Contact::find($id);
+        $isExist = is_null($contactData) ? false : true;
+        $contactType = $contactData->contactType();
 
         return $isExist ? view('pages.contact.page', [
             'id' => $id,
