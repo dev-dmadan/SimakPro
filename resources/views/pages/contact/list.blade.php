@@ -82,6 +82,7 @@
         const _isKasBesar = @json($isKasBesar, JSON_PRETTY_PRINT);
         const _isKasKecil = @json($isKasKecil, JSON_PRETTY_PRINT);
         const _isSubKasKecil = @json($isSubKasKecil, JSON_PRETTY_PRINT);
+        const _contactType = @json($contactType, JSON_PRETTY_PRINT);
     </script>
     <script type="module" src="{{ asset('js/app/contact/list.js') }}"></script>
 

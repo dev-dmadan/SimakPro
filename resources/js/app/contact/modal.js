@@ -13,6 +13,7 @@ const modal = new Modal({
         }
     },
     close: () => {
+        contact.birthdate.set(null);
         contact.contact_type.set(null);
         contact.active_status.set(null);
     }
@@ -22,6 +23,17 @@ async function init() {
     try {
         contact.renderAllProperty();
         await renderLookup();
+
+        if(!_isContact) {
+            contact.contact_type.show(false);
+
+            if(_isKasBesar) {
+                contact.saldo.show(false);
+            }
+        } else {
+            contact.saldo.show(false);
+        }
+
     } catch (error) {
         throw error;
     }
@@ -58,7 +70,23 @@ async function renderLookup() {
                 }
             })
         };
+        
+        if(_isContact) {
+            contact.contact_type.plugin.onChange = (value) => {
+                if(_isContact) {
+                    const isSaldoShow = [_contactType.SubKasKecil, _contactType.KasKecil].filter(item => {
+                        if(value && value.id) {
+                            return item == value.id;
+                        }
     
+                        return false;
+                    }).length > 0 ? true : false;
+    
+                    contact.saldo.show(isSaldoShow);
+                }
+            };
+        }
+
         contact.contact_type.plugin.init();
         contact.active_status.plugin.init();
     } catch (error) {
@@ -77,6 +105,22 @@ async function saveModal() {
 
     try {
         // modal.loading(true);
+
+        if(_isKasBesar) {
+            contact.contact_type.set(_contactType.KasBesar);
+            contact.saldo.isSend = false;
+        } else if(_isKasKecil) {
+            contact.contact_type.set(_contactType.KasKecil);
+        } else if(_isSubKasKecil) {
+            contact.contact_type.set(_contactType.SubKasKecil);
+        } else {
+            const listContactTypeWithSaldo = [_contactType.SubKasKecil, _contactType.KasKecil];
+            const isSaldoSend = listContactTypeWithSaldo.filter(item => {
+                const contactType = contact.contact_type.get();
+                return contactType && contactType.id == item;
+            }).length > 0 ? true : false;
+            contact.saldo.isSend = isSaldoSend;
+        }
 
         const save = await contact.save();
         if(save && save.success) {

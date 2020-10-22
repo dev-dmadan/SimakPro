@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use App\Constants\PaginationConstant;
 use App\Models\Contact;
 use Illuminate\Support\Facades\Validator;
+use App\Constants\ContactTypeConstant;
 
 class ContactController extends Controller
 {
@@ -34,12 +35,19 @@ class ContactController extends Controller
             $title = 'Kontak';
         }
 
+        $contactType = [
+            'KasBesar' => ContactTypeConstant::KasBesar,
+            'KasKecil' => ContactTypeConstant::KasKecil,
+            'SubKasKecil' => ContactTypeConstant::SubKasKecil,
+        ];
+
         return view('pages.contact.list', [
             'title' => $title,
             'isContact' => $isContact,
             'isKasBesar' => $isKasBesar,
             'isKasKecil' => $isKasKecil,
-            'isSubKasKecil' => $isSubKasKecil
+            'isSubKasKecil' => $isSubKasKecil,
+            'contactType' => $contactType
         ]);
     }
 
