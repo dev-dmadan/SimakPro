@@ -55,11 +55,14 @@
                                 </div>
 
                                 {{-- filter --}}
-                                <div class="row ml-0 mt-2">
-                                    <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Filters</a>
-                                    <div class="dropdown-menu" aria-labelledby="filters-button">
-                                        <a class="dropdown-item" id="filters-button-add-filter" href="javascript:void(0)">Add filters</a>
-                                        <a class="dropdown-item disabled" id="filters-button-advance-filter" href="javascript:void(0)">Advanced filters <span class="badge badge-primary">Coming Soon</span></a>
+                                <div class="row mt-2">
+                                    <div class="col">
+                                        <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Filters</a>
+                                        <div class="dropdown-menu" aria-labelledby="filters-button">
+                                            <a class="dropdown-item" id="filters_folders_add_filters" href="javascript:void(0)">Add filters</a>
+                                            <a class="dropdown-item disabled" id="filters-button-advance-filter" href="javascript:void(0)" style="cursor: not-allowed;">Advanced filters <span class="badge badge-primary">Coming Soon</span></a>
+                                        </div>
+                                        <div class="filter_folder_list mt-2 align-items-center"></div>
                                     </div>
                                 </div>
 
