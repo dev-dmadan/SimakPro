@@ -11,6 +11,7 @@ import { AlertHelper } from './libraries/alert/alert';
     window.Alert = (args) => AlertHelper.Alert(args);
     window.Toastr = (args) => AlertHelper.Toastr(args);
     window.Confirm = (args) => AlertHelper.Confirm(args);
+    window.moment = require('moment');
 /** End Init Global Function */
 
 window.ADD_MODE = 'Add';

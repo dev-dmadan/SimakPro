@@ -3,7 +3,7 @@ import { AlertHelper } from '../../libraries/alert/alert';
 import { Project } from './project';
 
 Shimmer(true);
-const projectId = document.querySelector('#project-page-id') ? document.querySelector('#project-page-id').value : null;
+const id = document.querySelector('#project-page-id') ? document.querySelector('#project-page-id').value : null;
 const pageMode = document.querySelector('#page-mode') ? document.querySelector('#page-mode').value : ADD_MODE;
 const project = new Project(Project.attribute.page);
 
@@ -82,8 +82,8 @@ async function init() {
         handlingNewButtonDetails();
         handlingAfterSaveModals();
 
-        if(pageMode == EDIT_MODE && projectId != undefined) {
-            const data = await Project.show({id: projectId});
+        if(pageMode == EDIT_MODE && id != undefined) {
+            const data = await Project.show({id: id});
             renderPage(data);
         }
     } catch (error) {
@@ -187,7 +187,7 @@ async function reloadPage() {
 
     Shimmer(true);
     try {
-        const data = await Project.show({id: projectId});
+        const data = await Project.show({id: id});
         renderPage(data);
         await reloadDetail({reloadAll: true});
     } catch (error) {
@@ -211,7 +211,7 @@ async function save() {
         if(pageMode == ADD_MODE) {
             return await project.save();
         } else if(pageMode == EDIT_MODE) {
-            return await project.update({id: projectId});
+            return await project.update({id: id});
         }   
     } catch (error) {
         console.error(error);

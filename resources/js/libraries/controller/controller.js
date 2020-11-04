@@ -6,6 +6,7 @@ import Slider from 'bootstrap-slider';
 import Cleave from 'cleave.js';
 import moment from 'moment';
 require('cleave.js/dist/addons/cleave-phone.id');
+require('../tempusdominus-bootstrap-4.js');
 
 export class Controller {
     _data = null;
@@ -77,7 +78,7 @@ export class Controller {
         const setterName = isLookup || isForceLookup ? `${name}_id` : name;
         const _value = isLookup ? (value && value.id ? value.id : value) : value;
 
-        this._data[setterName] = _value;
+        this._data[setterName] = Validation.isString(_value) && Validation.isStringNullOrEmpty(_value) ? null : _value;
     }
 
     /**
@@ -216,6 +217,14 @@ export class Controller {
                             });
 
                             break;
+                        
+                        case Controller.PluginType.DateTime:
+                            $(this._attributes[key].element).on('change.datetimepicker', (e) => {
+                                console.log('reset error')
+                                this._resetError(element, elementClass);
+                            });
+
+                            break;
 
                         case Controller.PluginType.Lookup:
                             this[`_${key}`].plugin.onChange = () => {
@@ -333,9 +342,25 @@ export class Controller {
 
                     break;
     
-                // case Controller.PluginType.DateTime:
-                //     data = this._lookupPlugin(element, options);
-                //     break;
+                case Controller.PluginType.DateTime:
+                    try {
+                        if(Validation.isString(value) && !Validation.isStringNullOrEmpty(value)) {
+                            const checkDate = new Date(value);
+                            const isDate = checkDate instanceof Date && !isNaN(checkDate);
+                            value = isDate ? checkDate : null;
+                        } 
+                    } catch(e) {
+                        console.warn(e);
+                        value = null;
+                    }
+
+                    if(value) {
+                        $(this[`_${propertyName}`].element).datetimepicker('date', value);
+                    } else {
+                        $(this[`_${propertyName}`].element).datetimepicker('clear');
+                    }
+
+                    break;
     
                 // case Controller.PluginType.RangeDate:
                 //     data = this._lookupPlugin(element, options);
@@ -404,7 +429,7 @@ export class Controller {
      */ 
     _setupErrorProperty(element, elementClassName, error) {
         const errorString = Validation.isString(error) && !Validation.isStringNullOrEmpty(error) ? 
-            error : (error.length > 0 ? error.join("<br>") : '');
+            error : (error && error.length > 0 ? error.join("<br>") : '');
 
         if(!Validation.isStringNullOrEmpty(errorString)) {
             // radio / checkbox group
@@ -541,9 +566,9 @@ export class Controller {
                 data = this._datePlugin(element, options);
                 break;
 
-            // case Controller.PluginType.DateTime:
-            //     data = this._lookupPlugin(element, options);
-            //     break;
+            case Controller.PluginType.DateTime:
+                data = this._dateTimePlugin(element, options);
+                break;
 
             // case Controller.PluginType.RangeDate:
             //     data = this._lookupPlugin(element, options);
@@ -589,9 +614,9 @@ export class Controller {
                 value = this._dateValuePlugin(property);
                 break;
 
-            // case Controller.PluginType.DateTime:
-            //     value = this._lookupPlugin(element, options);
-            //     break;
+            case Controller.PluginType.DateTime:
+                value = this._dateTimeValuePlugin(element);
+                break;
 
             // case Controller.PluginType.RangeDate:
             //     value = this._lookupPlugin(element, options);
@@ -668,6 +693,47 @@ export class Controller {
     _dateValuePlugin(element) {
         const value = $(element).datepicker('getDate');
         return value != undefined ? moment(value).format('YYYY-MM-DD') : null;
+    }
+
+    /**
+     * _dateTimePlugin
+     * using tempusdominus-bootstrap-4 (datetimepicker) library
+     * @param {string} element 
+     * @param {object} options 
+     * @return {Datepicker} data
+     */
+    _dateTimePlugin(element, options = {}) {
+        const valid = Validation.isString(element) && !Validation.isStringNullOrEmpty(element);
+        if(!valid) {
+            throw "Element must be string and can't be empty";
+        }
+
+        const _options = options == undefined || Object.keys(options).length < 1 ? {
+            icons: {
+                time: 'far fa-clock',
+                date: 'far fa-calendar',
+                today: 'far fa-calendar-check-o',
+                clear: 'far fa-trash-alt',
+                close: 'far fa-times'
+            },
+            buttons: {
+                showClear: true
+            },
+            format: "DD/MM/YYYY h:mm A",
+            useCurrent: false
+        } : options;
+
+        return $(element).datetimepicker(_options);
+    }
+
+    /**
+     * _dateValuePlugin
+     * using bootstrap-datepicker library
+     * @param {string} element 
+     */
+    _dateTimeValuePlugin(element) {
+        const value = $(element).datetimepicker('date');
+        return value;
     }
 
     /**
@@ -896,7 +962,10 @@ export class Controller {
         const inputType = element.type;
         switch (inputType) {
             case 'checkbox':
-                element.checked = Validation.isBoolean(value) ? value : false;
+                const _value = Validation.isBoolean(value) ? value : (
+                    Validation.isNumber(value, true) ? Boolean(Number(value)) : false
+                );
+                element.checked = _value;
                 element.dispatchEvent(new Event('change'));
 
                 break;

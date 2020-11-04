@@ -73,7 +73,6 @@ async function init() {
             } else {
                 contactType = _contactType.SubKasKecil;
             }
-            console.log('contactType: ', contactType);
 
             dataTable.setDefaultFilter([
                 {
@@ -109,7 +108,7 @@ async function renderModal() {
 
 function editRecord(id) {
     let uri;
-    if(_isKasKecil) {
+    if(_isKasBesar) {
         uri = 'kas-besar';
     } else if(_isKasKecil) {
         uri = 'kas-kecil';

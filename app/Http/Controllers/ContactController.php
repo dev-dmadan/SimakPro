@@ -7,8 +7,10 @@ use Illuminate\Support\Facades\DB;
 use App\Constants\PaginationConstant;
 use App\Models\Contact;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use App\Constants\ContactTypeConstant;
 use App\Helpers\Filter;
+use Illuminate\Support\Str;
 
 class ContactController extends Controller
 {
@@ -70,38 +72,67 @@ class ContactController extends Controller
      */
     public function store(Request $request)
     {
+        $id = null;
         $isSuccess = false;
         $message = null;
         $errors = null;
-
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:500',
-            'birthplace' => 'string|max:250', 
-            'birthdate' => 'nullable|date',
-            'gender_id' => 'required|uuid',
-            'address' => 'string',
-            'email' => 'email|max:100',
-            'phone_number' => 'string|max:50',
-            'contact_type_id' => 'required|uuid',
-            'active_status_id' => 'required|uuid',
-            'saldo' => 'numeric|max:99999999999999999'
-        ]);
         
-        if(!$validator->fails()) {
+        DB::beginTransaction();
+        try {
+            $rules = [
+                'name' => 'required|string|max:500',
+                'birthplace' => 'nullable|string|max:250', 
+                'birthdate' => 'nullable|date',
+                'gender_id' => 'required|uuid',
+                'address' => 'nullable|string',
+                'email' => 'nullable|email|max:100',
+                'phone_number' => 'nullable|string|max:50',
+                'contact_type_id' => 'required|uuid',
+                'active_status_id' => 'required|uuid',
+                'saldo' => [
+                    Rule::requiredIf(function () use ($request) {
+                        $isRequired = false;
+                        $saldoRequired = array_map(function($item) {
+                            return strtolower($item);
+                        }, [ContactTypeConstant::KasKecil, ContactTypeConstant::SubKasKecil]);
+                        if($request->has('contact_type_id') && in_array(strtolower($request->input('contact_type_id')), $saldoRequired)) {
+                            $isRequired = true;
+                        }
+        
+                        return $isRequired;
+                    }),
+                    'nullable',
+                    'numeric',
+                    'max:99999999999999999'
+                ]        
+            ];
+            $data = $request->only(array_keys($rules));
+            $validator = Validator::make($data, $rules);
+            if($validator->fails()) {
+                $errors = $validator->messages();
+                throw new \Exception('Something wrong in form');
+            }
+
             $contact = new Contact();
-            foreach($request->all() as $key => $item) {
-                if($item != null || is_numeric($item)) {
+            foreach($data as $key => $item) {
+                if($item !== null) {
                     $contact->$key = $item;
                 }
             }
+
             $isSuccess = $contact->save();
+            $id = $isSuccess ? $contact->id : null;
+            DB::commit();
+        } catch (\Exception $e) {
+            $message = $e->getMessage();
+            DB::rollBack();
         }
-        $errors = $validator->fails() ? $validator->messages() : null;
 
         return response()->json([
             'success' => $isSuccess,
             'message' => $message,
-            'errors' => $errors
+            'errors' => $errors,
+            'id' => $id
         ]);
     }
 
@@ -153,7 +184,7 @@ class ContactController extends Controller
                 ->paginate(PaginationConstant::Limit);
         } else {
             $contacts = $contacts->orderBy('created_at', 'DESC')
-            ->paginate(10);
+            ->paginate(PaginationConstant::Limit);
         }
 
         return response()->json($contacts);
@@ -165,22 +196,52 @@ class ContactController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($id, Request $request)
     {
         $contactData = Contact::find($id);
         $isExist = is_null($contactData) ? false : true;
-        $contactType = $contactData->contactType();
+        if(!$isExist) {
+            abort(404);
+        }
 
-        return $isExist ? view('pages.contact.page', [
+        $contactType = [
+            'KasBesar' => ContactTypeConstant::KasBesar,
+            'KasKecil' => ContactTypeConstant::KasKecil,
+            'SubKasKecil' => ContactTypeConstant::SubKasKecil,
+        ];
+
+        $route = $request->route()->uri;
+        $isContact = Str::contains($route, 'contacts') ? true : false;
+        $isKasBesar = Str::contains($route, 'kas-besar') ? true : false;
+        $isKasKecil = Str::contains($route, 'kas-kecil') ? true : false;
+        $isSubKasKecil = Str::contains($route, 'sub-kas-kecil') ? true : false;
+
+        $title = '';
+        if($isKasBesar) {
+            $title = 'Kas Besar';
+        } else if($isKasKecil) {
+            $title = 'Kas Kecil';
+        } else if($isSubKasKecil) {
+            $title = 'Sub Kas Kecil';
+        } else {
+            $title = 'Kontak';
+        }
+
+        return view('pages.contact.page', [
             'id' => $id,
+            'title' => $title,
             'pageMode' => 'Edit',
+            'isContact' => $isContact,
+            'isKasBesar' => $isKasBesar,
+            'isKasKecil' => $isKasKecil,
+            'isSubKasKecil' => $isSubKasKecil,
             'contactType' => $contactType,
             'useMainProfileSection' => true,
             'useSubProfileSection' => false,
             'useMainContentSection' => true,
             'useDetailContentSection' => true,
             'useProfileImage' => true
-        ]) : abort(404);
+        ]);
     }
 
     /**
@@ -192,16 +253,67 @@ class ContactController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $contact = Contact::find($id);
-        foreach($request->all() as $key => $item) {
-            if($item == null && in_array($key, Contact::nullColumns)) {
-                $contact->$key = $item;
-            } else if($item != null || is_numeric($item)) {
-                $contact->$key = $item;
+        $isSuccess = false;
+        $message = null;
+        $errors = null;
+
+        DB::beginTransaction();
+        try {
+            $rules = [
+                'name' => 'required|string|max:500',
+                'birthplace' => 'nullable|string|max:250', 
+                'birthdate' => 'nullable|date',
+                'gender_id' => 'required|uuid',
+                'address' => 'nullable|string',
+                'email' => 'nullable|email|max:100',
+                'phone_number' => 'nullable|string|max:50',
+                'contact_type_id' => 'required|uuid',
+                'active_status_id' => 'required|uuid',
+                'saldo' => [
+                    Rule::requiredIf(function () use ($request) {
+                        $isRequired = false;
+                        $saldoRequired = array_map(function($item) {
+                            return strtolower($item);
+                        }, [ContactTypeConstant::KasKecil, ContactTypeConstant::SubKasKecil]);
+                        if($request->has('contact_type_id') && in_array(strtolower($request->input('contact_type_id')), $saldoRequired)) {
+                            $isRequired = true;
+                        }
+        
+                        return $isRequired;
+                    }),
+                    'nullable',
+                    'numeric',
+                    'max:99999999999999999'
+                ]        
+            ];
+            $data = $request->only(array_keys($rules));
+            $validator = Validator::make($data, $rules);
+            if($validator->fails()) {
+                $errors = $validator->messages();
+                throw new \Exception('Something wrong in form');
             }
+
+            $contact = Contact::find($id);
+            foreach($data as $key => $item) {
+                if($item === null && in_array($key, Contact::NULL_COLUMNS)) {
+                    $contact->$key = $item;
+                } else if($item !== null) {
+                    $contact->$key = $item;
+                }
+            }
+
+            $isSuccess = $contact->save();
+            DB::commit();
+        } catch (\Exception $e) {
+            $message = $e->getMessage();
+            DB::rollBack();
         }
 
-        return response()->json($contact->save());
+        return response()->json([
+            'success' => $isSuccess,
+            'message' => $message,
+            'errors' => $errors
+        ]);
     }
 
     /**
@@ -212,7 +324,24 @@ class ContactController extends Controller
      */
     public function destroy($id)
     {
-        $contact = Contact::find($id);
-        return response()->json($contact->delete());
+        $isSuccess = false;
+        $message = null;
+        $errors = null;
+
+        DB::beginTransaction();
+        try {
+            Contact::find($id)->delete();
+        } catch (\Exception $e) {
+            $message = $e->getMessage();
+            $errors = $e;
+
+            DB::rollBack();
+        }
+
+        return response()->json([
+            'success' => $isSuccess,
+            'message' => $message,
+            'errors' => $errors
+        ]);
     }
 }
