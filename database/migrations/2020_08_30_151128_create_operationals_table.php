@@ -16,6 +16,7 @@ class CreateOperationalsTable extends Migration
         Schema::create('operationals', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name', 500);
+            $table->uuid('contact_id')->nullable();
             $table->date('date')->nullable();
             $table->decimal('total', 19, 2)->default(0);
             $table->text('notes')->nullable();
@@ -23,6 +24,7 @@ class CreateOperationalsTable extends Migration
             $table->uuid('updated_by_id')->nullable();
             $table->timestamps();
 
+            $table->foreign('contact_id')->references('id')->on('contacts');
             $table->foreign('created_by_id')->references('id')->on('contacts');
             $table->foreign('updated_by_id')->references('id')->on('contacts');
             $table->engine = 'InnoDB';
