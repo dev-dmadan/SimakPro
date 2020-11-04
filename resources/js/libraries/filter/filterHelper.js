@@ -1,26 +1,16 @@
 import { Lookup } from "../lookup/lookup";
+import { Validation } from "../validation/validation";
 
 export class FilterHelper {
     _element;
     _event;
     _listSelectColumn;
-    _listFilter;
-    _hideClass = 'd-none';
-    _marginBottomClass = 'mb-2';
-    _marginRightClass = 'mr-2';
-    _marginLeftClass = 'ml-2';
-    _selectColumnClass = 'form-control';
-    _inputValueClass = 'form-control';
-    _titleClass = 'small d-inline-block text-truncate align-middle';
-    _buttonRemove = {
-        class: 'close align-middle',
-        icon: '<span aria-hidden="true">×</span>',
-        iconMinimize: '<i class="fa fa-angle-double-left"></i>'
-    };
-    _buttonSearch = {
-        class: 'close',
-        icon: '<i class="fa fa-check small"></i>'
-    };
+    _listFilter = [];
+    _lookups = {};
+    _isRenderFilter = false;
+    _isShowFilter = false;
+    _isFilterFromTitle = false;
+    _activeTitle = null;
 
     /**
      * @param {{
@@ -28,7 +18,7 @@ export class FilterHelper {
      *      button: string;
      *      container: string;
      *  };
-     *  event: void;
+     *  event: (filter) => void;
      *  searchColumns: [{
      *      text: string;
      *      value: string;
@@ -42,31 +32,43 @@ export class FilterHelper {
             button: '#filters_folders_add_filters',
             container: '.filter_folder_list'
         },
-        event = () => {},
-        searchColumns = [],
-        customClass = {
-            hideClass: 'd-none',
-            selectColumnClass: 'form-control',
-            inputValueClass: 'form-control'
-        },
-        customButton = {
-            remove: {
-                close: '<span aria-hidden="true">×</span>',
-                minimize: '<i class="fa fa-angle-double-left"></i>'
-            },
-            searh: '<i class="fa fa-check small"></i>'
-        }
+        event = null,
+        searchColumns = []
     } = {}) {
         this.element = element;
         this.event = event;
         this._listSelectColumn = searchColumns;
-        this.customClass = customClass;
-        this.customButton = customButton;
         
         this.init();
     }
 
-    static get listOperator() {
+    static get buttonStyle() {
+        return {
+            remove: {
+                class: 'btn btn-secondary',
+                icon: '<i aria-hidden="true" class="fas fa-times"></i>'
+            },
+            search: {
+                class: 'btn btn-secondary',
+                icon: '<i class="fas fa-check"></i>'
+            },
+            title: {
+                class: 'btn btn-link-dark btn-icon',
+                icon: '<i aria-hidden="true" class="fas fa-times"></i>'
+            }
+        };
+    }
+
+    static get defaultStyle() {
+        return {
+            hide: 'd-none',
+            selectColumn: 'form-control',
+            inputValue: 'form-control',
+            title: 'mr-3 text-truncate'
+        }
+    }
+
+    static get Operator() {
         return {
             Equal: {
                 value: 0,
@@ -106,7 +108,22 @@ export class FilterHelper {
             },
         };
     }
+    
+    static get inputType() {
+        return {
+            number: 'number',
+            lookup: 'lookup',
+            date: 'date',
+            text: 'text'
+        };
+    }
 
+    /**
+     * @return {{
+     *  button: string;
+     *  container: string
+     * }}
+     */
     get element() {
         return this._element != undefined ? this._element : {
             button: '#filters_folders_add_filters',
@@ -119,71 +136,67 @@ export class FilterHelper {
         }
     }
 
+    /**
+     * @param {void} value
+     */
     set event(value) {
         if(value != undefined && typeof value == 'function') {
             this._event = value;
         }
     }
 
-    set customClass(value) {
-
-    }
-
-    set customButton(value) {
-
-    }
-
-    get hideClass() {
-        return this._hideClass;
-    }
-    get marginBottomClass() {
-        return this._marginBottomClass;
-    }
-    get marginRightClass() {
-        return this._marginRightClass;
-    }
-    get marginLeftClass() {
-        return this._marginLeftClass;
-    }
-    get selectColumnClass() {
-        return this._selectColumnClass;
-    }
-    get inputValueClass() {
-        return this._inputValueClass;
-    }
-    get titleClass() {
-        return this._titleClass;
-    }
-    get buttonRemove() {
-        return this._buttonRemove;
-    }
-    get buttonSearch() {
-        return this._buttonSearch;
-    }
-
     init() {
-        const filterElement = document.querySelector(this.element.button);
-        filterElement.addEventListener('click', () => {
+        const filterButton = document.querySelector(this.element.button);
+        const container = document.querySelector(this.element.container);
+
+        const rowContainerTitle = document.createElement('div');
+        rowContainerTitle.setAttribute('class', 'row');
+
+        const colContainerTitle = document.createElement('div');
+        colContainerTitle.setAttribute('class', 'col filter-helper-container-title mb-3');
+        rowContainerTitle.appendChild(colContainerTitle);
+
+        const rowContainerFilter = document.createElement('div');
+        rowContainerFilter.setAttribute('class', 'row filter-helper-container-filter');
+
+        container.appendChild(rowContainerTitle);
+        container.appendChild(rowContainerFilter);
+        
+        filterButton.addEventListener('click', () => {
             this.addFilter();
         });
     }
 
-    getListFilter() {
-        return this._listFilter;
-    }
-
+    /**
+     * @return {[
+     *  text: string;
+     *  value: string;
+     *  type: string;
+     *  source: object;
+     * ]}
+     */
     getOptionSelectColumn() {
         return this._listSelectColumn != undefined ? this._listSelectColumn : [];
     }
 
-    addFilter() {
-        this._listFilter = this._listFilter == undefined ? [] : this._listFilter;
-        const isCanAddFilter = this.getListFilter().filter(item => item && item.isActive).length > 0 ? false : true;
-        if(isCanAddFilter) {
-            this.renderFilter();
+    addFilter() {        
+        if(!this._isRenderFilter) {
+            this._renderFilter();
+            this._isRenderFilter = true;
+        } else {
+            if(!this._isShowFilter) {
+                this.showFilter(true);
+            }
         }
     }
 
+    /**
+     * setFilter
+     * @param {number} indexFilter 
+     * @param {string} selectColumn 
+     * @param {string} operator 
+     * @param {any} value 
+     */
     setFilter(indexFilter, selectColumn, operator, value) {
         const _selectColumn = JSON.parse(selectColumn);
         this._listFilter[indexFilter].configFilter = {
@@ -193,170 +206,261 @@ export class FilterHelper {
         };
     }
 
+    /**
+     * @return {[{
+     *  column: string;
+     * value: any;
+     * operator: number;
+     * columnRAW: string;
+     * isLookup: boolean;
+     * }]}
+     */
+    getListFilter() {
+        return this._listFilter;
+    }
+
+    /**
+     * @return {[
+     *  column: string;
+     *  value: any;
+     *  operator: number;
+     * ]}
+     */
     getFilters() {
         const listFilter = this.getListFilter().filter(item => item && item != undefined);
-        const filters = listFilter.length > 0 ? listFilter.map(item => item.configFilter) : [];
+        const filters = listFilter.length > 0 ? listFilter.map(item => {
+            const value = item.isLookup ? 
+                (item.value ? item.value.id : item.value) : item.value;
+            return {
+                column: item.column,
+                value: value,
+                operator: item.operator
+            };
+        }) : [];
 
         return filters;
     }
 
-    renderFilter(inputType) {
-        const container = document.querySelector(this.element.container);
-        const indexFilter = this.getListFilter().length;
-        const selectColumn = this._renderSelectColumn();
-        const groupInputValue = this._renderInputValue(inputType);
-        const titleFilter = this._renderTitleFilter(indexFilter);
-        
-        const selectOperator = groupInputValue.querySelector('.input-group .input-group-prepend .form-control');
-        const inputValue = groupInputValue.querySelector('.input-group').lastElementChild.previousSibling;
-
-        const divGroup = document.createElement('div');
-        divGroup.setAttribute('class', `col-lg-6 col-md-12 col-sm-12 ${this.marginBottomClass} index-filter-${indexFilter}`);
-
-        const formGroup = document.createElement('div');
-        formGroup.setAttribute('class', 'form-row');
-
-        formGroup.appendChild(selectColumn);
-        formGroup.appendChild(groupInputValue);
-        divGroup.appendChild(formGroup);
-
-        container.appendChild(divGroup);
-        container.appendChild(titleFilter);
-
-        if(this.getListFilter().filter(item => item).length < 1 && container.querySelector('.button-search-filter') == null) {
-            container.appendChild(this._renderSearchButton());
+    /**
+     * showFilter
+     * @param {boolean} isShow 
+     */
+    showFilter(isShow = true) {
+        const containerFilter = document.querySelector(`${this.element.container} .filter-helper-container-filter`);
+        if(isShow) {
+            this._isShowFilter = true;
+            containerFilter.classList.remove(FilterHelper.defaultStyle.hide);
         } else {
-            const btnSearchFilter = container.querySelector('.button-search-filter');
-            container.appendChild(btnSearchFilter);
-            btnSearchFilter.classList.remove(this.hideClass);
+            this._isShowFilter = false;
+            containerFilter.classList.toggle(FilterHelper.defaultStyle.hide);
         }
 
-        this._listFilter.push({
-            groupFilter: divGroup,
-            selectColumn: selectColumn.lastElementChild,
-            selectOperator: selectOperator,
-            inputValue: inputValue,
-            titleFilter: titleFilter.firstElementChild,
-            isActive: true,
-            isSearch: false
-        });
-        this._onChangeSelectColumn(formGroup.firstElementChild.lastElementChild);
+        this.resetFilter();
     }
 
+    resetFilter() {
+        const parent = document.querySelector(`${this.element.container} .filter-helper-container-filter`);
+        const parentSelectColumn = parent.firstElementChild;
+        const parentGroupInput = parent.lastElementChild;
+
+        // reset select column
+        const selectColumn = parentSelectColumn.lastElementChild.querySelector('.form-control');
+        selectColumn.selectedIndex = 0;
+        selectColumn.dispatchEvent(new Event('change'));
+
+        // reset select operator
+        const selectOperator = parentGroupInput.lastElementChild.querySelector('.input-group .input-group-prepend');
+        selectOperator.selectedIndex = 0;
+        selectOperator.dispatchEvent(new Event('change'));
+
+        // clear all lookup
+        Object.keys(this._lookups).forEach(lookup => {
+            this._lookups[lookup].setValue(null);
+        });
+
+        // clear input
+        const inputValue = parentGroupInput.lastElementChild.querySelector('.input-group .input-value');
+        if(inputValue) {
+            inputValue.value = '';
+        }
+    }
+    
+    _renderFilter() {
+        const containerFilter = document.querySelector(`${this.element.container} .filter-helper-container-filter`);
+        const selectColumn = this._renderSelectColumn();
+        const selectFirstOption = JSON.parse(selectColumn.querySelector('select').value);
+        const optionLookup = selectFirstOption && selectFirstOption.source && selectFirstOption.type == FilterHelper.inputType.lookup ? 
+            selectFirstOption : null;
+        const groupInputValue = this._renderGroupInputValue(selectFirstOption.type, selectFirstOption.value);
+
+        if(optionLookup) {
+            const inputValue = groupInputValue.querySelector('.form-group .input-group .input-value');
+            this._renderLookup(inputValue, selectFirstOption.value, optionLookup);
+        }
+        
+        containerFilter.appendChild(selectColumn);
+        containerFilter.appendChild(groupInputValue);
+        this._isShowFilter = true;
+    }
+
+    /**
+     * _renderSelectColumn
+     * Render select column yang ingin difilter
+     * @return {HTMLElement}
+     */
     _renderSelectColumn() {
-        const divSelect = document.createElement('div');
-        divSelect.setAttribute('class', 'col-4');
+        const divCol = document.createElement('div');
+        divCol.setAttribute('class', 'col-4');
+
+        const divForm = document.createElement('div');
+        divForm.setAttribute('class', 'form-group');
 
         const select = document.createElement('select');
-        select.setAttribute('class', `${this.selectColumnClass}`);
+        select.setAttribute('class', FilterHelper.defaultStyle.selectColumn);
         
         this.getOptionSelectColumn().forEach(item => {
             const option = new Option(item.text, JSON.stringify(item), false, false);
             select.append(option);
         });
 
-        divSelect.appendChild(select);
+        select.addEventListener('change', (e) => this._onChangeSelectColumn(e.target.value));
 
-        select.addEventListener('change', (e) => {
-            this._onChangeSelectColumn(e.target);
-        });
+        divForm.appendChild(select);
+        divCol.appendChild(divForm);
 
-        return divSelect;
+        return divCol;
     }
 
-    _renderInputValue(inputType, lookupOption = null) {
-        const divInput = document.createElement('div');
-        divInput.setAttribute('class', 'col-8');
+    /**
+     * _onChangeSelectColumn
+     * @param {string} selectValue
+     */
+    _onChangeSelectColumn(selectValue) {
+        const value = JSON.parse(selectValue);
+        const optionLookup = value && value.type == FilterHelper.inputType.lookup && value.source ? 
+            value : null;
 
-        let inputColumnHTML;  
-        switch (inputType) {
-            case 'number':
-                inputColumnHTML = `<input type="number" class="${this.inputValueClass}">`;
-                break;
+        const newSelectOperator = this._renderOperator(value.type);
+        const newInputValue = this._renderInputValue(value.type, optionLookup ? optionLookup.value: null);
+        const parentOldInput = document.querySelector(`${this.element.container} .filter-helper-container-filter`).lastElementChild;
+        const divActionButton = parentOldInput.lastElementChild.lastElementChild.querySelector('.input-group-append');
+        const oldDefaultInputValue = parentOldInput.lastElementChild.querySelector('.input-group .input-value');
+        const oldSelectOperator = parentOldInput.lastElementChild.querySelector('.input-group .input-group-prepend .input-group-text');
 
-            case 'lookup':
-                inputColumnHTML = `<select class="${this.inputValueClass}"></select>`;
-                break;
+        if(optionLookup) {
+            if(!this._lookups.hasOwnProperty(optionLookup.value)) {
+                if(oldDefaultInputValue) {
+                    parentOldInput.lastElementChild.lastElementChild.replaceChild(newInputValue, oldDefaultInputValue);
+                } else {
+                    this._showLookupFilter(null, false);
+                    parentOldInput.lastElementChild.lastElementChild.insertBefore(newInputValue, divActionButton);
+                }
 
-            case 'date':
-            case 'text':
-            default:
-                inputColumnHTML = `<input type="text" class="${this.inputValueClass}">`;
-                break;
+                this._renderLookup(newInputValue, optionLookup.value, optionLookup);
+            } else {
+                if(oldDefaultInputValue) {
+                    oldDefaultInputValue.parentNode.removeChild(oldDefaultInputValue);
+                }
+
+                this._showLookupFilter(null, false);
+                this._showLookupFilter(optionLookup.value, true);
+            }   
+        } else {
+            if(!oldDefaultInputValue) {
+                this._showLookupFilter(null, false);
+                parentOldInput.lastElementChild.lastElementChild.insertBefore(newInputValue, divActionButton);
+            } else {
+                parentOldInput.lastElementChild.lastElementChild.replaceChild(newInputValue, oldDefaultInputValue);
+            }
         }
+
+        oldSelectOperator.removeEventListener('change', this._onChangeOperator);
+        oldSelectOperator.parentNode.replaceChild(newSelectOperator, oldSelectOperator);
+    }
+
+    /**
+     * _renderGroupInputValue
+     * Render group element operator dan input value untuk filter
+     * Jika inputType lookup maka akan memanggil library lookup
+     * @param {string} inputType 
+     * @param {object} lookupOption 
+     */
+    _renderGroupInputValue(inputType, lookupName = null) {
+        const divCol = document.createElement('div');
+        divCol.setAttribute('class', 'col-8');
+
+        const divForm = document.createElement('div');
+        divForm.setAttribute('class', 'form-group');
         
         const divGroupInput = document.createElement('div');
         divGroupInput.setAttribute('class', 'input-group');
-        // if(inputType == 'lookup') {
-        //     divGroupInput.setAttribute('style', 'font-size: 0.75rem');
-        // }
 
-        divGroupInput.appendChild(this._renderOperator(inputType));
-        divGroupInput.innerHTML += inputColumnHTML;
-        divGroupInput.appendChild(this._renderRemoveButton('form'));
-        
-        divInput.appendChild(divGroupInput);
-
-        // operator value
-        divGroupInput.firstElementChild.lastElementChild.addEventListener('change', (e) => {
-            this._onChangeOperator(e.target);
-        });
-
-        // input value
-        const inputValue = divGroupInput.lastElementChild.previousElementSibling;
-        if(lookupOption) {
-            new Lookup({
-                element: inputValue,
-                placeholder: `Choose ${lookupOption.text}`,
-                sourceData: lookupOption.source
-            });
-        } else {
-            inputValue.addEventListener('change', (e) => {
-                this._onChangeInput(e.target);
-            });
-        }
-
-        return divInput;
-    }
-
-    _renderOperator(inputType) {
         const divSelectOperator = document.createElement('div');
         divSelectOperator.setAttribute('class', 'input-group-prepend');
+
+        const selectOperator = this._renderOperator();
+        divSelectOperator.appendChild(selectOperator);
+
+        const inputValue = this._renderInputValue(inputType, lookupName);
+
+        const divActionButton = document.createElement('div');
+        divActionButton.setAttribute('class', 'input-group-append');
+
+        const actionButton = this._renderActionButton();
+        divActionButton.appendChild(actionButton.remove);
+        divActionButton.appendChild(actionButton.search);
+
+        divGroupInput.appendChild(divSelectOperator);
+        divGroupInput.appendChild(inputValue);
+        divGroupInput.appendChild(divActionButton);
+        
+        divForm.appendChild(divGroupInput);
+        divCol.appendChild(divForm);
+
+        return divCol;
+    }
+    
+    /**
+     * _renderOperator
+     * @param {string} inputType 
+     */
+    _renderOperator(inputType) {
         const select = document.createElement('select');
-        select.setAttribute('class', this.inputValueClass);
+        select.setAttribute('class', `${FilterHelper.defaultStyle.inputValue} input-group-text`);
+        select.setAttribute('style', 'background-color: unset');
 
         let listOptions;
         switch (inputType) {
             case 'number':
                 listOptions = [
-                    FilterHelper.listOperator.Equal, FilterHelper.listOperator.NotEqual,
-                    FilterHelper.listOperator.Greater, FilterHelper.listOperator.GreateOrEqual,
-                    FilterHelper.listOperator.Less, FilterHelper.listOperator.LessOrEqual
+                    FilterHelper.Operator.Equal, FilterHelper.Operator.NotEqual,
+                    FilterHelper.Operator.Greater, FilterHelper.Operator.GreateOrEqual,
+                    FilterHelper.Operator.Less, FilterHelper.Operator.LessOrEqual
                 ];
                 break;
 
             case 'lookup':
                 listOptions = [
-                    FilterHelper.listOperator.Equal, FilterHelper.listOperator.NotEqual,
-                    FilterHelper.listOperator.Empty
+                    FilterHelper.Operator.Equal, FilterHelper.Operator.NotEqual,
+                    FilterHelper.Operator.Empty
                 ];
                 break;
 
             case 'date':
                 listOptions = [
-                    FilterHelper.listOperator.Equal, FilterHelper.listOperator.NotEqual,
-                    FilterHelper.listOperator.Greater, FilterHelper.listOperator.GreateOrEqual,
-                    FilterHelper.listOperator.Less, FilterHelper.listOperator.LessOrEqual,
-                    FilterHelper.listOperator.Empty
+                    FilterHelper.Operator.Equal, FilterHelper.Operator.NotEqual,
+                    FilterHelper.Operator.Greater, FilterHelper.Operator.GreateOrEqual,
+                    FilterHelper.Operator.Less, FilterHelper.Operator.LessOrEqual,
+                    FilterHelper.Operator.Empty
                 ];
                 break;
             
             case 'text':
             default:
                 listOptions = [
-                    FilterHelper.listOperator.Equal, FilterHelper.listOperator.NotEqual,
-                    FilterHelper.listOperator.Contain, FilterHelper.listOperator.NotContain,
-                    FilterHelper.listOperator.Empty
+                    FilterHelper.Operator.Equal, FilterHelper.Operator.NotEqual,
+                    FilterHelper.Operator.Contain, FilterHelper.Operator.NotContain,
+                    FilterHelper.Operator.Empty
                 ];
                 break;
         }
@@ -366,278 +470,364 @@ export class FilterHelper {
             select.append(option);
         });
 
-        divSelectOperator.appendChild(select);
+        select.addEventListener('change', (e) => this._onChangeOperator(e.target));
 
-        return divSelectOperator;
+        return select;
     }
 
-    _renderTitleFilter(index) {
-        const divTitle = document.createElement('div');
-        divTitle.setAttribute('class', `${this.marginBottomClass} mr-3 index-filter-${index} ${this.hideClass}`);
-        
-        const span = document.createElement('span');
-        span.setAttribute('class', this.titleClass);
-        span.setAttribute('style', 'max-width: 200px');
-        divTitle.appendChild(span);
-        divTitle.appendChild(this._renderRemoveButton('title'));
-
-        divTitle.firstElementChild.addEventListener('click', (e) => {
-            this._onClickTitle(divTitle);
-        });
-
-        return divTitle;
-    }
-
-    _renderSearchButton() {
-        const divButton = document.createElement('div');
-        divButton.setAttribute('class', `${this.marginBottomClass} mr-3 button-search-filter`);
-
-        const button = `<button type="button" aria-label="Close" class="${this.buttonSearch.class}" style="float: none">${this.buttonSearch.icon}</button>`;        
-        divButton.innerHTML = button;
-
-        const buttonSearch = divButton.querySelector('button');
-        buttonSearch.addEventListener('click', () => {
-            this._onClickSearch(buttonSearch);
-        });
-
-        return divButton;
-    }
-
-    _renderRemoveButton(type) {
-        const button = document.createElement('button');
-        button.setAttribute('type', 'button');
-        button.setAttribute('aria-label', 'Close');
-        button.setAttribute('style', 'float: none');
-        button.setAttribute('class', `${this.buttonRemove.class} ${this.marginLeftClass}`);
-
-        const iconButton = this.buttonRemove.icon;     
-        button.innerHTML = iconButton;        
-
-        button.addEventListener('click', () => {
-            this._onClickRemove(button, type);
-        });
-        
-        return button;
-    }
-
-    _onChangeSelectColumn(scope) {
-        let indexFilter;
-        const classList = scope.parentElement.parentElement.parentElement.classList;
-        for(const item in classList) {
-            const _class = classList[item].toString();
-            if(_class.includes('index-filter-')) {
-                indexFilter = _class.split('-')[2];
-                break;
-            }
-        }
-
-        const typeJSON = JSON.parse(scope.value);
-        const type = typeJSON.type;
-        
-        const newInput = this._renderInputValue(type, (type == 'lookup' ? typeJSON : null));
-        const parentOldInput = scope.parentElement.parentElement.lastElementChild;
-        const oldInput = parentOldInput.lastElementChild;
-
-        parentOldInput.replaceChild(newInput.lastElementChild, oldInput);
-
-        if(indexFilter != undefined && indexFilter != -1) {
-            this._listFilter[parseInt(indexFilter)].selectOperator = parentOldInput.querySelector('.input-group .input-group-prepend .form-control');
-            this._listFilter[parseInt(indexFilter)].inputValue = type == 'lookup' ? 
-                parentOldInput.querySelector('.input-group').lastElementChild.previousElementSibling.previousElementSibling :
-                parentOldInput.querySelector('.input-group').lastElementChild.previousElementSibling;
-        }
-    }
-
+    /**
+     * _onChangeOperator
+     * @param {HTMLElement} scope 
+     */
     _onChangeOperator(scope) {
-        const emptyOperator = FilterHelper.listOperator.Empty.value;
-        const input = scope.parentElement.nextSibling;
-        if(scope.value == emptyOperator) {
-            input.disabled = true;
+        const emptyOperator = FilterHelper.Operator.Empty.value;
+        const parent = document.querySelector(`${this.element.container} .filter-helper-container-filter`);
+        const parentGroupInput = parent.lastElementChild;
+        const defaultInputValue = parentGroupInput.lastElementChild.querySelector('.input-group .input-value');
+        const isLookup = defaultInputValue == null ? true : false;
+        
+        let inputValue;
+        if(isLookup) {
+            const temp = this._getActiveLookup();
+            inputValue = temp.element;
+            if(scope.value == emptyOperator) {
+                temp.lookup.setValue(null);
+                inputValue.disabled = true;
+            } else {
+                inputValue.disabled = false;
+            }
         } else {
-            input.disabled = false;
+            inputValue = defaultInputValue;
+            if(scope.value == emptyOperator) {
+                inputValue.value = '';
+                inputValue.disabled = true;
+            } else {
+                inputValue.disabled = false;
+            } 
         }
     }
 
-    _onChangeInput(scope) {
-        console.log(scope.value);
-    }
+    /**
+     * _renderInputValue
+     * @param {string} inputType 
+     * @param {string} lookupName
+     * @return {HTMLElement} 
+     */
+    _renderInputValue(inputType, lookupName = null) {
+        let inputColumn;  
+        switch (inputType) {
+            case FilterHelper.inputType.number:
+                inputColumn = document.createElement('input');
+                inputColumn.setAttribute('type', 'number');
+                inputColumn.setAttribute('class', `${FilterHelper.defaultStyle.inputValue} input-value`);
 
-    _onClickTitle(title) {
-        const btnSearch = document.querySelector('.button-search-filter');
-
-        let indexFilter = null;
-        const classList = title.classList;
-
-        for(const item in classList) {
-            const _class = classList[item].toString();
-            if(_class.includes('index-filter-')) {
-                indexFilter = _class.split('-')[2];
                 break;
-            }
+
+            case FilterHelper.inputType.lookup:
+                inputColumn = document.createElement('select');
+                inputColumn.setAttribute('class', `${FilterHelper.defaultStyle.inputValue} input-value-lookup input-value-${lookupName ? lookupName : ''}`);
+
+                break;
+
+            case FilterHelper.inputType.date:
+            case FilterHelper.inputType.text:
+            default:
+                inputColumn = document.createElement('input');
+                inputColumn.setAttribute('type', 'text');
+                inputColumn.setAttribute('class', `${FilterHelper.defaultStyle.inputValue} input-value`);
+                break;
         }
 
-        if(indexFilter) {
-            const listDelete = [];
-            for(const item in this._listFilter) {
-                this._hideInputFilter(this._listFilter[item]);
-                this._listFilter[item].titleFilter.parentElement.classList.remove(this.hideClass);
-                this._listFilter[item].isActive = false;
+        return inputColumn;
+    }
 
-                if(!this._listFilter[item].isSearch) {
-                    listDelete.push(item);
-                }
-            }
-
-            this._listFilter[parseInt(indexFilter)].inputValue.parentElement.lastElementChild.lastElementChild.innerHTML = this.buttonRemove.iconMinimize;
-
-            const titleParent = this._listFilter[parseInt(indexFilter)].titleFilter.parentElement;
-            document.querySelector(this.element.container).insertBefore(btnSearch, titleParent.nextSibling);
-            btnSearch.classList.remove(this.hideClass);
-
-            this._hideInputFilter(this._listFilter[parseInt(indexFilter)], false);
-            this._listFilter[parseInt(indexFilter)].titleFilter.parentElement.classList.toggle(this.hideClass, true);
-            this._listFilter[parseInt(indexFilter)].isActive = true;
-            
-            if(this.getListFilter().filter(item => item).length < 1) {
-                this._listFilter[parseInt(indexFilter)].groupFilter.parentElement.classList.remove('ml-0');
-            }
-
-            listDelete.forEach(i => {
-                console.log(i);
-
-                this._listFilter[parseInt(i)].groupFilter.remove();
-                this._listFilter[parseInt(i)].titleFilter.parentElement.remove();
-
-                delete this._listFilter[parseInt(i)];
+    /**
+     * _renderLookup
+     * @param {string} inputValue 
+     * @param {string} lookupName 
+     * @param {{
+     *  text: string;
+     *  source: object;
+     * }} lookupOption 
+     */
+    _renderLookup(inputValue, lookupName, lookupOption) {        
+        if(!this._lookups.hasOwnProperty(lookupName)) {
+            this._lookups[lookupName] = new Lookup({
+                element: inputValue,
+                placeholder: `Choose ${lookupOption.text}`,
+                sourceData: lookupOption.source
             });
         }
     }
 
-    _onClickRemove(btn, type) {
-        let indexFilter = null;
-        const classList = type == 'form' ? 
-            btn.parentElement.parentElement.parentElement.parentElement.classList : 
-            btn.parentElement.classList;
+    /**
+     * @return {{
+     *  remove: HTMLElement
+     *  search: HTMLElement
+     * }}
+     */
+    _renderActionButton() {
+        const removeButton = document.createElement('button');
+        removeButton.setAttribute('class', FilterHelper.buttonStyle.remove.class);
+        removeButton.setAttribute('type', 'button');
+        removeButton.innerHTML = FilterHelper.buttonStyle.remove.icon;
+        removeButton.addEventListener('click', () => this._onClickActionRemove());
 
-        for(const item in classList) {
-            const _class = classList[item].toString();
-            if(_class.includes('index-filter-')) {
-                indexFilter = _class.split('-')[2];
-                break;
-            }
-        }
+        const searchButton = document.createElement('button');
+        searchButton.setAttribute('class', FilterHelper.buttonStyle.search.class);
+        searchButton.setAttribute('type', 'button');
+        searchButton.innerHTML = FilterHelper.buttonStyle.search.icon;
+        searchButton.addEventListener('click', () => this._onClickActionSearch());
 
-        if(indexFilter != undefined && indexFilter != -1) {
-            const isCanRemove = this._listFilter[parseInt(indexFilter)].isSearch == false ? true : false;
-
-            const parentGroupFilter = this._listFilter[parseInt(indexFilter)].groupFilter.parentElement;
-            if(isCanRemove || type == 'title') {
-                this._listFilter[parseInt(indexFilter)].groupFilter.remove();
-                this._listFilter[parseInt(indexFilter)].titleFilter.parentElement.remove();
-
-                delete this._listFilter[indexFilter];
-
-                if(this.getListFilter().filter(item => item).length < 1) {
-                    parentGroupFilter.classList.remove('ml-0');
-                }
-
-                this._event(this.getFilters());
-            } else {
-                this._hideInputFilter(this._listFilter[parseInt(indexFilter)]);
-                // this._listFilter[parseInt(indexFilter)].groupFilter.parentElement.classList.toggle('ml-0');
-                this._listFilter[parseInt(indexFilter)].titleFilter.parentElement.classList.remove(this.hideClass);
-                this._listFilter[parseInt(indexFilter)].isActive = false;
-
-                if(this.getListFilter().filter(item => item).length < 1) {
-                    parentGroupFilter.classList.toggle('ml-0', true);
-                }
-            }
-            
-            if(type != 'title') {
-                document.querySelector('.button-search-filter').classList.toggle(this.hideClass);
-            }
-        }
+        return {
+            remove: removeButton,
+            search: searchButton
+        };
     }
 
-    _onClickSearch(btn) {
-        const indexFilterActive = this.getListFilter().findIndex(item => item && item.isActive);
-        const filterActive = this._listFilter[indexFilterActive];
-        const inputType = indexFilterActive != -1 ? filterActive.inputValue.nodeName : null;
+    _onClickActionRemove() {        
+        this.showFilter(false);
+        if(this._isFilterFromTitle) {
+            document.querySelector(`${this.element.container} .filter-helper-container-title .${this._activeTitle}`).classList.remove(FilterHelper.defaultStyle.hide);
+        }
+
+        this._isFilterFromTitle = false;
+    }
+
+    _onClickActionSearch() {
+        // get data
+        const parent = document.querySelector(`${this.element.container} .filter-helper-container-filter`);
+        const parentGroupInput = parent.lastElementChild;
+        const selectColumn = parent.firstElementChild.lastElementChild.querySelector(`.${FilterHelper.defaultStyle.selectColumn}`);
+        const selectOperator = parentGroupInput.lastElementChild.querySelector('.input-group .input-group-prepend .input-group-text');
+        const defaultInputValue = parentGroupInput.lastElementChild.querySelector('.input-group .input-value');
+        const isLookup = defaultInputValue == null ? true : false;
+        const activeLookup = isLookup ? this._getActiveLookup() : null;
+        const lookupValue = activeLookup ? activeLookup.lookup.getValue() : null;
         
-        console.log({
-            indexFilterActive: indexFilterActive,
-            filterActive: filterActive,
-            inputType: inputType
-        });
+        const selectColumnValue = JSON.parse(selectColumn.value);
+        const column = selectColumnValue.value;
+        const operator = selectOperator.value;
+        const operatorText = selectOperator.options[selectOperator.selectedIndex].text;
+        const value = defaultInputValue ? defaultInputValue.value : lookupValue;
         
-        if(!inputType) {
+        let isValid = true;
+        if(operator != FilterHelper.Operator.Empty.value) {
+            if(isLookup) {
+                isValid = Validation.isLookup(value) ? true : false;
+            } else {
+                isValid = Validation.isString(value) && !Validation.isStringNullOrEmpty(value) ? true : false;
+            }
+        }
+
+        if(!isValid) {
             return;
         }
 
-        const isValid = this._validationInput(filterActive);
-        if(isValid) {
-            const selectColumn = this._getSelectColumn(filterActive.selectColumn);
-            const operator = this._getOperator(filterActive.selectOperator);
-            const input = this._getInputValue(filterActive.inputValue);
+        if(this._isFilterFromTitle) {
+            // edit data list
+            const activeTitleSplit = this._activeTitle.split('-');
+            const indexFilter = activeTitleSplit.length > 1 ? activeTitleSplit[2] : null;
+            if(indexFilter) {
+                this._listFilter[parseInt(indexFilter)] = {
+                    columnRAW: selectColumn.value,
+                    column: column,
+                    operator: operator,
+                    value: value,
+                    isLookup: isLookup
+                };
+            }
 
-            filterActive.titleFilter.innerHTML = `${selectColumn.text} ${operator.text} ${typeof input == 'object' ? input.text : input}`;
-            this._hideInputFilter(filterActive);
-            filterActive.titleFilter.parentElement.classList.remove(this.hideClass);
-            this._listFilter[indexFilterActive].isActive = false;
-            this._listFilter[indexFilterActive].isSearch = true;
-            this._listFilter[indexFilterActive].groupFilter.parentElement.classList.toggle('ml-0', true);
-
-            this.setFilter(indexFilterActive, selectColumn.value, operator.value, (typeof input == 'object' ? input.value : input));
-            
-            btn.parentElement.classList.toggle(this.hideClass);
-            this._event(this.getFilters());
-        }
-    }
-
-    _validationInput(element) {
-        console.log(element);
-
-        const value = element.inputValue.value;
-        const operator = element.selectOperator.value;
-
-        if(operator == FilterHelper.listOperator.Empty.value) {
-            return true;
-        }
-
-        if(typeof value != 'string' || value.trim() == '') {
-            return false;
-        }
-
-        return true;
-    }
-
-    _hideInputFilter(element, isHide = true) {
-        if(isHide) {
-            element.groupFilter.classList.toggle(this.hideClass, true);
+            // edit title
+            const titleActive = document.querySelector(`${this.element.container} .filter-helper-container-title .${this._activeTitle}`);
+            titleActive.firstChild.textContent = FilterHelper.Operator.Empty.symbol != operatorText ? 
+                `${selectColumnValue.text} ${operatorText} ${lookupValue ? lookupValue.name : value}` : 
+                `${selectColumnValue.text} is ${operatorText}`;
+            titleActive.classList.remove(FilterHelper.defaultStyle.hide);
         } else {
-            element.groupFilter.classList.remove(this.hideClass);
+            // push data ke list
+            this._listFilter.push({
+                columnRAW: selectColumn.value,
+                column: column,
+                operator: operator,
+                value: value,
+                isLookup: isLookup
+            });
+
+            // render title
+            const containerTitle = document.querySelector(`${this.element.container} .filter-helper-container-title`);
+            containerTitle.appendChild(this._renderTitleFilter(selectColumnValue.text, operatorText, lookupValue ? lookupValue.name : value));
+        }
+
+        // hide filter
+        this.showFilter(false);
+        this._isFilterFromTitle = false;
+        this._event(this.getFilters());
+    }
+
+    /**
+     * _renderTitleFilter
+     * @param {string} column 
+     * @param {string} operator 
+     * @param {string} value 
+     * @return {HTMLElement}
+     */
+    _renderTitleFilter(column, operator, value) {
+        const indexFilter = this._listFilter && this._listFilter.length > 0 ? this._listFilter.length - 1 : 0;
+
+        const span = document.createElement('span');
+        span.setAttribute('class', `index-filter-${indexFilter} ${FilterHelper.defaultStyle.title}`);
+        span.setAttribute('style', 'max-width: 200px');
+        span.innerText = FilterHelper.Operator.Empty.symbol != operator ? `${column} ${operator} ${value}` : `${column} is ${operator}`;
+        span.addEventListener('click', (e) => this._onClickTitleFilter(e.target));
+        
+        const button = document.createElement('button');
+        button.setAttribute('class', FilterHelper.buttonStyle.title.class);
+        button.innerHTML = FilterHelper.buttonStyle.title.icon;
+        button.addEventListener('click', (e) => this._onClickRemoveTitle(e.target));
+
+        span.appendChild(button);
+
+        return span;
+    }
+
+    /**
+     * _onClickTitleFilter
+     * @param {HTMLElement} scope 
+     */
+    _onClickTitleFilter(scope) {
+        if(scope.nodeName != 'SPAN') {
+            return;
+        }
+
+        if(this._isShowFilter) {
+            document.querySelector(`${this.element.container} .filter-helper-container-title .${this._activeTitle}`).classList.remove(FilterHelper.defaultStyle.hide);
+        }
+
+        let indexFilter;
+        const classList = scope.classList;
+        classList.forEach(_class => {
+            if(_class.includes('index-filter-')) {
+                let _classSplit = _class.split('-');
+                indexFilter = _classSplit.length > 1 ? _classSplit[2] : null;
+            }
+        });
+        
+        scope.classList.toggle(FilterHelper.defaultStyle.hide, true);
+        this._activeTitle = indexFilter ? `index-filter-${indexFilter}` : null;
+        this._isFilterFromTitle = true;
+        this.showFilter(true);
+
+        const indexFilterValue = this._listFilter[parseInt(indexFilter)];
+        const parent = document.querySelector(`${this.element.container} .filter-helper-container-filter`);
+        const selectColumn = parent.firstElementChild.lastElementChild.querySelector(`.${FilterHelper.defaultStyle.selectColumn}`);
+
+        for(let i = 0, j = selectColumn.options.length; i < j; ++i) {
+            const parseValue = JSON.parse(selectColumn.options[i].value);
+            if(parseValue.value === indexFilterValue.column) {
+                selectColumn.selectedIndex = i;
+                break;
+            }
+        }
+        this._onChangeSelectColumn(indexFilterValue.columnRAW);
+
+        const parentGroupInput = parent.lastElementChild;
+        const selectOperator = parentGroupInput.lastElementChild.querySelector('.input-group .input-group-prepend .input-group-text');
+        selectOperator.value = indexFilterValue.operator;
+
+        // set input value
+        if(indexFilterValue.isLookup) {
+            this._lookups[indexFilterValue.column].setValue(indexFilterValue.value);
+        } else {
+            parentGroupInput.lastElementChild.querySelector('.input-group .input-value').value = indexFilterValue.value;
         }
     }
 
-    _getSelectColumn(selectColumnElement) {
+    /**
+     * _onClickRemoveTitle
+     * @param {HTMLElement} scope 
+     */
+    _onClickRemoveTitle(scope) {
+        if(!(scope.nodeName == 'BUTTON' || scope.nodeName == 'I')) {
+            return;
+        }
+
+        let indexFilter;
+        const classList = scope.nodeName == 'BUTTON' ? scope.parentNode.classList : scope.parentNode.parentNode.classList;
+        classList.forEach(_class => {
+            if(_class.includes('index-filter-')) {
+                let _classSplit = _class.split('-');
+                indexFilter = _classSplit.length > 1 ? _classSplit[2] : null;
+            }
+        });
+
+        // hapus event listener ti title dan button
+        const isButton = scope.nodeName == 'BUTTON' ? true : false;
+        const button = isButton ? scope : scope.parentNode;
+        const title = isButton ? scope.parentNode : scope.parentNode.parentNode;
+
+        button.removeEventListener('click', this._onClickRemoveTitle);
+        title.removeEventListener('click', this._onClickTitleFilter);
+        title.remove(title);
+
+        // hapus di list
+        delete this._listFilter[parseInt(indexFilter)];
+        this._event(this.getFilters());
+    }
+
+    /**
+     * _showLookupFilter
+     * @param {string} lookupName 
+     * @param {boolean} isShow 
+     */
+    _showLookupFilter(lookupName = null, isShow = true) {
+        const inputValueLookup = !lookupName ? 
+            document.querySelectorAll(`${this.element.container} .filter-helper-container-filter .input-value-lookup`) : 
+            document.querySelector(`${this.element.container} .filter-helper-container-filter .input-value-${lookupName}`);
+        if(!lookupName) {
+            inputValueLookup.forEach(item => {
+                if(isShow) {
+                    item.nextElementSibling.classList.remove(FilterHelper.defaultStyle.hide);
+                } else {
+                    item.nextElementSibling.classList.toggle(FilterHelper.defaultStyle.hide, true);
+                }
+            });
+        } else {
+            if(isShow) {
+                inputValueLookup.nextElementSibling.classList.remove(FilterHelper.defaultStyle.hide);
+            } else {
+                inputValueLookup.nextElementSibling.classList.toggle(FilterHelper.defaultStyle.hide, true);
+            }
+        }
+    }
+
+    /**
+     * @return {{
+     *  element: HTMLElement
+     *  lookup: Lookup
+     * }}
+     */
+    _getActiveLookup() {
+        const inputValueLookup = document.querySelectorAll(`${this.element.container} .filter-helper-container-filter .input-value-lookup`);
+        let lookupName;
+
+        inputValueLookup.forEach(item => {
+            const isShow = item.nextElementSibling.classList.contains(FilterHelper.defaultStyle.hide) ? false : true;
+
+            if(isShow) {
+                const classList = item.classList;
+                classList.forEach(_class => {
+                    if(_class.includes('input-value-')) {
+                        let _classSplit = _class.split('-');
+                        lookupName = _classSplit.length > 1 ? _classSplit[2] : null;
+                    }
+                });
+            }
+        });
+
         return {
-            value: selectColumnElement.value,
-            text: selectColumnElement.selectedOptions[0] ?  selectColumnElement.selectedOptions[0].text : 'Filter'
-        }
+            element: document.querySelector(`${this.element.container} .filter-helper-container-filter .input-value-${lookupName}`),
+            lookup: this._lookups[lookupName]
+        };
     }
-
-    _getOperator(operatorElement) {
-        return {
-            value: operatorElement.value,
-            text: operatorElement.selectedOptions[0] ? operatorElement.selectedOptions[0].text : '='
-        }
-    }
-
-    _getInputValue(inputValueElement) {
-        return inputValueElement.nodeName == 'SELECT' ? {
-            text: inputValueElement.selectedOptions[0].text,
-            value: inputValueElement.value
-        } : inputValueElement.value;
-    }
-    
 }
