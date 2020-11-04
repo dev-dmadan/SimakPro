@@ -45,44 +45,57 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
+        $id = null;
         $isSuccess = false;
         $message = null;
         $errors = null;
-
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:500',
-            // 'code'=> 'required|string|max:500|unique:App\Models\Project,code',
-            'owner' => 'required|string|max:500',
-            'date' => 'required|date',
-            'city' => 'required|string|max:100',
-            'address' => 'required|string',
-            'luas_area' => 'numeric|max:999999',
-            'estimasi' => 'numeric|max:999999',
-            'sub_total' => 'required|numeric|min:1|max:99999999999999999',
-            'cco' => 'numeric|max:99999999999999999',
-            'total' => 'required|numeric|min:1|max:99999999999999999',
-            'dp' => 'required|numeric|min:1|max:99999999999999999',
-            'sisa' => 'required|numeric|max:99999999999999999',
-            'progress' => 'required|integer|min:0|max:100',
-            'project_status_id' => 'required|uuid'
-        ]);
         
-        if(!$validator->fails()) {
+        DB::beginTransaction();
+        try {
+            $rules = [
+                'name' => 'required|string|max:500',
+                // 'code' => 'required|string|max:500|unique:App\Models\Project,code',
+                'owner' => 'required|string|max:500',
+                'date' => 'required|date',
+                'city' => 'required|string|max:100',
+                'address' => 'required|string',
+                'luas_area' => 'numeric|max:999999',
+                'estimasi' => 'numeric|max:999999',
+                'sub_total' => 'required|numeric|min:1|max:99999999999999999',
+                'cco' => 'numeric|max:99999999999999999',
+                'total' => 'required|numeric|min:1|max:99999999999999999',
+                'dp' => 'required|numeric|min:1|max:99999999999999999',
+                'sisa' => 'required|numeric|max:99999999999999999',
+                'progress' => 'required|integer|min:0|max:100',
+                'project_status_id' => 'required|uuid'
+            ];
+            $data = $request->only(array_keys($rules));
+            $validator = Validator::make($data, $rules);
+            if($validator->fails()) {
+                $errors = $validator->messages();
+                throw new \Exception('Something wrong in form');
+            }
+
             $project = new Project();
-            foreach($request->all() as $key => $item) {
-                if($item != null || is_numeric($item)) {
+            foreach($data as $key => $item) {
+                if($item !== null) {
                     $project->$key = $item;
                 }
             }
+
             $isSuccess = $project->save();
+            $id = $isSuccess ? $project->id : null;
+            DB::commit();
+        } catch (\Exception $e) {
+            $message = $e->getMessage();
+            DB::rollBack();
         }
-        $errors = $validator->fails() ? $validator->messages() : null;
 
         return response()->json([
             'success' => $isSuccess,
             'message' => $message,
             'errors' => $errors,
-            'id' => $isSuccess ? $project->id : null
+            'id' => $id
         ]);
     }
 
@@ -155,36 +168,47 @@ class ProjectController extends Controller
         $message = null;
         $errors = null;
 
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:500',
-            // 'code'=> 'required|string|max:500|unique:App\Models\Project,code',
-            'owner' => 'required|string|max:500',
-            'date' => 'required|date',
-            'city' => 'required|string|max:100',
-            'address' => 'required|string',
-            'luas_area' => 'numeric|max:999999',
-            'estimasi' => 'numeric|max:999999',
-            'sub_total' => 'required|numeric|min:1|max:99999999999999999',
-            'cco' => 'numeric|max:99999999999999999',
-            'total' => 'required|numeric|min:1|max:99999999999999999',
-            'dp' => 'required|numeric|min:1|max:99999999999999999',
-            'sisa' => 'required|numeric|max:99999999999999999',
-            'progress' => 'required|integer|min:0|max:100',
-            'project_status_id' => 'required|uuid'
-        ]);
+        DB::beginTransaction();
+        try {
+            $rules = [
+                'name' => 'required|string|max:500',
+                // 'code' => 'required|string|max:500|unique:App\Models\Project,code',
+                'owner' => 'required|string|max:500',
+                'date' => 'required|date',
+                'city' => 'required|string|max:100',
+                'address' => 'required|string',
+                'luas_area' => 'numeric|max:999999',
+                'estimasi' => 'numeric|max:999999',
+                'sub_total' => 'required|numeric|min:1|max:99999999999999999',
+                'cco' => 'numeric|max:99999999999999999',
+                'total' => 'required|numeric|min:1|max:99999999999999999',
+                'dp' => 'required|numeric|min:1|max:99999999999999999',
+                'sisa' => 'required|numeric|max:99999999999999999',
+                'progress' => 'required|integer|min:0|max:100',
+                'project_status_id' => 'required|uuid'
+            ];
+            $data = $request->only(array_keys($rules));
+            $validator = Validator::make($data, $rules);
+            if($validator->fails()) {
+                $errors = $validator->messages();
+                throw new \Exception('Something wrong in form');
+            }
 
-        if(!$validator->fails()) {
             $project = Project::find($id);
-            foreach($request->all() as $key => $item) {
-                if($item == null && in_array($key, Project::nullColumns)) {
+            foreach($data as $key => $item) {
+                if($item === null && in_array($key, Project::NULL_COLUMNS)) {
                     $project->$key = $item;
-                } else if($item != null || is_numeric($item)) {
+                } else if($item !== null) {
                     $project->$key = $item;
                 }
             }
+
             $isSuccess = $project->save();
+            DB::commit();
+        } catch (\Exception $e) {
+            $message = $e->getMessage();
+            DB::rollBack();
         }
-        $errors = $validator->fails() ? $validator->messages() : null;
 
         return response()->json([
             'success' => $isSuccess,
@@ -201,7 +225,24 @@ class ProjectController extends Controller
      */
     public function destroy($id)
     {
-        $project = Project::find($id);
-        return response()->json($project->delete());
+        $isSuccess = false;
+        $message = null;
+        $errors = null;
+
+        DB::beginTransaction();
+        try {
+            Project::find($id)->delete();
+        } catch (\Exception $e) {
+            $message = $e->getMessage();
+            $errors = $e;
+
+            DB::rollBack();
+        }
+
+        return response()->json([
+            'success' => $isSuccess,
+            'message' => $message,
+            'errors' => $errors
+        ]);
     }
 }
