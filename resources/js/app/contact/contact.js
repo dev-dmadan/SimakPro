@@ -24,14 +24,51 @@ export class Contact extends Controller {
             page: {
                 name: '#contact-page-name',
                 birthplace: '#contact-page-birthplace',
-                birthdate: '#contact-page-birthdate',
-                gender: '#contact-page-gender',
+                birthdate: {
+                    element: '#contact-page-birthdate',
+                    plugin: {
+                        type: Controller.PluginType.Date
+                    }
+                },
+                gender: {
+                    element: 'contact-page-gender',
+                    choice: true,
+                    isLookup: true
+                },
                 address: '#contact-page-address',
                 email: '#contact-page-email',
-                phone_number: '#contact-page-phone_number',
-                contact_type: '#contact-page-contact_type',
-                active_status: '#contact-page-active_status',
-                saldo: '#contact-page-saldo'
+                phone_number: {
+                    element: '#contact-page-phone_number',
+                    plugin: {
+                        type: Controller.PluginType.Phone
+                    }
+                },
+                contact_type: {
+                    element: '#contact-page-contact_type',
+                    plugin: {
+                        type: Controller.PluginType.Lookup,
+                        options: {
+                            placeholder: 'Pilih Jenis Kontak',
+                            isAutoInit: false
+                        }
+                    }
+                },
+                active_status: {
+                    element: '#contact-page-active_status',
+                    plugin: {
+                        type: Controller.PluginType.Lookup,
+                        options: {
+                            placeholder: 'Pilih Jenis Kontak',
+                            isAutoInit: false
+                        }
+                    }
+                },
+                saldo: {
+                    element: '#contact-page-saldo',
+                    plugin: {
+                        type: Controller.PluginType.Currency
+                    }
+                }
             },
             modal: {
                 name: '#contact-modal-name',
@@ -138,7 +175,7 @@ export class Contact extends Controller {
      * @return {{
      *  element: HTMLElement;
      *  get(): string;
-     *  set(value: string): void;
+     *  set(index: number, value: boolean): void;
      *  error(value: string | null): void;
      *  show(isShow: boolean): void;
      *  enable(isEnable: boolean): void;

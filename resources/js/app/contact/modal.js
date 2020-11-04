@@ -73,17 +73,16 @@ async function renderLookup() {
         
         if(_isContact) {
             contact.contact_type.plugin.onChange = (value) => {
-                if(_isContact) {
-                    const isSaldoShow = [_contactType.SubKasKecil, _contactType.KasKecil].filter(item => {
-                        if(value && value.id) {
-                            return item == value.id;
-                        }
-    
-                        return false;
-                    }).length > 0 ? true : false;
-    
-                    contact.saldo.show(isSaldoShow);
-                }
+                contact.contact_type.error(null);
+                const isSaldoShow = [_contactType.SubKasKecil, _contactType.KasKecil].filter(item => {
+                    if(value && value.id) {
+                        return item == value.id;
+                    }
+
+                    return false;
+                }).length > 0 ? true : false;
+
+                contact.saldo.show(isSaldoShow);
             };
         }
 

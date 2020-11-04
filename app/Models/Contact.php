@@ -13,7 +13,7 @@ class Contact extends Model
     protected $primaryKey = 'id';
     public $incrementing = false;
     protected $keyType = 'string';
-    const nullColumns = ['gender_id', 'contact_type_id', 'created_by_id', 'updated_by_id'];
+    const NULL_COLUMNS = ['gender_id', 'contact_type_id', 'created_by_id', 'updated_by_id'];
 
     public function gender()
     {
