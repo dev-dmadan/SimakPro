@@ -1,7 +1,6 @@
 @php
     $_male = \App\Constants\GenderConstant::Male;
     $_female = \App\Constants\GenderConstant::Female;
-    // dd($title)
 @endphp
 
 @extends('layouts.modal')
@@ -30,7 +29,7 @@
     </div>
 
     <div class="form-group contact-modal-gender">
-        <label>Pilih Jenis Kelamin</label>
+        <label>Jenis Kelamin</label>
         <br>
         <div class="form-check form-check-inline">
             <input class="form-check-input" type="radio" name="contact-modal-gender" id="gender1" value="{{ $_male }}">
@@ -42,12 +41,6 @@
         </div>
         <div class="invalid-feedback contact-modal-gender"></div>
     </div>   
-    
-    <div class="form-group">
-        <label for="contact-modal-address">Alamat</label>
-        <textarea class="form-control" id="contact-modal-address" placeholder="Masukkan Alamat"></textarea>
-        <div class="invalid-feedback contact-modal-address"></div>
-    </div>
 
     <div class="form-group">
         <label for="contact-modal-phone_number">No. Telepon</label>
@@ -59,6 +52,12 @@
         <label for="contact-modal-email">Email</label>
         <input type="text" class="form-control" id="contact-modal-email" placeholder="Masukkan Email">
         <div class="invalid-feedback contact-modal-email"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="contact-modal-address">Alamat</label>
+        <textarea class="form-control" id="contact-modal-address" placeholder="Masukkan Alamat"></textarea>
+        <div class="invalid-feedback contact-modal-address"></div>
     </div>
 
     <div class="form-group">
