@@ -227,8 +227,8 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
         'Constants' => App\Constants::class,
-        'Filter' => App\Helpers::class,
-        
+        'Filter' => App\Helpers\Filter::class,
+        'Sorting' => App\Helpers\Sorting::class,
     ],
 
 ];
