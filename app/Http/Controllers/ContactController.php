@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use App\Constants\ContactTypeConstant;
 use App\Helpers\Filter;
+use App\Helpers\Sorting;
 use Illuminate\Support\Str;
 
 class ContactController extends Controller
@@ -166,7 +167,7 @@ class ContactController extends Controller
 
     public function showList(Request $request)
     {
-        $contacts = Contact::with([
+        $contacts = Contact::select('contacts.*')->with([
             'gender' => function($query) {
                 $query->select('id', 'name');
             },
@@ -179,9 +180,17 @@ class ContactController extends Controller
         ]);
 
         if($request->isMethod(('post'))) {
-            $contacts = Filter::buildFilters($contacts, $request->input('filters'))
-                ->orderBy('created_at', 'DESC')
-                ->paginate(PaginationConstant::Limit);
+            if($request->has('filters')) {
+                $contacts = Filter::buildFilters($contacts, $request->input('filters'));
+            }
+
+            // if($request->has('sort')) {
+            //     $contacts = Sorting::buildSorting($contacts, $request->input('sort'));
+            // } else {
+            //     $contacts = $contacts->orderBy('created_at', 'DESC');
+            // }
+
+            $contacts = $contacts->paginate(PaginationConstant::Limit);
         } else {
             $contacts = $contacts->orderBy('created_at', 'DESC')
             ->paginate(PaginationConstant::Limit);
@@ -331,6 +340,7 @@ class ContactController extends Controller
         DB::beginTransaction();
         try {
             Contact::find($id)->delete();
+            DB::commit();
         } catch (\Exception $e) {
             $message = $e->getMessage();
             $errors = $e;

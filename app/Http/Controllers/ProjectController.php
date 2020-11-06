@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\DB;
 use App\Constants\PaginationConstant;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Project;
+use App\Helpers\Filter;
+use App\Helpers\Sorting;
 
 class ProjectController extends Controller
 {
@@ -121,15 +123,30 @@ class ProjectController extends Controller
         return response()->json($project);
     }
 
-    public function showList()
+    public function showList(Request $request)
     {
-        $projects = Project::with([
+        $projects = Project::select('projects.*')->with([
             'projectStatus' => function($query) {
                 $query->select('id', 'name');
             },
-        ])
-        ->orderBy('created_at', 'DESC')
-        ->paginate(PaginationConstant::Limit);
+        ]);
+        
+        if($request->isMethod('post')) {
+            if($request->has('filters')) {
+                $projects = Filter::buildFilters($projects, $request->input('filters'));
+            }
+
+            // if($request->has('sort')) {
+            //     $projects = Sorting::buildSorting($projects, $request->input('sort'));
+            // } else {
+            //     $projects = $projects->orderBy('created_at', 'DESC');
+            // }
+
+            $projects = $projects->paginate(PaginationConstant::Limit);
+        } else {
+            $projects = $projects->orderBy('created_at', 'DESC')
+            ->paginate(PaginationConstant::Limit);
+        }
 
         return response()->json($projects);
     }
@@ -232,6 +249,7 @@ class ProjectController extends Controller
         DB::beginTransaction();
         try {
             Project::find($id)->delete();
+            DB::commit();
         } catch (\Exception $e) {
             $message = $e->getMessage();
             $errors = $e;
